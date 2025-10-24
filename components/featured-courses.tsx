@@ -79,6 +79,25 @@ const courses = [
     category: "Data Science",
     description: "Learn to analyze and visualize data using Python, Pandas, and Matplotlib.",
   },
+  // languages
+  {
+    title: "Japnese language N5 to N1",
+    platform: "japanesetest4you",
+    url: "https://japanesetest4you.com/",
+    level: "Intermediate",
+    duration: "unlimited",
+    category: "Languages",
+    description: "Learn japnese language from beginner to pro.",
+  },
+  {
+    title: "Japnese language N5 to N1",
+    platform: "nihongopro",
+    url: "https://www.nihongo-pro.com/",
+    level: "Intermediate",
+    duration: "unlimited",
+    category: "Languages",
+    description: "Practice N5 to N1 japnese language lessions.",
+  },
 ]
 
 const levelColors = {
