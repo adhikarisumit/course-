@@ -1,1 +1,1 @@
-# This coourse site is under construction
+# This course site is under construction
