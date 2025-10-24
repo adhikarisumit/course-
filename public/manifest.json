@@ -1,0 +1,30 @@
+{
+  "name": "proteclink",
+  "short_name": "proteclink",
+  "description": "proteclink — learning resources and curated courses",
+  "version": "1.0.0",
+  "home_page": "https://proteclink.com",
+  "author": "Proteclink",
+  "author_email": "contact@proteclink.com",
+  "license": "MIT",
+  "permissions": {
+    "contents": "*",
+    "metadata": "*",
+    "issues": "*"
+  },
+  "manifest": {
+    "name": "proteclink",
+    "short_name": "proteclink",
+    "description": "proteclink — learning resources and curated courses",
+    "version": "1.0.0",
+    "home_page": "https://proteclink.com",
+    "author": "Proteclink",
+    "author_email": "contact@proteclink.com",
+    "license": "MIT",
+    "permissions": {
+      "contents": "*",
+      "metadata": "*",
+      "issues": "*"
+    }
+  }
+}

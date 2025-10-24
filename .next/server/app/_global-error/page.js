@@ -8,3 +8,4 @@ R.c("server/chunks/ssr/[root-of-the-server]__666f8ec1._.js")
 R.c("server/chunks/ssr/_next-internal_server_app__global-error_page_actions_75761787.js")
 R.m(37823)
 module.exports=R.m(37823).exports
+

@@ -197,3 +197,4 @@ export function FeaturedCourses({ searchQuery = "", selectedCategory = null }: F
 		</section>
 	)
 }
+

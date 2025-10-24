@@ -11,3 +11,4 @@ R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_forbidde
 R.c("server/chunks/ssr/_next-internal_server_app__not-found_page_actions_554ec2bf.js")
 R.m(70933)
 module.exports=R.m(70933).exports
+
