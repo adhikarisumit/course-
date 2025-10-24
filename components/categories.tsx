@@ -13,19 +13,19 @@ const categories = [
   {
     icon: Palette,
     title: "Design",
-    count: "1 course available uploading more...",
+    count: "1 course available. uploading more...",
     color: "text-pink-600 dark:text-pink-400",
   },
   {
     icon: TrendingUp,
     title: "Business",
-    count: "1 course available uploading more...",
+    count: "1 course available. uploading more...",
     color: "text-green-600 dark:text-green-400",
   },
   {
     icon: Brain,
     title: "Data Science",
-    count: "2 courses available uploading more...",
+    count: "2 courses available. uploading more...",
     color: "text-purple-600 dark:text-purple-400",
   },
   {
