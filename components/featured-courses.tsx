@@ -10,7 +10,7 @@ const courses = [
     title: "Complete Javascript Course",
     platform: "Youtube",
     url: "https://www.youtube.com/playlist?list=PLu71SKxNbfoBuX3f4EOACle2y-tRC5Q37",
-    level: "Beginner to intermidiate",
+    level: "Intermediate",
     duration: "15 Days",
     category: "Programming",
     description: " Learn JavaScript from Zero to Hero",
