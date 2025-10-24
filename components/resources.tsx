@@ -23,6 +23,8 @@ const resources = [
       { name: "Git & GitHub Crash Course", type: "Video", url: "https://www.youtube.com/watch?v=RGOj5yH7evk" },
       { name: "CSS Grid & Flexbox Guide", type: "Video", url: "https://www.youtube.com/watch?v=3elGSZSWTbM" },
       { name: "API Development Tutorial", type: "Video", url: "https://www.youtube.com/watch?v=0oXYLzuucwE" },
+      { name: "Office install Mac", type: "Video", url: "https://www.tiktok.com/@noob_programmer4u/video/7563520469438156048?is_from_webapp=1&sender_device=pc&web_id=7511665166490420744" },
+      { name: "Office install windows", type: "Video", url: "https://www.https://www.tiktok.com/@noob_programmer4u/video/7560573368672505089?is_from_webapp=1&sender_device=pc&web_id=7511665166490420744.com" },
     ],
   },
   {

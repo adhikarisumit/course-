@@ -17,14 +17,6 @@ const categories = [
     color: "text-pink-600 dark:text-pink-400",
   },
   {
-    icon: FcIdea,
-    title: "Tips",
-    count: "100+ Videos",
-    color: "text-purple-600 dark:text-purple-400",
-  },
-
-
-  {
     icon: TrendingUp,
     title: "Business",
     count: "120+ courses",

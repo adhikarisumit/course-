@@ -79,15 +79,6 @@ const courses = [
     category: "Data Science",
     description: "Learn to analyze and visualize data using Python, Pandas, and Matplotlib.",
   },
-  {
-    title: "MS Office Free-Install(Windows) ",
-    platform: "Tiktok",
-    url: "https://www.https://www.tiktok.com/@noob_programmer4u/video/7560573368672505089?is_from_webapp=1&sender_device=pc&web_id=7511665166490420744.com",
-    level: "Beginner",
-    duration: "5 minutes",
-    category: "Tips",
-    description: "Learn to analyze and visualize data using Python, Pandas, and Matplotlib.",
-  },
 ]
 
 const levelColors = {
