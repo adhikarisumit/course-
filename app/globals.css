@@ -123,3 +123,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+#resources a,
+.learning-resources a {
+  cursor: pointer;
+}
+
+/* End of file — no JSX/HTML here */
