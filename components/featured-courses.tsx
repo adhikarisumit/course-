@@ -10,7 +10,7 @@ const courses = [
 		// Programming
 		title: "Complete HTML Course",
 		platform: "YouTube",
-		url: "https://www.youtube.com/watch?v=HcOc7P5BMi4&t=5620s&pp=ygULaHRtbCBjb3Vyc2U%3D",
+		url: "https://www.youtube.com/watch?v=HcOc7P5BMi4",
 		level: "Beginner",
 		duration: "32 Minutes",
 		category: "Programming",
@@ -90,7 +90,7 @@ const courses = [
 		description: "Learn Japanese language from beginner to pro.",
 	},
 	{
-		title: "Japanese language N5 to N1",
+		title: "Japanese language N5 to N1 (nihongo-pro)",
 		platform: "nihongopro",
 		url: "https://www.nihongo-pro.com/",
 		level: "Intermediate",
@@ -107,36 +107,32 @@ const levelColors = {
 }
 
 interface FeaturedCoursesProps {
-	searchQuery: string
-	selectedCategory: string | null
+	searchQuery?: string
+	selectedCategory?: string | null
 }
 
 function normalize(s?: string | null) {
 	return (s ?? "").toString().trim().toLowerCase()
 }
 
-export function FeaturedCourses({ searchQuery, selectedCategory }: FeaturedCoursesProps) {
-	// Debug: show what category was passed
-	// Remove or comment out console.debug in production
-	console.debug("FeaturedCourses selectedCategory:", selectedCategory)
+export function FeaturedCourses({ searchQuery = "", selectedCategory = null }: FeaturedCoursesProps) {
+	console.debug("[FeaturedCourses] selectedCategory:", selectedCategory)
 
 	const filteredCourses = courses.filter((course) => {
-		if (selectedCategory) {
-			if (normalize(course.category) !== normalize(selectedCategory)) return false
-		}
+		if (selectedCategory && normalize(course.category) !== normalize(selectedCategory)) return false
 
 		if (!searchQuery) return true
-		const query = searchQuery.toLowerCase()
+		const q = searchQuery.toLowerCase()
 		return (
-			course.title.toLowerCase().includes(query) ||
-			course.description.toLowerCase().includes(query) ||
-			course.category.toLowerCase().includes(query) ||
-			course.platform.toLowerCase().includes(query) ||
-			course.level.toLowerCase().includes(query)
+			course.title.toLowerCase().includes(q) ||
+			course.description.toLowerCase().includes(q) ||
+			course.category.toLowerCase().includes(q) ||
+			course.platform.toLowerCase().includes(q) ||
+			course.level.toLowerCase().includes(q)
 		)
 	})
 
-	console.debug("filteredCourses length:", filteredCourses.length)
+	console.debug("[FeaturedCourses] filteredCourses length:", filteredCourses.length)
 
 	return (
 		<section id="courses" className="py-16 md:py-24 bg-secondary/50">
@@ -154,14 +150,14 @@ export function FeaturedCourses({ searchQuery, selectedCategory }: FeaturedCours
 				</div>
 
 				{filteredCourses.length === 0 ? (
-					<div className="text-center py-12">
+					<div data-testid="no-results" className="text-center py-12">
 						<p className="text-muted-foreground text-lg">No courses found matching your search.</p>
 						<p className="text-sm text-muted-foreground mt-2">Try different keywords or clear the category filter.</p>
 					</div>
 				) : (
-					<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+					<div data-testid="results" className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 						{filteredCourses.map((course) => (
-							<Card key={course.title} className="flex flex-col hover:shadow-lg transition-shadow">
+							<Card key={course.title} className="flex flex-col hover:shadow-lg transition-shadow" data-course={course.title}>
 								<CardHeader>
 									<div className="flex items-start justify-between gap-2 mb-2">
 										<Badge variant="secondary">{course.category}</Badge>
@@ -189,7 +185,7 @@ export function FeaturedCourses({ searchQuery, selectedCategory }: FeaturedCours
 									<Button className="w-full gap-2 bg-transparent" variant="outline" asChild>
 										<a href={course.url} target="_blank" rel="noopener noreferrer">
 											View Course
-											<ExternalLink className="h-4 w-4" />
+											<ExternalLink className="h-4 w-4 ml-2" />
 										</a>
 									</Button>
 								</CardFooter>
