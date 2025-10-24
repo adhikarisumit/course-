@@ -24,6 +24,12 @@ const cheatSheets = [
     url: "/resources/sql-query-reference.txt",
     topics: ["SELECT", "JOIN", "INSERT", "UPDATE", "DELETE", "GROUP BY"],
   },
+  {
+    name: "Git Cheatseat",
+    description: "This cheat will help you to master your git skills",
+    url: "/resources/git-cheat-sheet.pdf",
+    topics: ["git", "git branch", "all commands"],
+  },
 ]
 
 export default function CheatSheetsPage() {
