@@ -7,6 +7,25 @@ import { ExternalLink, Clock, BarChart } from "lucide-react"
 
 const courses = [
   {
+    // Programming
+    title: "Complete HTML Course",
+    platform: "Youtube",
+    url: "https://www.youtube.com/watch?v=HcOc7P5BMi4&t=5620s&pp=ygULaHRtbCBjb3Vyc2U%3D",
+    level: "Beginner",
+    duration: "32 Minutes",
+    category: "Programming",
+    description: " Learn Basic HTML in 30 minutes",
+  },
+  {
+    title: "Complete Css Course",
+    platform: "Youtube",
+    url: "https://www.youtube.com/watch?v=EUtlj7xdO1o&t=80s&pp=ygUKY3NzIGNvdXJzZQ%3D%3D",
+    level: "Beginner",
+    duration: "1 hour 32 Minutes",
+    category: "Programming",
+    description: " Learn Full Css course",
+  },
+  {
     title: "Complete Javascript Course",
     platform: "Youtube",
     url: "https://www.youtube.com/playlist?list=PLu71SKxNbfoBuX3f4EOACle2y-tRC5Q37",
@@ -16,11 +35,11 @@ const courses = [
     description: " Learn JavaScript from Zero to Hero",
   },
   {
-    title: "Machine Learning A-Z",
-    platform: "Coursera",
-    url: "https://www.coursera.org",
+    title: "Complete WEB-Devlopment Course",
+    platform: "Youtube",
+    url: "https://www.coursera.https://www.youtube.com/watch?v=-WN74rN9OPI&list=PLu0W_9lII9agq5TrH9XLIKQvv0iaF2X3w",
     level: "Intermediate",
-    duration: "44 hours",
+    duration: "1 Month",
     category: "Data Science",
     description: "Master Machine Learning algorithms with Python and R. Includes hands-on projects.",
   },
