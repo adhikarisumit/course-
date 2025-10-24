@@ -7,37 +7,37 @@ const categories = [
   {
     icon: Code,
     title: "Programming",
-    count: "150+ courses",
+    count: "4 courses uploading more",
     color: "text-blue-600 dark:text-blue-400",
   },
   {
     icon: Palette,
     title: "Design",
-    count: "80+ courses",
+    count: "uploading...",
     color: "text-pink-600 dark:text-pink-400",
   },
   {
     icon: TrendingUp,
     title: "Business",
-    count: "120+ courses",
+    count: "uploading...",
     color: "text-green-600 dark:text-green-400",
   },
   {
     icon: Brain,
     title: "Data Science",
-    count: "95+ courses",
+    count: "1 course uploading more",
     color: "text-purple-600 dark:text-purple-400",
   },
   {
     icon: Globe,
     title: "Languages",
-    count: "60+ courses",
+    count: "uploading...",
     color: "text-orange-600 dark:text-orange-400",
   },
   {
     icon: Database,
     title: "Databases",
-    count: "45+ courses",
+    count: "uploading...",
     color: "text-teal-600 dark:text-teal-400",
   },
 ]
