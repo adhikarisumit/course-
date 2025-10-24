@@ -49,8 +49,9 @@ interface CategoriesProps {
 
 export function Categories({ selectedCategory, onSelectCategory }: CategoriesProps) {
 	const handleCategoryClick = (categoryTitle: string) => {
+		console.log("Category clicked:", categoryTitle) // <-- debug: verify correct title
 		if (selectedCategory === categoryTitle) {
-			onSelectCategory(null) // Deselect if clicking the same category
+			onSelectCategory(null)
 		} else {
 			onSelectCategory(categoryTitle)
 		}
@@ -74,28 +75,33 @@ export function Categories({ selectedCategory, onSelectCategory }: CategoriesPro
 				</div>
 
 				<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-					{categories.map((category) => (
-						<Card
-							key={category.title}
-							onClick={() => handleCategoryClick(category.title)}
-							className={`hover:shadow-lg transition-all cursor-pointer group ${
-								selectedCategory === category.title
-									? "ring-2 ring-primary shadow-lg scale-105"
-									: ""
-							}`}
-						>
-							<CardContent className="p-6 text-center">
-								<category.icon
-									className={`h-10 w-10 mx-auto mb-3 ${category.color} group-hover:scale-110 transition-transform`}
-								/>
-								<h3 className="font-semibold mb-1">{category.title}</h3>
-								<p className="text-sm text-muted-foreground">
-									{category.count}
-								</p>
-							</CardContent>
-						</Card>
-					))}
+					{categories.map((category) => {
+						const Icon = category.icon // use capitalized local variable for the component
+						return (
+							<Card
+								key={category.title}
+								onClick={() => handleCategoryClick(category.title)}
+								className={`relative overflow-hidden hover:shadow-lg transition-all cursor-pointer group ${
+									selectedCategory === category.title
+										? "ring-2 ring-primary shadow-lg scale-105 z-10"
+										: ""
+								}`}
+								data-category={category.title}
+							>
+								<CardContent className="p-6 text-center">
+									<Icon
+										className={`h-10 w-10 mx-auto mb-3 ${category.color} group-hover:scale-110 transition-transform`}
+									/>
+									<h3 className="font-semibold mb-1">{category.title}</h3>
+									<p className="text-sm text-muted-foreground">
+										{category.count}
+									</p>
+								</CardContent>
+							</Card>
+						)
+					})}
 				</div>
+
 				{selectedCategory && (
 					<div className="text-center mt-6">
 						<button
