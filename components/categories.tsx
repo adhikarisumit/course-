@@ -1,6 +1,6 @@
 "use client"
 
-import { Code, Palette, TrendingUp, Brain, Globe, Database } from "lucide-react"
+import { Code, Palette, TrendingUp, Brain, Globe, Database, FcIdea } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 
 const categories = [
@@ -17,7 +17,7 @@ const categories = [
     color: "text-pink-600 dark:text-pink-400",
   },
   {
-    icon: Brain,
+    icon: FcIdea,
     title: "Tips",
     count: "100+ Videos",
     color: "text-purple-600 dark:text-purple-400",
