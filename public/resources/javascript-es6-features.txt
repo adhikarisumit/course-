@@ -1,0 +1,46 @@
+# JavaScript ES6+ Features - Study Notes
+
+## 1. Arrow Functions
+- Shorter syntax for function expressions
+- Lexical 'this' binding
+Example: const add = (a, b) => a + b;
+
+## 2. Template Literals
+- String interpolation with backticks
+- Multi-line strings
+Example: `Hello ${name}!`
+
+## 3. Destructuring
+- Extract values from arrays/objects
+Example: const { name, age } = person;
+
+## 4. Spread Operator
+- Expand arrays/objects
+Example: const newArr = [...oldArr, newItem];
+
+## 5. Promises & Async/Await
+- Handle asynchronous operations
+Example: async function fetchData() { await fetch(url); }
+
+## 6. Classes
+- Object-oriented programming syntax
+Example: class Person { constructor(name) { this.name = name; } }
+
+## 7. Modules (Import/Export)
+- Code organization and reusability
+Example: export default MyComponent;
+
+## 8. Let & Const
+- Block-scoped variable declarations
+- const for constants, let for variables
+
+## 9. Default Parameters
+- Set default values for function parameters
+Example: function greet(name = 'Guest') { }
+
+## 10. Rest Parameters
+- Collect remaining arguments into an array
+Example: function sum(...numbers) { }
+
+---
+Download more resources at LearnHub
