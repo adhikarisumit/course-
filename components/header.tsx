@@ -63,3 +63,4 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
     </header>
   )
 }
+

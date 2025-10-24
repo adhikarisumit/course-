@@ -116,3 +116,4 @@ export function Categories({ selectedCategory, onSelectCategory }: CategoriesPro
 		</section>
 	)
 }
+

@@ -8,9 +8,8 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "LearnHub - Your Gateway to Online Learning",
-  description:
-    "Discover curated courses, educational notes, and learning resources from the best platforms across the web.",
+  title: "proteclink",
+  description: "proteclink — learning resources and curated courses",
   generator: "v0.app",
 }
 
@@ -20,7 +19,14 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
+      <head>
+        <title>proteclink</title>
+        <meta name="application-name" content="proteclink" />
+        <meta name="description" content="proteclink — learning resources and curated courses" />
+        <meta property="og:title" content="proteclink" />
+        <meta name="twitter:title" content="proteclink" />
+      </head>
       <body className={`font-sans antialiased`}>
         {children}
         <Analytics />
@@ -28,3 +34,4 @@ export default function RootLayout({
     </html>
   )
 }
+

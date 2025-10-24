@@ -14,3 +14,4 @@ R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_unauthor
 R.c("server/chunks/ssr/_next-internal_server_app_about_page_actions_6fff35e4.js")
 R.m(76406)
 module.exports=R.m(76406).exports
+
