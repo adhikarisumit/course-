@@ -119,11 +119,13 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
 }
 
+/* Make links in the resources area show pointer cursor */
 #resources a,
 .learning-resources a {
   cursor: pointer;
