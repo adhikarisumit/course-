@@ -7,13 +7,13 @@ import { ExternalLink, Clock, BarChart } from "lucide-react"
 
 const courses = [
   {
-    title: "Complete Web Development Bootcamp",
-    platform: "Udemy",
-    url: "https://www.udemy.com",
-    level: "Beginner",
-    duration: "65 hours",
+    title: "Complete Javascript Course",
+    platform: "Youtube",
+    url: "https://www.youtube.com/playlist?list=PLu71SKxNbfoBuX3f4EOACle2y-tRC5Q37",
+    level: "Beginner to intermidiate",
+    duration: "15 Days",
     category: "Programming",
-    description: "Learn HTML, CSS, JavaScript, React, Node.js and more in this comprehensive bootcamp.",
+    description: " Learn JavaScript from Zero to Hero",
   },
   {
     title: "Machine Learning A-Z",
