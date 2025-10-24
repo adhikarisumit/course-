@@ -65,7 +65,7 @@ export default function AboutPage() {
             right learning path.
           </p>
           <p className="text-muted-foreground mb-4">
-            We bring together courses from leading platforms like Udemy, Coursera, edX, and more, along with free
+            We bring together courses from leading platforms like Udemy, Coursera, edX, Youtube and more, along with free
             resources like study notes, documentation, and video tutorials. Our goal is to be your one-stop destination
             for continuous learning.
           </p>
