@@ -7,7 +7,7 @@ const categories = [
   {
     icon: Code,
     title: "Programming",
-    count: "4 courses uploading more",
+    count: "4 courses available. uploading more...",
     color: "text-blue-600 dark:text-blue-400",
   },
   {
@@ -25,7 +25,7 @@ const categories = [
   {
     icon: Brain,
     title: "Data Science",
-    count: "1 course uploading more",
+    count: "1 course available uploading more...",
     color: "text-purple-600 dark:text-purple-400",
   },
   {
