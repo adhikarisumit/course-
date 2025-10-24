@@ -7,10 +7,10 @@ import Link from "next/link"
 
 const cheatSheets = [
   {
-    name: "JavaScript ES6+ Features",
-    description: "Modern JavaScript syntax, arrow functions, destructuring, spread operators, and more",
-    url: "/resources/javascript-es6-features.txt",
-    topics: ["Arrow Functions", "Destructuring", "Spread/Rest", "Template Literals", "Modules"],
+    name: "Python code ",
+    description: "Don't copy all to all .Write your own syntax",
+    url: "/resources/pythonCode.txt",
+    topics: ["Nen hisab garne code "],
   },
   {
     name: "React Hooks Cheat Sheet",
