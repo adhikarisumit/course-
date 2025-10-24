@@ -111,10 +111,18 @@ interface FeaturedCoursesProps {
 	selectedCategory: string | null
 }
 
+function normalize(s?: string | null) {
+	return (s ?? "").toString().trim().toLowerCase()
+}
+
 export function FeaturedCourses({ searchQuery, selectedCategory }: FeaturedCoursesProps) {
+	// Debug: show what category was passed
+	// Remove or comment out console.debug in production
+	console.debug("FeaturedCourses selectedCategory:", selectedCategory)
+
 	const filteredCourses = courses.filter((course) => {
-		if (selectedCategory && course.category !== selectedCategory) {
-			return false
+		if (selectedCategory) {
+			if (normalize(course.category) !== normalize(selectedCategory)) return false
 		}
 
 		if (!searchQuery) return true
@@ -127,6 +135,8 @@ export function FeaturedCourses({ searchQuery, selectedCategory }: FeaturedCours
 			course.level.toLowerCase().includes(query)
 		)
 	})
+
+	console.debug("filteredCourses length:", filteredCourses.length)
 
 	return (
 		<section id="courses" className="py-16 md:py-24 bg-secondary/50">
@@ -146,7 +156,7 @@ export function FeaturedCourses({ searchQuery, selectedCategory }: FeaturedCours
 				{filteredCourses.length === 0 ? (
 					<div className="text-center py-12">
 						<p className="text-muted-foreground text-lg">No courses found matching your search.</p>
-						<p className="text-sm text-muted-foreground mt-2">Try different keywords or browse all courses.</p>
+						<p className="text-sm text-muted-foreground mt-2">Try different keywords or clear the category filter.</p>
 					</div>
 				) : (
 					<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
