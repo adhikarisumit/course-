@@ -170,6 +170,11 @@ export function Footer() {
                   Cheat Sheets
                 </Link>
               </li>
+              <li>
+                <Link href="/softwares" className="hover:text-foreground transition-colors">
+                  Softwares & Links
+                </Link>
+              </li>
             </ul>
           </div>
 
