@@ -8,6 +8,12 @@ import { Badge } from "@/components/ui/badge"
 
 const softwareLinks = [
   {
+    name: "Comet browser",
+    description: "Popular Ai browser with primium Ai models and features.",
+    url: "https://pplx.ai/sumitadhik11441",
+    category: "Browser",
+  },
+  {
     name: "VS Code",
     description: "Popular code editor with great extension support",
     url: "https://code.visualstudio.com/download",
