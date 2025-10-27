@@ -12,9 +12,9 @@ const courses = [
 		platform: "YouTube",
 		url: "https://www.youtube.com/watch?v=HcOc7P5BMi4",
 		level: "Beginner",
-		duration: "32 Minutes",
+		duration: "2 hour 6 Minutes",
 		category: "Programming",
-		description: "Learn Basic HTML in 30 minutes",
+		description: "Learn Full HTML in 2 hours",
 	},
 	{
 		title: "Complete CSS Course",
@@ -97,6 +97,15 @@ const courses = [
 		duration: "unlimited",
 		category: "Languages",
 		description: "Practice N5 to N1 Japanese language lessons.",
+	},
+	{
+		title: "Developer Roadmap",
+		platform: "Roadmap.sh",
+		url: "https://roadmap.sh/",
+		level: "Beginner",
+		duration: "unlimited",
+		category: "Programming",
+		description: "You can find best roadmap for your next step from here.",
 	},
 ]
 
