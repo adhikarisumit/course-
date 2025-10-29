@@ -19,7 +19,7 @@ export function Hero() {
           <h1 className="text-4xl md:text-6xl font-bold mb-6 text-balance">Your Gateway to Quality Online Learning</h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-8 text-pretty">
             Discover curated courses, educational notes, and learning resources from the best platforms across the web.
-            All in one place.
+            All in one place.<br></br><mark>Note:We're not course builders or course owner. We just guide and provide the course and resources and ideas.</mark>
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="gap-2" onClick={scrollToCourses}>
