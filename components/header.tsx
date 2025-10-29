@@ -1,6 +1,6 @@
 "use client"
 
-import { BookOpen, Search } from "lucide-react"
+import { Cpu , Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -23,7 +23,7 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <BookOpen className="h-8 w-8" />
+            <Cpu  className="h-8 w-8" />
             <span className="text-xl font-semibold">Proteclink</span>
           </div>
 
