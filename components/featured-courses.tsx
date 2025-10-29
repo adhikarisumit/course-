@@ -107,6 +107,15 @@ const courses = [
 		category: "Programming",
 		description: "You can find best roadmap for your next step from here.",
 	},
+	{
+		title: "Complete Git and Github",
+		platform: "Youtube",
+		url: "https://www.youtube.com/watch?v=q8EevlEpQ2A&pp=ygUcZ2l0IGFuZCBnaXRodWIgZnVsbCB0dXRvcmlhbA%3D%3D",
+		level: "Beginner",
+		duration: "2 hour 54 minutes",
+		category: "Programming",
+		description: "You will be clear about git and github after browing this course.",
+	},
 ]
 
 const levelColors = {
