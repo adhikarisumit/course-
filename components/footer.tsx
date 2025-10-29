@@ -210,7 +210,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
-          <p>© {currentYear} LearnHub. All rights reserved. Built for educational purposes.</p>
+          <p>© {currentYear} Proteclink. All rights reserved. Built for educational purposes.</p>
         </div>
       </div>
     </footer>
