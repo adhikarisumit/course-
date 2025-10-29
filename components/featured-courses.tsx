@@ -116,6 +116,15 @@ const courses = [
 		category: "Programming",
 		description: "You will be clear about git and github after browing this course.",
 	},
+	{
+		title: "Adobe Photoshop",
+		platform: "Youtube",
+		url: "https://www.youtube.com/playlist?list=PLW-zSkCnZ-gA5Jn6gZtUa6-aG0OoRZyb6",
+		level: "Intermediate",
+		duration: "1 month",
+		category: "Design",
+		description: "learn detailed Photoshop in one month",
+	},
 ]
 
 const levelColors = {
