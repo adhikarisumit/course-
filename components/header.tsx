@@ -24,7 +24,7 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <BookOpen className="h-8 w-8" />
-            <span className="text-xl font-semibold">LearnHub</span>
+            <span className="text-xl font-semibold">Proteclink</span>
           </div>
 
           <div className="hidden md:flex flex-1 max-w-md mx-8">
