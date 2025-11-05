@@ -14,7 +14,7 @@ const softwareLinks = [
     category: "Browser",
   },
   {
-    name: "MIcrosoft Office (Windows)",
+    name: "Microsoft Office (Windows)",
     description: "Microsoft office products ",
     url: "https://www.microsoft.com/en-us/microsoft-365/download-office?msockid=0cbd0bfcc18a61733d491da9c09460ec#download",
     category: "Software",
