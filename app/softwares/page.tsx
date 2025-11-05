@@ -14,6 +14,12 @@ const softwareLinks = [
     category: "Browser",
   },
   {
+    name: "MIcrosoft Ofice (Windows)",
+    description: "Microsoft office products ",
+    url: "https://www.microsoft.com/en-us/microsoft-365/download-office?msockid=0cbd0bfcc18a61733d491da9c09460ec#download",
+    category: "Software",
+  },
+  {
     name: "VS Code",
     description: "Popular code editor with great extension support",
     url: "https://code.visualstudio.com/download",
