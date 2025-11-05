@@ -1,13 +1,17 @@
 AD=input("ADを入力してください: ")
+AD=int(AD)
 if AD== 0:
     print("正しいAD入力してください")
 elif AD>=1868:
-    print("明治 は "+str(int(AD)-1867))+"年です。")
+    print("明治 は "+str(AD-1867)+"年です。")
 elif AD>=1912:
-    print("明治 は "+str(int(AD)-1911))+"年です。")
+    print("大正 は "+str(AD-1911)+"年です。")
 elif AD >= 1926:
-    print("明治 は "+str(int(AD-1925))+"年です。")
+    print("昭和 は "+str(AD-1925)+"年です。")
 elif AD >= 1989:
-    print("明治 は "+str(int(AD-1988))+"年です。")
-else :
-    print("明治 は "+str(int(AD-2018))+"年です。")
+    print("平成 は "+str(AD-1988)+"年です。")
+elif (AD>=2019):
+    print("令和 は "+str(AD-2018)+"年です。")
+# else:{
+    
+# }
