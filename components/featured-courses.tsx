@@ -80,6 +80,15 @@ const courses = [
 		description: "Learn to analyze and visualize data using Python, Pandas, and Matplotlib.",
 	},
 	{
+		title: "Python full course in Nepali",
+		platform: "Youtube",
+		url: "https://youtu.be/Pv1dPzot4nk?si=PhxSJNvsj6iydwJ1",
+		level: "Beginner",
+		duration: "4 hours 24 minutes",
+		category: "Programming",
+		description: "Learn Python programming in 4.5 hours",
+	},
+	{
 		// languages
 		title: "Japanese language N5 to N1",
 		platform: "japanesetest4you",
