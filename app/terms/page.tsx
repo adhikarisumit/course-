@@ -26,7 +26,7 @@ export default function TermsPage() {
 
         <h2 className="text-2xl font-bold mt-8 mb-4">Disclaimer</h2>
         <p className="text-muted-foreground mb-4">
-          LearnHub is a course directory and resource aggregator. We provide links to external educational platforms and
+          Proteclink is a course directory and resource aggregator. We provide links to external educational platforms and
           content:
         </p>
         <ul className="list-disc pl-6 text-muted-foreground space-y-2">
