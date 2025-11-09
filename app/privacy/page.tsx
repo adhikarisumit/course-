@@ -9,7 +9,7 @@ export default function PrivacyPage() {
 
         <h2 className="text-2xl font-bold mt-8 mb-4">Introduction</h2>
         <p className="text-muted-foreground">
-          LearnHub ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we
+          Proteclink ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we
           collect, use, and safeguard your information when you visit our website.
         </p>
 

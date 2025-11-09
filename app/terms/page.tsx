@@ -9,7 +9,7 @@ export default function TermsPage() {
 
         <h2 className="text-2xl font-bold mt-8 mb-4">Agreement to Terms</h2>
         <p className="text-muted-foreground">
-          By accessing LearnHub, you agree to be bound by these Terms of Service and all applicable laws and
+          By accessing Proteclink, you agree to be bound by these Terms of Service and all applicable laws and
           regulations. If you do not agree with any of these terms, you are prohibited from using this site.
         </p>
 
@@ -58,7 +58,7 @@ export default function TermsPage() {
 
         <h2 className="text-2xl font-bold mt-8 mb-4">Contact Information</h2>
         <p className="text-muted-foreground">
-          If you have any questions about these Terms of Service, please contact us at hello@learnhub.com
+          If you have any questions about these Terms of Service, please contact us at sumitadhikari2341@gmail.com
         </p>
       </div>
     </div>
