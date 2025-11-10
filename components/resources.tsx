@@ -20,6 +20,7 @@ const resources = [
     title: "Video Tutorials",
     description: "Curated video content from YouTube",
     items: [
+      { name: "Gen AI Intensive Course with Google Day 1", type: "Video", url: "https://www.youtube.com/live/ZaUcqznlhv8?si=wkKloy5m5boKdoZH" },
       { name: "Git & GitHub Crash Course", type: "Video", url: "https://www.youtube.com/watch?v=RGOj5yH7evk" },
       { name: "CSS Grid & Flexbox Guide", type: "Video", url: "https://www.youtube.com/watch?v=3elGSZSWTbM" },
       { name: "API Development Tutorial", type: "Video", url: "https://www.youtube.com/watch?v=0oXYLzuucwE" },
