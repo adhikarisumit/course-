@@ -22,6 +22,8 @@ const resources = [
     items: [
       { name: "Gen AI Intensive Course with Google Day 1", type: "Video", url: "https://www.youtube.com/live/ZaUcqznlhv8?si=wkKloy5m5boKdoZH" },
       { name: "Gen AI Intensive Course with Google Day 2", type: "Video", url: "https://www.youtube.com/live/8Gk1BE3uYek" },
+      { name: "Gen AI Intensive Course with Google Day 3", type: "Video", url: "https://www.youtube.com/live/8o-GXj8A3nE?si=tJiXEXqOQ-ASMTBn" },
+      { name: "Gen AI Intensive Course with Google Day 4", type: "Video", url: "https://www.youtube.com/live/JW1Yybfxyr4?si=EplExrUj6RS3WDHn" },
       { name: "Git & GitHub Crash Course", type: "Video", url: "https://www.youtube.com/watch?v=RGOj5yH7evk" },
       { name: "CSS Grid & Flexbox Guide", type: "Video", url: "https://www.youtube.com/watch?v=3elGSZSWTbM" },
       { name: "API Development Tutorial", type: "Video", url: "https://www.youtube.com/watch?v=0oXYLzuucwE" },
