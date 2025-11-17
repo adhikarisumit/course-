@@ -3,19 +3,19 @@ import Link from "next/link"
 
 const files: { title: string; filename: string; description?: string }[] = [
   {
-    title: "230新日本语能力考试 N2 Luyen tap Tu vung - Chu Han",
+    title: "230新日本语能力考试 N2 ",
     filename: "230新日本语能力考试  N2  Luyen tap Tu vung - Chu Han (1).pdf",
   },
   {
-    title: "Shiken ni deru Bunpou to hyougen 1-2kyuu",
+    title: "試験 に 出る 文法 と 表現 1-2級",
     filename: "Shiken ni deru Bunpou to hyougen 1-2kyuu.pdf",
   },
   {
-    title: "Yosou mondaishuu",
+    title: "予想 問題数",
     filename: "Yosou mondaishuu.pdf",
   },
   {
-    title: "JLPT Goukaku Dekiru N2",
+    title: "JLPT 合格 できる N2",
     filename: "[studyjapanese.net]_JLPT_Goukaku_Dekiru_N2.pdf",
   },
   {
