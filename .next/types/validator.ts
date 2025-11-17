@@ -54,6 +54,42 @@ type LayoutConfig<Route extends LayoutRoutes = LayoutRoutes> = {
   type __Unused = __Check
 }
 
+// Validate ../../app/collections/[...slug]/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/collections/[...slug]">> = Specific
+  const handler = {} as typeof import("../../app/collections/[...slug]/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/collections/[collection]/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/collections/[collection]">> = Specific
+  const handler = {} as typeof import("../../app/collections/[collection]/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/collections/n2/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/collections/n2">> = Specific
+  const handler = {} as typeof import("../../app/collections/n2/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/collections/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/collections">> = Specific
+  const handler = {} as typeof import("../../app/collections/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../app/contact/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/contact">> = Specific
@@ -76,6 +112,15 @@ type LayoutConfig<Route extends LayoutRoutes = LayoutRoutes> = {
 {
   type __IsExpected<Specific extends AppPageConfig<"/privacy">> = Specific
   const handler = {} as typeof import("../../app/privacy/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/softwares/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/softwares">> = Specific
+  const handler = {} as typeof import("../../app/softwares/page.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check
@@ -104,4 +149,3 @@ type LayoutConfig<Route extends LayoutRoutes = LayoutRoutes> = {
   // @ts-ignore
   type __Unused = __Check
 }
-

@@ -2,8 +2,8 @@ var R=require("../../chunks/ssr/[turbopack]_runtime.js")("server/app/privacy/pag
 R.c("server/chunks/ssr/_b57186ce._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__d0935222._.js")
 R.c("server/chunks/ssr/_75e6853b._.js")
-R.c("server/chunks/ssr/[root-of-the-server]__8756e439._.js")
-R.c("server/chunks/ssr/[root-of-the-server]__17ee6246._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__2f546a22._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__78346915._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__666f8ec1._.js")
 R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_global-error_ece394eb.js")
 R.c("server/chunks/ssr/[root-of-the-server]__4c1e03ea._.js")
@@ -13,4 +13,3 @@ R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_unauthor
 R.c("server/chunks/ssr/_next-internal_server_app_privacy_page_actions_78bfea85.js")
 R.m(97478)
 module.exports=R.m(97478).exports
-

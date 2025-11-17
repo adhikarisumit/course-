@@ -15,19 +15,13 @@ export function Footer() {
     e.preventDefault()
 
     if (pathname === "/") {
-      // Already on homepage, just scroll
       const element = document.getElementById("resources")
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" })
-      }
+      if (element) element.scrollIntoView({ behavior: "smooth" })
     } else {
-      // Navigate to homepage then scroll
       router.push("/")
       setTimeout(() => {
         const element = document.getElementById("resources")
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth" })
-        }
+        if (element) element.scrollIntoView({ behavior: "smooth" })
       }, 100)
     }
   }
@@ -36,19 +30,13 @@ export function Footer() {
     e.preventDefault()
 
     if (pathname === "/") {
-      // Already on homepage, just scroll
       const element = document.getElementById("categories")
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" })
-      }
+      if (element) element.scrollIntoView({ behavior: "smooth" })
     } else {
-      // Navigate to homepage then scroll
       router.push("/")
       setTimeout(() => {
         const element = document.getElementById("categories")
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth" })
-        }
+        if (element) element.scrollIntoView({ behavior: "smooth" })
       }, 100)
     }
   }
@@ -56,38 +44,26 @@ export function Footer() {
   return (
     <footer className="border-t border-border bg-card mt-16">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid md:grid-cols-4 gap-8">
+        <div className="grid md:grid-cols-5 gap-8">
           <div>
             <Link href="/" className="flex items-center gap-2 mb-4">
               <BookOpen className="h-6 w-6" />
-              <span className="font-semibold text-lg">LearnHub</span>
+              <span className="font-semibold text-lg">Proteclink</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               Your centralized platform for discovering quality online courses and educational resources.
             </p>
             <div className="mt-4 space-y-2">
-              <Link
-                href="/about"
-                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
+              <Link href="/about" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
                 About Us
               </Link>
-              <Link
-                href="/contact"
-                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
+              <Link href="/contact" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Contact
               </Link>
-              <Link
-                href="/privacy"
-                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
+              <Link href="/privacy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Privacy Policy
               </Link>
-              <Link
-                href="/terms"
-                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
+              <Link href="/terms" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Terms of Service
               </Link>
             </div>
@@ -97,38 +73,22 @@ export function Footer() {
             <h4 className="font-semibold mb-4">Categories</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <a
-                  href="/#categories"
-                  onClick={handleCategoryClick}
-                  className="hover:text-foreground transition-colors cursor-pointer"
-                >
+                <a href="/#categories" onClick={handleCategoryClick} className="hover:text-foreground transition-colors cursor-pointer">
                   Programming
                 </a>
               </li>
               <li>
-                <a
-                  href="/#categories"
-                  onClick={handleCategoryClick}
-                  className="hover:text-foreground transition-colors cursor-pointer"
-                >
+                <a href="/#categories" onClick={handleCategoryClick} className="hover:text-foreground transition-colors cursor-pointer">
                   Design
                 </a>
               </li>
               <li>
-                <a
-                  href="/#categories"
-                  onClick={handleCategoryClick}
-                  className="hover:text-foreground transition-colors cursor-pointer"
-                >
+                <a href="/#categories" onClick={handleCategoryClick} className="hover:text-foreground transition-colors cursor-pointer">
                   Business
                 </a>
               </li>
               <li>
-                <a
-                  href="/#categories"
-                  onClick={handleCategoryClick}
-                  className="hover:text-foreground transition-colors cursor-pointer"
-                >
+                <a href="/#categories" onClick={handleCategoryClick} className="hover:text-foreground transition-colors cursor-pointer">
                   Data Science
                 </a>
               </li>
@@ -139,29 +99,17 @@ export function Footer() {
             <h4 className="font-semibold mb-4">Resources</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <a
-                  href="/#resources"
-                  onClick={handleResourceClick}
-                  className="hover:text-foreground transition-colors cursor-pointer"
-                >
+                <a href="/#resources" onClick={handleResourceClick} className="hover:text-foreground transition-colors cursor-pointer">
                   Study Notes
                 </a>
               </li>
               <li>
-                <a
-                  href="/#resources"
-                  onClick={handleResourceClick}
-                  className="hover:text-foreground transition-colors cursor-pointer"
-                >
+                <a href="/#resources" onClick={handleResourceClick} className="hover:text-foreground transition-colors cursor-pointer">
                   Video Tutorials
                 </a>
               </li>
               <li>
-                <a
-                  href="/#resources"
-                  onClick={handleResourceClick}
-                  className="hover:text-foreground transition-colors cursor-pointer"
-                >
+                <a href="/#resources" onClick={handleResourceClick} className="hover:text-foreground transition-colors cursor-pointer">
                   Documentation
                 </a>
               </li>
@@ -179,30 +127,34 @@ export function Footer() {
           </div>
 
           <div>
+            <h4 className="font-semibold mb-4">Collections</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li>
+                <Link href="/collections" className="hover:text-foreground transition-colors">
+                  All Collections
+                </Link>
+              </li>
+              <li>
+                <Link href="/collections/n2" className="hover:text-foreground transition-colors">
+                  JLPT N2
+                </Link>
+              </li>
+              <li>
+                <span className="text-muted-foreground">More coming</span>
+              </li>
+            </ul>
+          </div>
+
+          <div>
             <h4 className="font-semibold mb-4">Connect</h4>
             <div className="flex gap-4">
-              <a
-                href="https://github.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors"
-              >
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
                 <Github className="h-5 w-5" />
               </a>
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors"
-              >
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors"
-              >
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
                 <Linkedin className="h-5 w-5" />
               </a>
             </div>

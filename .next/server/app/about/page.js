@@ -1,10 +1,10 @@
 var R=require("../../chunks/ssr/[turbopack]_runtime.js")("server/app/about/page.js")
-R.c("server/chunks/ssr/_c00b19f2._.js")
+R.c("server/chunks/ssr/_1eb859b1._.js")
 R.c("server/chunks/ssr/_e2a6e339._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__d0935222._.js")
-R.c("server/chunks/ssr/node_modules_lucide-react_dist_esm_createLucideIcon_9cf7f378.js")
-R.c("server/chunks/ssr/[root-of-the-server]__8756e439._.js")
-R.c("server/chunks/ssr/[root-of-the-server]__17ee6246._.js")
+R.c("server/chunks/ssr/lib_utils_ts_78807e9c._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__2f546a22._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__78346915._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__666f8ec1._.js")
 R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_global-error_ece394eb.js")
 R.c("server/chunks/ssr/[root-of-the-server]__4c1e03ea._.js")
@@ -14,4 +14,3 @@ R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_unauthor
 R.c("server/chunks/ssr/_next-internal_server_app_about_page_actions_6fff35e4.js")
 R.m(76406)
 module.exports=R.m(76406).exports
-
