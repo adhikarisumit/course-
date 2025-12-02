@@ -122,4 +122,19 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Ensure interactive elements show pointer cursor */
+  /* Ensure interactive elements show pointer cursor. Use stronger selectors to override other styles. */
+  button:not(:disabled),
+  a[href],
+  [data-slot="button"],
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer !important;
+  }
+
+  /* Disabled controls should not show pointer */
+  button:disabled,
+  [aria-disabled="true"],
+  a[aria-disabled="true"] {
+    cursor: default !important;
+  }
 }

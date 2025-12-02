@@ -16,7 +16,14 @@ export default async function CollectionsPage() {
 
   return (
     <main className="container mx-auto px-4 py-12">
-      <h1 className="text-3xl font-semibold mb-4">Collections</h1>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-3xl font-semibold">Collections</h1>
+        <div>
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/">Back to Home</Link>
+          </Button>
+        </div>
+      </div>
       <p className="text-muted-foreground mb-8">Grouped downloadable resource collections.</p>
 
       {entries.length === 0 ? (

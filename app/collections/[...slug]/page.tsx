@@ -44,7 +44,8 @@ export default async function CollectionPage({ params }: Props) {
 
   return (
     <main className="container mx-auto px-4 py-12">
-      <nav className="text-sm mb-4">
+      <div className="flex items-center justify-between mb-4">
+        <nav className="text-sm">
         {crumbs.map((c, i) => (
           <span key={c.href}>
             <Link href={c.href} className="text-primary hover:underline">
@@ -53,7 +54,14 @@ export default async function CollectionPage({ params }: Props) {
             {i < crumbs.length - 1 && <span className="mx-2">/</span>}
           </span>
         ))}
-      </nav>
+        </nav>
+
+        <div>
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/">Back to Home</Link>
+          </Button>
+        </div>
+      </div>
 
       <h1 className="text-3xl font-semibold mb-4">{decodedSegments.join(" / ")}</h1>
       <p className="text-muted-foreground mb-8">Folders and files in this collection.</p>
