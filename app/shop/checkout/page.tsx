@@ -54,7 +54,7 @@ export default function CheckoutPage() {
               <div className="font-semibold text-lg">{paypayId}</div>
               <Button size="sm" onClick={handleCopy}>{copied ? 'Copied' : 'Copy'}</Button>
             </div>
-            <p className="text-sm text-muted-foreground mt-3">After payment, please email the receipt to <strong>you@example.com</strong> (or contact via the app).</p>
+            <p className="text-sm text-muted-foreground mt-3">After payment, please email the receipt to <strong>sumitadhikari2341@gmail.com</strong> (or contact via the paypay app).</p>
           </div>
 
           <div className="mt-6 flex gap-2">
