@@ -38,13 +38,13 @@ export default function CheckoutPage() {
             {items.map((it) => (
               <li key={it.id} className="flex items-center justify-between">
                 <div>{it.title} × {it.qty}</div>
-                <div className="font-medium">${(it.price * it.qty).toFixed(2)}</div>
+                <div className="font-medium">¥{(it.price * it.qty).toFixed(2)}</div>
               </li>
             ))}
           </ul>
 
           <div className="mb-6">
-            <div className="text-lg">Total: <span className="font-semibold">${total.toFixed(2)}</span></div>
+            <div className="text-lg">Total: <span className="font-semibold">¥{total.toFixed(2)}</span></div>
           </div>
 
           <div className="p-4 border rounded-md bg-muted/30">
