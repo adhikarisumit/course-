@@ -30,13 +30,13 @@ export default function CartPage() {
                   {it.image && <img src={it.image} alt={it.title} className="w-24 h-16 object-cover rounded" />}
                   <div>
                     <div className="font-medium">{it.title}</div>
-                    <div className="text-sm text-muted-foreground">${it.price.toFixed(2)} each</div>
+                    <div className="text-sm text-muted-foreground">¥{it.price.toFixed(2)} each</div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <input type="number" min={1} value={it.qty} onChange={(e) => updateQty(it.id, Number(e.target.value) || 1)} className="w-16 p-1 border rounded" />
-                  <div className="w-24 text-right font-medium">${(it.price * it.qty).toFixed(2)}</div>
+                  <div className="w-24 text-right font-medium">¥{(it.price * it.qty).toFixed(2)}</div>
                   <Button variant="destructive" size="sm" onClick={() => removeItem(it.id)}>Remove</Button>
                 </div>
               </li>
@@ -44,7 +44,7 @@ export default function CartPage() {
           </ul>
 
           <div className="flex items-center justify-between">
-            <div className="text-lg font-semibold">Total: ${total.toFixed(2)}</div>
+            <div className="text-lg font-semibold">Total: ¥{total.toFixed(2)}</div>
             <div className="flex gap-2">
               <Button variant="outline" asChild>
                 <Link href="/shop">Continue shopping</Link>
