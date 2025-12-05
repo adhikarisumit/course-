@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import CartProvider from "@/components/cart-context"
+import { ThemeProvider } from "@/components/theme-provider"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
@@ -29,9 +30,11 @@ export default function RootLayout({
         <meta name="twitter:title" content="proteclink" />
       </head>
       <body className={`font-sans antialiased`}>
-        <CartProvider>
-          {children}
-        </CartProvider>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          <CartProvider>
+            {children}
+          </CartProvider>
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>
