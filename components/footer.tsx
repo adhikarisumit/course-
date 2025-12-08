@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { BookOpen, Github, Twitter, Linkedin } from "lucide-react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
@@ -44,7 +43,7 @@ export function Footer() {
   return (
     <footer className="border-t border-border bg-card mt-16">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid md:grid-cols-5 gap-8">
+        <div className="grid md:grid-cols-4 gap-8">
           <div>
             <Link href="/" className="flex items-center gap-2 mb-4">
               <BookOpen className="h-6 w-6" />
@@ -127,25 +126,6 @@ export function Footer() {
                 <Link href="/softwares" className="hover:text-foreground transition-colors">
                   Softwares & Links
                 </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-4">Collections</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <Link href="/collections" className="hover:text-foreground transition-colors">
-                  All Collections
-                </Link>
-              </li>
-              <li>
-                <Link href="/collections/n2" className="hover:text-foreground transition-colors">
-                  JLPT N2
-                </Link>
-              </li>
-              <li>
-                <span className="text-muted-foreground">More coming</span>
               </li>
             </ul>
           </div>
