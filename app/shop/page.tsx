@@ -41,58 +41,39 @@ function ProductCard({ p }: { p: Product }) {
           <h2 className="font-medium text-lg">{p.title}</h2>
           {p.description && <p className="text-sm text-muted-foreground mt-2">{p.description}</p>}
 
-          <div className="mt-4 flex items-center justify-between">
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="text-lg font-semibold">{p.price}</div>
-            <div className="hidden sm:flex gap-2">
-              <Button size="sm" asChild>
-                <button
-                  onClick={() => {
-                    addItem(p, 1)
-                  }}
-                >
-                  Add to cart
-                </button>
+
+            <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
+              <Button size="sm" className="w-full sm:w-auto" onClick={() => addItem(p, 1)}>
+                Add to cart
               </Button>
 
-              <Button variant="secondary" size="sm" asChild>
-                <button
-                  onClick={() => {
-                    addItem(p, 1)
-                    router.push('/shop/checkout')
-                  }}
-                >
-                  Buy Now
-                </button>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="w-full sm:w-auto"
+                onClick={() => {
+                  addItem(p, 1)
+                  router.push('/shop/checkout')
+                }}
+              >
+                Buy Now
               </Button>
+
+              {p.url && (
+                <Button size="sm" variant="outline" className="w-full sm:w-auto">
+                  <a href={p.url} target="_blank" rel="noopener noreferrer" className="w-full block text-center">
+                    View Product
+                  </a>
+                </Button>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Actions for mobile stacked */}
-      <div className="mt-4 sm:hidden flex flex-col gap-2">
-        <div className="text-lg font-semibold">{p.price}</div>
-        <Button size="sm" asChild>
-          <button
-            onClick={() => {
-              addItem(p, 1)
-            }}
-          >
-            Add to cart
-          </button>
-        </Button>
-
-        <Button variant="secondary" size="sm" asChild>
-          <button
-            onClick={() => {
-              addItem(p, 1)
-              router.push('/shop/checkout')
-            }}
-          >
-            Buy Now
-          </button>
-        </Button>
-      </div>
+      {/* (mobile actions handled above with responsive classes) */}
     </li>
   )
 }
