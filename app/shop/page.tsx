@@ -34,40 +34,30 @@ function ProductCard({ p }: { p: Product }) {
         {p.description && <p className="text-sm text-muted-foreground mt-2">{p.description}</p>}
       </div>
 
-      <div className="mt-4 space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="text-lg font-semibold">{p.price}</div>
-          <div className="flex gap-2">
-            <Button size="sm" asChild>
-              <button
-                onClick={() => {
-                  addItem(p, 1)
-                }}
-              >
-                Add to cart
-              </button>
-            </Button>
-
-            <Button variant="secondary" size="sm" asChild>
-              <button
-                onClick={() => {
-                  addItem(p, 1)
-                  router.push('/shop/checkout')
-                }}
-              >
-                Buy Now
-              </button>
-            </Button>
-          </div>
-        </div>
-
-        {p.url && (
-          <Button size="sm" variant="outline" asChild className="w-full">
-            <a href={p.url} target="_blank" rel="noopener noreferrer">
-              View Product
-            </a>
+      <div className="mt-4 flex items-center justify-between">
+        <div className="text-lg font-semibold">{p.price}</div>
+        <div className="flex gap-2">
+          <Button size="sm" asChild>
+            <button
+              onClick={() => {
+                addItem(p, 1)
+              }}
+            >
+              Add to cart
+            </button>
           </Button>
-        )}
+
+          <Button variant="secondary" size="sm" asChild>
+            <button
+              onClick={() => {
+                addItem(p, 1)
+                router.push('/shop/checkout')
+              }}
+            >
+              Buy Now
+            </button>
+          </Button>
+        </div>
       </div>
     </li>
   )
