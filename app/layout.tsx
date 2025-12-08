@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import CartProvider from "@/components/cart-context"
 import { ThemeProvider } from "@/components/theme-provider"
+import DebugTheme from "@/components/debug-theme"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
@@ -30,9 +31,10 @@ export default function RootLayout({
         <meta name="twitter:title" content="proteclink" />
       </head>
       <body className={`font-sans antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true}>
           <CartProvider>
             {children}
+            {process.env.NODE_ENV === "development" && <DebugTheme />}
           </CartProvider>
         </ThemeProvider>
         <Analytics />

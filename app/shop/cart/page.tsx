@@ -25,31 +25,41 @@ export default function CartPage() {
         <>
           <ul className="space-y-4 mb-6">
             {items.map((it) => (
-              <li key={it.id} className="p-4 border rounded-md flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  {it.image && <img src={it.image} alt={it.title} className="w-24 h-16 object-cover rounded" />}
+              <li key={it.id} className="p-4 border rounded-md flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-start sm:items-center gap-4">
+                  {it.image && <img src={it.image} alt={it.title} className="w-20 h-16 sm:w-24 sm:h-16 object-cover rounded" />}
                   <div>
                     <div className="font-medium">{it.title}</div>
                     <div className="text-sm text-muted-foreground">¥{it.price.toFixed(2)} each</div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <input type="number" min={1} value={it.qty} onChange={(e) => updateQty(it.id, Number(e.target.value) || 1)} className="w-16 p-1 border rounded" />
-                  <div className="w-24 text-right font-medium">¥{(it.price * it.qty).toFixed(2)}</div>
-                  <Button variant="destructive" size="sm" onClick={() => removeItem(it.id)}>Remove</Button>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
+                  <input
+                    type="number"
+                    min={1}
+                    value={it.qty}
+                    onChange={(e) => updateQty(it.id, Number(e.target.value) || 1)}
+                    className="w-full sm:w-16 p-1 border rounded"
+                  />
+                  <div className="text-right font-medium">¥{(it.price * it.qty).toFixed(2)}</div>
+                  <div className="w-full sm:w-auto">
+                    <Button variant="destructive" size="sm" className="w-full" onClick={() => removeItem(it.id)}>
+                      Remove
+                    </Button>
+                  </div>
                 </div>
               </li>
             ))}
           </ul>
 
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="text-lg font-semibold">Total: ¥{total.toFixed(2)}</div>
-            <div className="flex gap-2">
-              <Button variant="outline" asChild>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <Button variant="outline" asChild className="w-full sm:w-auto">
                 <Link href="/shop">Continue shopping</Link>
               </Button>
-              <Button asChild>
+              <Button asChild className="w-full sm:w-auto">
                 <Link href="/shop/checkout">Proceed to checkout</Link>
               </Button>
             </div>

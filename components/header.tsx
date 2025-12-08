@@ -1,6 +1,7 @@
 "use client"
 
-import { Cpu , Search, ShoppingCart } from "lucide-react"
+import { useState } from "react"
+import { Cpu, Search, ShoppingCart, Menu, X } from "lucide-react"
 import Link from "next/link"
 import { useCart } from "@/components/cart-context"
 import { Input } from "@/components/ui/input"
@@ -13,6 +14,7 @@ interface HeaderProps {
 }
 
 export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
+  const [mobileOpen, setMobileOpen] = useState(false)
   const handleSearch = () => {
     const coursesSection = document.getElementById("courses")
     if (coursesSection) {
@@ -77,7 +79,6 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
               </Button>
             </div>
           </div>
-
           <nav className="flex items-center gap-6">
             <a href="#courses" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
               Courses
@@ -88,12 +89,39 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
             <Link href="/shop" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
               Shop
             </Link>
+            {/* mobile menu toggle */}
+            <button
+              type="button"
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileOpen}
+              onClick={() => setMobileOpen((s) => !s)}
+              className="md:hidden p-2 rounded hover:bg-accent/10"
+            >
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
             {/* Cart icon only (visible on all sizes). Accessible label provided for screen readers. */}
             <CartIcon />
             <ThemeToggle />
           </nav>
         </div>
       </div>
+
+      {/* Mobile navigation panel */}
+      {mobileOpen && (
+        <div className="md:hidden bg-card border-t border-border">
+          <div className="container mx-auto px-4 py-3 flex flex-col gap-2">
+            <a href="#courses" className="text-sm font-medium hover:text-primary transition-colors">
+              Courses
+            </a>
+            <a href="#resources" className="text-sm font-medium hover:text-primary transition-colors">
+              Resources
+            </a>
+            <Link href="/shop" className="text-sm font-medium hover:text-primary transition-colors">
+              Shop
+            </Link>
+          </div>
+        </div>
+      )}
     </header>
   )
 }

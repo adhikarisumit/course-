@@ -37,8 +37,8 @@ export const products: Product[] = [
     ],
   },
   {
-    id: 'headphone',
-    title: ' Active Noise Cancelling Headphones',
+    id: 'headphone-1',
+    title: 'Active Noise Cancelling Headphones',
     price: '¥5500',
     description: 'Hybrid Wireless Headphone With Multi Magnetic Touch Control LED Screen.',
     url: 'https://s.click.aliexpress.com/e/_c3b8SLlf',
@@ -51,8 +51,8 @@ export const products: Product[] = [
     ],
   },
   {
-    id: 'headphone',
-    title: 'Wireless Headphone with Detachable Full Color Touch Screen ',
+    id: 'headphone-2',
+    title: 'Wireless Headphone with Detachable Full Color Touch Screen',
     price: '¥5500',
     description: 'AI Assistant Smart Chat Translation Function BT5.4.',
     url: 'https://s.click.aliexpress.com/e/_c4tuoPrT',
