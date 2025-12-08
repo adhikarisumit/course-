@@ -53,7 +53,7 @@ export const products: Product[] = [
   {
     id: 'headphone-2',
     title: 'Wireless Headphone with Detachable Full Color Touch Screen',
-    price: '¥5500',
+    price: '¥4500',
     description: 'AI Assistant Smart Chat Translation Function BT5.4.',
     url: 'https://s.click.aliexpress.com/e/_c4tuoPrT',
     images: [
