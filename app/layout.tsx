@@ -31,7 +31,7 @@ export default function RootLayout({
         <meta name="twitter:title" content="proteclink" />
       </head>
       <body className={`font-sans antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true} enableColorScheme={false}>
           <CartProvider>
             {children}
             {process.env.NODE_ENV === "development" && <DebugTheme />}
