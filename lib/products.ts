@@ -64,6 +64,48 @@ export const products: Product[] = [
       '/shop/Headphone2/headphone5.jpg',
     ],
   },
+  {
+    id: 'plug-1',
+    title: 'Smart Wifi Plug US Standard Wireless Remote Control ',
+    price: '¥750',
+    description: 'Tuya Smart Wifi Plug US Standard Wireless Outlet 10A Remote Control Smart Home Appliances Work With Alexa Google Home',
+    url: 'https://s.click.aliexpress.com/e/_c3YUWMF3',
+    images: [
+      '/shop/Plug1/plug1.jpg',
+      '/shop/Plug1/plug2.jpg',
+      '/shop/Plug1/plug3.jpg',
+      '/shop/Plug1/plug4.jpg',
+      '/shop/Plug1/plug5.jpg',
+    ],
+  },
+  {
+    id: 'card_reader1',
+    title: 'Stable Operation USB Smart Card Reader  ',
+    price: '¥700',
+    description: 'Stable Operation USB Smart Card Reader Reliable Simplicity for DNIE ATM CAC IC ID SIM Card Cloner Connector Windows',
+    url: 'https://s.click.aliexpress.com/e/_c2zd9lZj',
+    images: [
+      '/shop/Card_reader1/card_reader1.jpg',
+      '/shop/Card_reader1/card_reader2.jpg',
+      '/shop/Card_reader1/card_reader3.jpg',
+      '/shop/Card_reader1/card_reader4.jpg',
+      '/shop/Card_reader1/card_reader5.jpg',
+    ],
+  },
+  {
+    id: 'Tshirt-1',
+    title: '100% Cotton T-shirt Custom Logo Street Trend Short Sleeve T-shirt ',
+    price: '¥1600',
+    description: 'mbroidery Design European American Size Tops Printing Pattern',
+    url: 'https://s.click.aliexpress.com/e/_c39hJGdP',
+    images: [
+      '/shop/Tshirt1/tshirt1.png',
+      '/shop/Tshirt1/tshirt2.png',
+      '/shop/Tshirt1/tshirt3.png',
+      '/shop/Tshirt1/tshirt4.png',
+      '/shop/Tshirt1/tshirt5.png',
+    ],
+  },
   
 ]
 
