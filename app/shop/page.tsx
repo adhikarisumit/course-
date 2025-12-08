@@ -14,50 +14,84 @@ function ProductCard({ p }: { p: Product }) {
   const [selected, setSelected] = useState(0)
 
   return (
-    <li key={p.id} className="p-3 border rounded-md flex flex-col justify-between h-full">
-      <div>
-        <div className="w-full h-32 mb-2 flex items-center justify-center bg-muted/10 rounded-md overflow-hidden">
-          <img src={imgs[selected]} alt={p.title} className="max-h-full max-w-full object-contain" />
-        </div>
-
+    <li key={p.id} className="p-3 border rounded-md h-full">
+      <div className="flex flex-col sm:flex-row gap-4">
+        {/* Thumbnails: left on desktop, below on mobile */}
         {imgs.length > 1 && (
-          <div className="flex gap-2 mb-2">
+          <div className="order-2 sm:order-1 flex gap-2 sm:flex-col sm:w-20">
             {imgs.map((src, i) => (
-              <button key={src} onClick={() => setSelected(i)} className={`w-10 h-10 rounded overflow-hidden border ${i === selected ? 'ring-2 ring-primary' : ''}`}>
+              <button
+                key={src}
+                onClick={() => setSelected(i)}
+                aria-label={`Show image ${i + 1} for ${p.title}`}
+                className={`w-12 h-12 sm:w-16 sm:h-16 rounded overflow-hidden border flex-shrink-0 ${i === selected ? 'ring-2 ring-primary' : ''}`}
+              >
                 <img src={src} alt={`${p.title} ${i + 1}`} className="w-full h-full object-cover" />
               </button>
             ))}
           </div>
         )}
 
-        <h2 className="font-medium text-lg">{p.title}</h2>
-        {p.description && <p className="text-sm text-muted-foreground mt-2">{p.description}</p>}
+        {/* Main image and details */}
+        <div className="order-1 sm:order-2 flex-1">
+          <div className="w-full h-56 sm:h-48 mb-3 flex items-center justify-center bg-muted/10 rounded-md overflow-hidden">
+            <img src={imgs[selected]} alt={p.title} className="max-h-full max-w-full object-contain" />
+          </div>
+
+          <h2 className="font-medium text-lg">{p.title}</h2>
+          {p.description && <p className="text-sm text-muted-foreground mt-2">{p.description}</p>}
+
+          <div className="mt-4 flex items-center justify-between">
+            <div className="text-lg font-semibold">{p.price}</div>
+            <div className="hidden sm:flex gap-2">
+              <Button size="sm" asChild>
+                <button
+                  onClick={() => {
+                    addItem(p, 1)
+                  }}
+                >
+                  Add to cart
+                </button>
+              </Button>
+
+              <Button variant="secondary" size="sm" asChild>
+                <button
+                  onClick={() => {
+                    addItem(p, 1)
+                    router.push('/shop/checkout')
+                  }}
+                >
+                  Buy Now
+                </button>
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-between">
+      {/* Actions for mobile stacked */}
+      <div className="mt-4 sm:hidden flex flex-col gap-2">
         <div className="text-lg font-semibold">{p.price}</div>
-        <div className="flex gap-2">
-          <Button size="sm" asChild>
-            <button
-              onClick={() => {
-                addItem(p, 1)
-              }}
-            >
-              Add to cart
-            </button>
-          </Button>
+        <Button size="sm" asChild>
+          <button
+            onClick={() => {
+              addItem(p, 1)
+            }}
+          >
+            Add to cart
+          </button>
+        </Button>
 
-          <Button variant="secondary" size="sm" asChild>
-            <button
-              onClick={() => {
-                addItem(p, 1)
-                router.push('/shop/checkout')
-              }}
-            >
-              Buy Now
-            </button>
-          </Button>
-        </div>
+        <Button variant="secondary" size="sm" asChild>
+          <button
+            onClick={() => {
+              addItem(p, 1)
+              router.push('/shop/checkout')
+            }}
+          >
+            Buy Now
+          </button>
+        </Button>
       </div>
     </li>
   )
