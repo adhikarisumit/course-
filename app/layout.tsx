@@ -29,6 +29,7 @@ export default function RootLayout({
         <meta name="description" content="proteclink — learning resources and curated courses" />
         <meta property="og:title" content="proteclink" />
         <meta name="twitter:title" content="proteclink" />
+        <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js" async></script>
       </head>
       <body className={`font-sans antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true} enableColorScheme={false}>
