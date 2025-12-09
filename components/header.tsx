@@ -89,6 +89,9 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
             <Link href="/shop" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
               Shop
             </Link>
+            {/* Cart icon only (visible on all sizes). Accessible label provided for screen readers. */}
+            <CartIcon />
+            <ThemeToggle />
             {/* mobile menu toggle */}
             <button
               type="button"
@@ -99,9 +102,6 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
-            {/* Cart icon only (visible on all sizes). Accessible label provided for screen readers. */}
-            <CartIcon />
-            <ThemeToggle />
           </nav>
         </div>
       </div>
@@ -109,16 +109,40 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
       {/* Mobile navigation panel */}
       {mobileOpen && (
         <div className="md:hidden bg-card border-t border-border">
-          <div className="container mx-auto px-4 py-3 flex flex-col gap-2">
-            <a href="#courses" className="text-sm font-medium hover:text-primary transition-colors">
-              Courses
-            </a>
-            <a href="#resources" className="text-sm font-medium hover:text-primary transition-colors">
-              Resources
-            </a>
-            <Link href="/shop" className="text-sm font-medium hover:text-primary transition-colors">
-              Shop
-            </Link>
+          <div className="container mx-auto px-4 py-3 flex flex-col gap-3">
+            {/* Mobile search */}
+            <div className="relative w-full flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search courses, notes, resources..."
+                  className="pl-10"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleSearch()
+                      setMobileOpen(false)
+                    }
+                  }}
+                />
+              </div>
+              <Button onClick={() => { handleSearch(); setMobileOpen(false); }} size="default">
+                Search
+              </Button>
+            </div>
+            {/* Mobile nav links */}
+            <div className="flex flex-col gap-2 border-t border-border pt-2 items-end">
+              <a href="#courses" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setMobileOpen(false)}>
+                Courses
+              </a>
+              <a href="#resources" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setMobileOpen(false)}>
+                Resources
+              </a>
+              <Link href="/shop" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setMobileOpen(false)}>
+                Shop
+              </Link>
+            </div>
           </div>
         </div>
       )}

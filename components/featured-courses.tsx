@@ -171,10 +171,16 @@ export function FeaturedCourses({ searchQuery = "", selectedCategory = null }: F
 	console.debug("[FeaturedCourses] filteredCourses length:", filteredCourses.length)
 
 	return (
-		<section id="courses" className="py-16 md:py-24 bg-secondary/50">
-			<div className="container mx-auto px-4">
+		<section id="courses" className="py-16 md:py-24 relative overflow-hidden">
+			{/* Subtle background pattern */}
+			<div className="absolute inset-0 bg-gradient-to-b from-secondary/30 via-background to-background"></div>
+			<div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent"></div>
+			
+			<div className="container mx-auto px-4 relative z-10">
 				<div className="text-center mb-12">
-					<h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Courses</h2>
+					<h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+						Featured Courses
+					</h2>
 					<p className="text-muted-foreground text-lg">Hand-picked courses from top learning platforms</p>
 					{(searchQuery || selectedCategory) && (
 						<p className="text-sm text-muted-foreground mt-2">
@@ -193,32 +199,35 @@ export function FeaturedCourses({ searchQuery = "", selectedCategory = null }: F
 				) : (
 					<div data-testid="results" className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 						{filteredCourses.map((course) => (
-							<Card key={course.title} className="flex flex-col hover:shadow-lg transition-shadow" data-course={course.title}>
-								<CardHeader>
+							<Card key={course.title} className="flex flex-col shadow-md border-2 group overflow-hidden" data-course={course.title}>
+								{/* Gradient overlay on hover */}
+								<div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+								
+								<CardHeader className="relative z-10">
 									<div className="flex items-start justify-between gap-2 mb-2">
-										<Badge variant="secondary">{course.category}</Badge>
-										<Badge className={levelColors[course.level as keyof typeof levelColors]}>{course.level}</Badge>
+										<Badge variant="secondary" className="shadow-sm">{course.category}</Badge>
+										<Badge className={`${levelColors[course.level as keyof typeof levelColors]} shadow-sm`}>{course.level}</Badge>
 									</div>
 									<h3 className="font-semibold text-lg leading-tight">{course.title}</h3>
 									<p className="text-sm text-muted-foreground">{course.platform}</p>
 								</CardHeader>
 
-								<CardContent className="flex-1">
+								<CardContent className="flex-1 relative z-10">
 									<p className="text-sm text-muted-foreground mb-4">{course.description}</p>
 									<div className="flex items-center gap-4 text-sm text-muted-foreground">
 										<div className="flex items-center gap-1">
-											<Clock className="h-4 w-4" />
+											<Clock className="h-4 w-4 text-primary" />
 											<span>{course.duration}</span>
 										</div>
 										<div className="flex items-center gap-1">
-											<BarChart className="h-4 w-4" />
+											<BarChart className="h-4 w-4 text-primary" />
 											<span>{course.level}</span>
 										</div>
 									</div>
 								</CardContent>
 
-								<CardFooter>
-									<Button className="w-full gap-2 bg-transparent" variant="outline" asChild>
+								<CardFooter className="relative z-10">
+									<Button className="w-full gap-2" variant="outline" asChild>
 										<a href={course.url} target="_blank" rel="noopener noreferrer">
 											View Course
 											<ExternalLink className="h-4 w-4 ml-2" />

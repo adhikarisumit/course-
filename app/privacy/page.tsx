@@ -15,7 +15,7 @@ export default function PrivacyPage() {
 
         <h2 className="text-2xl font-bold mt-8 mb-4">Information We Collect</h2>
         <p className="text-muted-foreground mb-4">
-          LearnHub is a frontend-only application that does not collect or store personal information. We do not require
+          Proteclink is a frontend-only application that does not collect or store personal information. We do not require
           user accounts, and we do not track your browsing behavior.
         </p>
         <ul className="list-disc pl-6 text-muted-foreground space-y-2">
