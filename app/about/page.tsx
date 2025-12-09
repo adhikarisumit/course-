@@ -5,7 +5,7 @@ export default function AboutPage() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold mb-6">About LearnHub</h1>
+        <h1 className="text-4xl font-bold mb-6">About Proteclink</h1>
         <p className="text-lg text-muted-foreground mb-12">
           Your centralized platform for discovering quality online courses and educational resources from around the
           web.
@@ -60,7 +60,7 @@ export default function AboutPage() {
         <div className="prose prose-neutral dark:prose-invert max-w-none">
           <h2 className="text-2xl font-bold mb-4">Our Story</h2>
           <p className="text-muted-foreground mb-4">
-            LearnHub was created to solve a common problem: finding quality educational content scattered across the
+            Proteclink was created to solve a common problem: finding quality educational content scattered across the
             internet. With thousands of courses available on various platforms, it can be overwhelming to discover the
             right learning path.
           </p>
@@ -70,7 +70,7 @@ export default function AboutPage() {
             for continuous learning.
           </p>
           <p className="text-muted-foreground">
-            Whether you're a beginner starting your journey or an experienced professional looking to upskill, LearnHub
+            Whether you're a beginner starting your journey or an experienced professional looking to upskill, Proteclink
             helps you find the perfect resources to achieve your learning goals.
           </p>
         </div>

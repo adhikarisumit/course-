@@ -14,7 +14,7 @@ export default function TermsPage() {
         </p>
 
         <h2 className="text-2xl font-bold mt-8 mb-4">Use License</h2>
-        <p className="text-muted-foreground mb-4">LearnHub grants you permission to:</p>
+        <p className="text-muted-foreground mb-4">Proteclink grants you permission to:</p>
         <ul className="list-disc pl-6 text-muted-foreground space-y-2">
           <li>Browse and search for educational courses and resources</li>
           <li>Download provided study materials and resources for personal use</li>
@@ -38,14 +38,14 @@ export default function TermsPage() {
 
         <h2 className="text-2xl font-bold mt-8 mb-4">Educational Purpose</h2>
         <p className="text-muted-foreground">
-          All resources and materials provided on LearnHub are for educational purposes only. We strive to provide
+          All resources and materials provided on Proteclink are for educational purposes only. We strive to provide
           accurate and up-to-date information, but we make no warranties about the completeness or accuracy of the
           content.
         </p>
 
         <h2 className="text-2xl font-bold mt-8 mb-4">External Links</h2>
         <p className="text-muted-foreground">
-          LearnHub contains links to external websites. We have no control over the content and nature of these sites
+          Proteclink contains links to external websites. We have no control over the content and nature of these sites
           and are not responsible for their availability or content. The inclusion of any links does not necessarily
           imply a recommendation or endorsement.
         </p>
