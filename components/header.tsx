@@ -80,12 +80,12 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
             </div>
           </div>
           <nav className="flex items-center gap-6">
-            <a href="#courses" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
+            <Link href="/#courses" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
               Courses
-            </a>
-            <a href="#resources" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
+            </Link>
+            <Link href="/#resources" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
               Resources
-            </a>
+            </Link>
             <Link href="/playground" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
               Playground
             </Link>
@@ -136,12 +136,12 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
             </div>
             {/* Mobile nav links */}
             <div className="flex flex-col gap-3 border-t border-border pt-3 items-end">
-              <a href="#courses" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
+              <Link href="/#courses" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
                 Courses
-              </a>
-              <a href="#resources" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
+              </Link>
+              <Link href="/#resources" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
                 Resources
-              </a>
+              </Link>
               <Link href="/playground" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
                 Playground
               </Link>

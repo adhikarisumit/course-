@@ -1,13 +1,12 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Play, Trash2, Copy, Check } from "lucide-react"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
+import dynamic from 'next/dynamic'
 import Editor from 'react-simple-code-editor'
 import Prism from 'prismjs'
 import 'prismjs/components/prism-javascript'
@@ -17,6 +16,9 @@ import 'prismjs/components/prism-css'
 import 'prismjs/components/prism-sql'
 import 'prismjs/themes/prism.css'
 import { useTheme } from "next-themes"
+
+const Header = dynamic(() => import('@/components/header').then(mod => ({ default: mod.Header })), { ssr: false })
+const Footer = dynamic(() => import('@/components/footer').then(mod => ({ default: mod.Footer })), { ssr: false })
 
 const CODE_TEMPLATES = {
   javascript: `// JavaScript Code
@@ -144,6 +146,15 @@ export default function PlaygroundPage() {
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Debounce auto-save
+  useEffect(() => {
+    if (!mounted) return
+    const timer = setTimeout(() => {
+      localStorage.setItem(`playground-code-\${language}`, code)
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [code, language, mounted])
 
   // Load code from localStorage on mount
   useEffect(() => {
@@ -303,7 +314,7 @@ sys.stdout.getvalue()
     return langMap[language] || 'javascript'
   }
 
-  const highlightCode = (code: string) => {
+  const highlightCode = useCallback((code: string) => {
     try {
       const lang = getLanguageForHighlighter()
       const highlighted = Prism.highlight(code, Prism.languages[lang] || Prism.languages.javascript, lang)
@@ -312,7 +323,7 @@ sys.stdout.getvalue()
     } catch (e) {
       return code
     }
-  }
+  }, [language])
 
   const handleEditorKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement | HTMLDivElement>) => {
     const textarea = e.target as HTMLTextAreaElement
