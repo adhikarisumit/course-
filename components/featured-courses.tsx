@@ -199,11 +199,8 @@ export function FeaturedCourses({ searchQuery = "", selectedCategory = null }: F
 				) : (
 					<div data-testid="results" className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 						{filteredCourses.map((course) => (
-							<Card key={course.title} className="flex flex-col shadow-md border-2 group overflow-hidden" data-course={course.title}>
-								{/* Gradient overlay on hover */}
-								<div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-								
-								<CardHeader className="relative z-10">
+							<Card key={course.title} className="flex flex-col shadow-md border-2" data-course={course.title}>
+								<CardHeader>
 									<div className="flex items-start justify-between gap-2 mb-2">
 										<Badge variant="secondary" className="shadow-sm">{course.category}</Badge>
 										<Badge className={`${levelColors[course.level as keyof typeof levelColors]} shadow-sm`}>{course.level}</Badge>
@@ -212,7 +209,7 @@ export function FeaturedCourses({ searchQuery = "", selectedCategory = null }: F
 									<p className="text-sm text-muted-foreground">{course.platform}</p>
 								</CardHeader>
 
-								<CardContent className="flex-1 relative z-10">
+								<CardContent className="flex-1">
 									<p className="text-sm text-muted-foreground mb-4">{course.description}</p>
 									<div className="flex items-center gap-4 text-sm text-muted-foreground">
 										<div className="flex items-center gap-1">
@@ -226,7 +223,7 @@ export function FeaturedCourses({ searchQuery = "", selectedCategory = null }: F
 									</div>
 								</CardContent>
 
-								<CardFooter className="relative z-10">
+								<CardFooter>
 									<Button className="w-full gap-2" variant="outline" asChild>
 										<a href={course.url} target="_blank" rel="noopener noreferrer">
 											View Course

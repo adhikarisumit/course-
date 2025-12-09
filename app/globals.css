@@ -147,6 +147,20 @@
   .dark .card, .dark .border {
     box-shadow: 0 1px 3px oklch(0 0 0 / 0.3);
   }
+
+  /* Code animation */
+  @keyframes scrollCode {
+    0% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(-50%);
+    }
+  }
+
+  .code-animation {
+    animation: scrollCode 20s linear infinite;
+  }
 }
 
 /* Make links in the resources area show pointer cursor */

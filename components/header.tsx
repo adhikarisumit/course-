@@ -86,6 +86,9 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
             <a href="#resources" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
               Resources
             </a>
+            <Link href="/playground" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
+              Playground
+            </Link>
             <Link href="/shop" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
               Shop
             </Link>
@@ -139,6 +142,9 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
               <a href="#resources" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setMobileOpen(false)}>
                 Resources
               </a>
+              <Link href="/playground" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setMobileOpen(false)}>
+                Playground
+              </Link>
               <Link href="/shop" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setMobileOpen(false)}>
                 Shop
               </Link>
