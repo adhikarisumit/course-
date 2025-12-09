@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Play, Trash2, Copy, Check } from "lucide-react"
+import { Header } from "@/components/header"
 import dynamic from 'next/dynamic'
 import Editor from 'react-simple-code-editor'
 import Prism from 'prismjs'
@@ -17,7 +18,6 @@ import 'prismjs/components/prism-sql'
 import 'prismjs/themes/prism.css'
 import { useTheme } from "next-themes"
 
-const Header = dynamic(() => import('@/components/header').then(mod => ({ default: mod.Header })), { ssr: false })
 const Footer = dynamic(() => import('@/components/footer').then(mod => ({ default: mod.Footer })), { ssr: false })
 
 const CODE_TEMPLATES = {
