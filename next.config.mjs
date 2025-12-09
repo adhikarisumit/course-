@@ -6,6 +6,10 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  compress: true,
+  swcMinify: true,
+  reactStrictMode: true,
+  poweredByHeader: false,
 }
 
 export default nextConfig
