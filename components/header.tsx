@@ -135,17 +135,17 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
               </Button>
             </div>
             {/* Mobile nav links */}
-            <div className="flex flex-col gap-2 border-t border-border pt-2 items-end">
-              <a href="#courses" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setMobileOpen(false)}>
+            <div className="flex flex-col gap-3 border-t border-border pt-3 items-end">
+              <a href="#courses" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
                 Courses
               </a>
-              <a href="#resources" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setMobileOpen(false)}>
+              <a href="#resources" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
                 Resources
               </a>
-              <Link href="/playground" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setMobileOpen(false)}>
+              <Link href="/playground" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
                 Playground
               </Link>
-              <Link href="/shop" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setMobileOpen(false)}>
+              <Link href="/shop" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
                 Shop
               </Link>
             </div>
