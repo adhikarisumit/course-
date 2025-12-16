@@ -33,10 +33,10 @@ export default function Home() {
     <HomeClient>
       <main>
         <Hero />
-        <MentorIntro />
         <WhyChooseUs />
-        <Testimonials />
+        <MentorIntro />
         <SuccessMetrics />
+        <Testimonials />
         <CTASection />
       </main>
       <Footer />
