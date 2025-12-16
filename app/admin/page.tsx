@@ -7,6 +7,7 @@ import { BookOpen, Users, Settings, BarChart, UserCircle, Database, HardDrive, T
 import prisma from "@/lib/prisma"
 
 export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 export default async function AdminDashboard() {
   const session = await auth()
