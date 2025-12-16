@@ -184,6 +184,10 @@ export default function AdminMentorsPage() {
           <p className="text-sm md:text-base text-muted-foreground">
             Add and manage educational mentors displayed on the homepage
           </p>
+          <div className="mt-2 flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
+            <span className="inline-block w-2 h-2 rounded-full bg-green-600 dark:bg-green-400 animate-pulse"></span>
+            Auto-updates on homepage when you add new mentors
+          </div>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>

@@ -30,9 +30,10 @@ export async function MentorIntro() {
   let mentors: Mentor[] = []
   
   try {
+    // Fetch all active mentors - automatically updates when new mentors are added
     mentors = await prisma.mentor.findMany({
       where: { isActive: true },
-      orderBy: { displayOrder: "asc" },
+      orderBy: { displayOrder: "asc" }
     }) as Mentor[]
   } catch (error) {
     console.error("Failed to fetch mentors:", error)
@@ -64,8 +65,8 @@ export async function MentorIntro() {
             </p>
           </div>
 
-          {/* Mentors Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+          {/* Mentors Grid - Automatically displays all active mentors */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-12">
             {mentors.map((mentor: Mentor) => {
               const achievements = mentor.achievements ? mentor.achievements.split(',').map((a: string) => a.trim()) : []
               
