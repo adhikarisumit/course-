@@ -133,6 +133,12 @@
     background: linear-gradient(135deg, oklch(var(--card)) 0%, oklch(0.18 0.04 262) 100%);
   }
 
+  /* Pointer cursor for all interactive elements */
+  button, a, [role="button"], [type="button"], [type="submit"], [type="reset"], 
+  input[type="checkbox"], input[type="radio"], select, label[for] {
+    cursor: pointer;
+  }
+
   /* Enhanced button hover effects */
   button:hover, a.button:hover {
     transform: translateY(-1px);
@@ -161,12 +167,6 @@
   .code-animation {
     animation: scrollCode 20s linear infinite;
   }
-}
-
-/* Make links in the resources area show pointer cursor */
-#resources a,
-.learning-resources a {
-  cursor: pointer;
 }
 
 /* End of file — no JSX/HTML here */

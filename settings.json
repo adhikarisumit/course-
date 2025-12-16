@@ -1,0 +1,27 @@
+{
+  "site": {
+    "name": "Course Platform",
+    "description": "Learn and grow with our courses",
+    "url": "https://proteclink.com",
+    "contactEmail": "sumitadhikari2341@gmail.com"
+  },
+  "payment": {
+    "currency": "JPY",
+    "stripeEnabled": false,
+    "paypalEnabled": false,
+    "bankTransferEnabled": true,
+    "bankDetails": ""
+  },
+  "email": {
+    "fromEmail": "",
+    "fromName": "",
+    "smtpHost": "",
+    "smtpPort": "587",
+    "smtpUser": ""
+  },
+  "security": {
+    "requireEmailVerification": false,
+    "allowSignup": true,
+    "sessionTimeout": 30
+  }
+}

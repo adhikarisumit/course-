@@ -42,8 +42,8 @@ export function Footer() {
 
   return (
     <footer className="border-t border-border bg-card mt-16">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid md:grid-cols-4 gap-8">
+      <div className="container mx-auto px-4 py-8 md:py-12">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <Link href="/" className="flex items-center gap-2 mb-4">
               <BookOpen className="h-6 w-6" />
@@ -113,18 +113,8 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <Link href="/cheat-sheets" className="hover:text-foreground transition-colors">
-                  Cheat Sheets
-                </Link>
-              </li>
-              <li>
                 <Link href="/shop" className="hover:text-foreground transition-colors">
                   Shop
-                </Link>
-              </li>
-              <li>
-                <Link href="/softwares" className="hover:text-foreground transition-colors">
-                  Softwares & Links
                 </Link>
               </li>
             </ul>

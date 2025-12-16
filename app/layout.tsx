@@ -5,6 +5,8 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import CartProvider from "@/components/cart-context"
 import { ThemeProvider } from "@/components/theme-provider"
+import { AuthProvider } from "@/components/auth-provider"
+import { Toaster } from "@/components/ui/sonner"
 import DebugTheme from "@/components/debug-theme"
 
 const _geist = Geist({ subsets: ["latin"] })
@@ -31,12 +33,15 @@ export default function RootLayout({
         <meta name="twitter:title" content="proteclink" />
         <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js" async></script>
       </head>
-      <body className={`font-sans antialiased`}>
+      <body className={`font-sans antialiased`} suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true} enableColorScheme={false}>
-          <CartProvider>
-            {children}
-            {process.env.NODE_ENV === "development" && <DebugTheme />}
-          </CartProvider>
+          <AuthProvider>
+            <CartProvider>
+              {children}
+              {process.env.NODE_ENV === "development" && <DebugTheme />}
+              <Toaster />
+            </CartProvider>
+          </AuthProvider>
         </ThemeProvider>
         <Analytics />
       </body>

@@ -1,0 +1,338 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Loader2, Users, Search, Mail, Calendar, BookOpen, Key, Copy, Check } from "lucide-react"
+import { toast } from "sonner"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+
+interface User {
+  id: string
+  name: string | null
+  email: string
+  role: string
+  createdAt: string
+  _count: {
+    enrollments: number
+  }
+}
+
+export default function AdminUsersPage() {
+  const [loading, setLoading] = useState(true)
+  const [users, setUsers] = useState<User[]>([])
+  const [searchTerm, setSearchTerm] = useState("")
+  const [resetting, setResetting] = useState<string | null>(null)
+  const [newPassword, setNewPassword] = useState("")
+  const [generatedPassword, setGeneratedPassword] = useState("")
+  const [copied, setCopied] = useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    loadUsers()
+  }, [])
+
+  const loadUsers = async () => {
+    try {
+      const response = await fetch("/api/admin/users")
+      if (response.ok) {
+        const data = await response.json()
+        setUsers(data)
+      } else {
+        toast.error("Failed to load users")
+      }
+    } catch (error) {
+      toast.error("Failed to load users")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const generateRandomPassword = () => {
+    const length = 12
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*"
+    let password = ""
+    for (let i = 0; i < length; i++) {
+      password += charset.charAt(Math.floor(Math.random() * charset.length))
+    }
+    return password
+  }
+
+  const handleResetPassword = async (userId: string, userEmail: string) => {
+    const password = newPassword || generateRandomPassword()
+    setGeneratedPassword(password)
+    setResetting(userId)
+
+    try {
+      const response = await fetch(`/api/admin/users/${userId}/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to reset password")
+      }
+
+      toast.success(`Password reset for ${userEmail}`)
+      setNewPassword("")
+    } catch (error) {
+      toast.error("Failed to reset password")
+      setGeneratedPassword("")
+    } finally {
+      setResetting(null)
+    }
+  }
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(generatedPassword)
+      setCopied(true)
+      toast.success("Password copied to clipboard!")
+      setTimeout(() => setCopied(false), 2000)
+    } catch (error) {
+      toast.error("Failed to copy password")
+    }
+  }
+
+  const filteredUsers = users.filter(user => 
+    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  const studentCount = users.filter(u => u.role === "student").length
+  const adminCount = users.filter(u => u.role === "admin").length
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  return (
+    <div className="container mx-auto p-4 md:p-6">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold mb-2">User Management</h1>
+        <p className="text-sm md:text-base text-muted-foreground">View and manage all registered users</p>
+      </div>
+
+      {/* Stats */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{users.length}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Students</CardTitle>
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{studentCount}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Admins</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{adminCount}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Search */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Search Users</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by name or email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Users List */}
+      <Card>
+        <CardHeader>
+          <CardTitle>All Users ({filteredUsers.length})</CardTitle>
+          <CardDescription>Complete list of registered users</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {filteredUsers.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">No users found</p>
+          ) : (
+            <div className="space-y-4">
+              {filteredUsers.map((user) => (
+                <div
+                  key={user.id}
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                >
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">{user.name || "No name"}</p>
+                      <Badge variant={user.role === "admin" ? "default" : "secondary"}>
+                        {user.role}
+                      </Badge>
+                      {user._count.enrollments > 0 && (
+                        <Badge variant="outline">
+                          {user._count.enrollments} course{user._count.enrollments > 1 ? "s" : ""}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Mail className="h-3 w-3" />
+                        <span>{user.email}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        <span>Joined {new Date(user.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <Dialog
+                    open={dialogOpen && selectedUser?.id === user.id}
+                    onOpenChange={(open) => {
+                      setDialogOpen(open)
+                      if (!open) {
+                        setGeneratedPassword("")
+                        setNewPassword("")
+                        setSelectedUser(null)
+                      }
+                    }}
+                  >
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedUser(user)
+                          setDialogOpen(true)
+                        }}
+                      >
+                        <Key className="h-4 w-4 mr-2" />
+                        Reset Password
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Reset Password</DialogTitle>
+                        <DialogDescription>
+                          Reset password for {user.name || user.email}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        {generatedPassword ? (
+                          <div className="space-y-4">
+                            <div className="p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
+                              <p className="text-sm font-medium text-green-900 dark:text-green-100 mb-2">
+                                New Password Generated
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <code className="flex-1 p-2 bg-white dark:bg-gray-900 border rounded text-sm font-mono">
+                                  {generatedPassword}
+                                </code>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={copyToClipboard}
+                                >
+                                  {copied ? (
+                                    <Check className="h-4 w-4" />
+                                  ) : (
+                                    <Copy className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
+                              <p className="text-xs text-green-700 dark:text-green-300 mt-2">
+                                Make sure to copy this password and share it with the student securely. It won't be shown again.
+                              </p>
+                            </div>
+                            <Button
+                              className="w-full"
+                              onClick={() => {
+                                setDialogOpen(false)
+                                setGeneratedPassword("")
+                                setNewPassword("")
+                                setSelectedUser(null)
+                              }}
+                            >
+                              Close
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="password">New Password (optional)</Label>
+                              <Input
+                                id="password"
+                                type="text"
+                                placeholder="Leave empty to generate random password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                              />
+                              <p className="text-xs text-muted-foreground">
+                                If empty, a secure random password will be generated
+                              </p>
+                            </div>
+                            <DialogFooter>
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  setDialogOpen(false)
+                                  setNewPassword("")
+                                  setSelectedUser(null)
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                onClick={() => handleResetPassword(user.id, user.email)}
+                                disabled={resetting === user.id}
+                              >
+                                {resetting === user.id ? (
+                                  <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Resetting...
+                                  </>
+                                ) : (
+                                  "Reset Password"
+                                )}
+                              </Button>
+                            </DialogFooter>
+                          </div>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )
+}

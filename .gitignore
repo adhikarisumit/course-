@@ -12,3 +12,5 @@ yarn-error.log*
 Thumbs.db
 # Personal project README - do not track
 README.md
+
+/lib/generated/prisma

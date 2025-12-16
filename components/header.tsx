@@ -1,12 +1,22 @@
 "use client"
 
 import { useState } from "react"
-import { Cpu, Search, ShoppingCart, Menu, X } from "lucide-react"
+import { Cpu, Search, ShoppingCart, Menu, X, User, LogOut, LayoutDashboard, Settings } from "lucide-react"
 import Link from "next/link"
 import { useCart } from "@/components/cart-context"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { useSession, signOut } from "next-auth/react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 interface HeaderProps {
   searchQuery: string
@@ -49,6 +59,80 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
     }
   }
 
+  // User menu component
+  function UserMenu() {
+    const { data: session } = useSession()
+
+    if (!session?.user) {
+      return (
+        <div className="hidden sm:flex items-center gap-2">
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/auth/signin">Sign In</Link>
+          </Button>
+          <Button asChild size="sm">
+            <Link href="/auth/signup">Sign Up</Link>
+          </Button>
+        </div>
+      )
+    }
+
+    const initials = session.user.name
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase() || "U"
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={session.user.image || undefined} alt={session.user.name || "User"} />
+              <AvatarFallback>{initials}</AvatarFallback>
+            </Avatar>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56" align="end" forceMount>
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex flex-col space-y-1">
+              <p className="text-sm font-medium leading-none">{session.user.name}</p>
+              <p className="text-xs leading-none text-muted-foreground">{session.user.email}</p>
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link href="/portal/dashboard" className="cursor-pointer">
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              <span>Dashboard</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/portal/profile" className="cursor-pointer">
+              <User className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+            </Link>
+          </DropdownMenuItem>
+          {session.user.role === "admin" && (
+            <DropdownMenuItem asChild>
+              <Link href="/admin/courses" className="cursor-pointer">
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Manage Courses</span>
+              </Link>
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="cursor-pointer text-destructive focus:text-destructive"
+            onClick={() => signOut({ callbackUrl: "/" })}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Sign Out</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    )
+  }
+
   return (
     <header className="border-b border-border bg-card">
       <div className="container mx-auto px-4 py-4">
@@ -80,7 +164,7 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
             </div>
           </div>
           <nav className="flex items-center gap-6">
-            <Link href="/#courses" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
+            <Link href="/courses" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
               Courses
             </Link>
             <Link href="/#resources" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
@@ -94,6 +178,7 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
             </Link>
             {/* Cart icon only (visible on all sizes). Accessible label provided for screen readers. */}
             <CartIcon />
+            <UserMenu />
             <ThemeToggle />
             {/* mobile menu toggle */}
             <button
@@ -136,7 +221,7 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
             </div>
             {/* Mobile nav links */}
             <div className="flex flex-col gap-3 border-t border-border pt-3 items-end">
-              <Link href="/#courses" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
+              <Link href="/courses" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
                 Courses
               </Link>
               <Link href="/#resources" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>

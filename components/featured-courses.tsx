@@ -197,7 +197,7 @@ export function FeaturedCourses({ searchQuery = "", selectedCategory = null }: F
 						<p className="text-sm text-muted-foreground mt-2">Try different keywords or clear the category filter.</p>
 					</div>
 				) : (
-					<div data-testid="results" className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+					<div data-testid="results" className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 						{filteredCourses.map((course) => (
 							<Card key={course.title} className="flex flex-col shadow-md border-2" data-course={course.title}>
 								<CardHeader>

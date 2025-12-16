@@ -4,14 +4,6 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 
 export function Hero() {
-  const scrollToCourses = () => {
-    document.getElementById("courses")?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  const scrollToResources = () => {
-    document.getElementById("resources")?.scrollIntoView({ behavior: "smooth" })
-  }
-
   return (
     <section className="relative py-20 md:py-32 overflow-hidden bg-gray-900">
       {/* Programming keyboard background image - very visible */}
@@ -74,23 +66,45 @@ function buildSkills(resources) {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 text-balance bg-gradient-to-br from-white to-gray-200 bg-clip-text text-transparent">
-            Your Gateway to Quality Online Learning
+            Transform Your Career with Expert-Curated Learning
           </h1>
-          <p className="text-lg md:text-xl text-gray-300 mb-8 text-pretty">
-            Discover curated courses, educational notes, and learning resources from the best platforms across the web.
-            All in one place.<br></br>
-            <mark className="bg-yellow-300 dark:bg-yellow-400 text-gray-900 px-3 py-1.5 rounded font-medium">
-              Note: We're not course builders or course owner. We just guide and provide the course, resources and ideas.
-            </mark>
+          <p className="text-lg md:text-xl text-gray-300 mb-4 text-pretty">
+            Access premium courses, comprehensive resources, and structured learning paths designed by educational experts. 
+            Start your journey to success today.
           </p>
+          <div className="mb-8 inline-block">
+            <mark className="bg-yellow-300 dark:bg-yellow-400 text-gray-900 px-4 py-2 rounded-lg font-medium text-sm md:text-base">
+              ✨ We curate and guide—connecting you with the best learning resources worldwide
+            </mark>
+          </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="gap-2 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all cursor-pointer" onClick={scrollToCourses}>
-              Explore Courses
-              <ArrowRight className="h-4 w-4" />
+            <Button asChild size="lg" className="gap-2 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all cursor-pointer">
+              <a href="/courses">
+                Explore Courses
+                <ArrowRight className="h-4 w-4" />
+              </a>
             </Button>
-            <Button size="lg" variant="outline" className="border-2 border-white/80 hover:border-white text-black dark:text-white hover:text-white dark:hover:text-black hover:bg-white/10 dark:hover:bg-white transition-all cursor-pointer" onClick={scrollToResources}>
-              Browse Resources
+            <Button asChild size="lg" variant="outline" className="border-2 border-white/80 hover:border-white text-black dark:text-white hover:text-white dark:hover:text-black hover:bg-white/10 dark:hover:bg-white transition-all cursor-pointer">
+              <a href="#mentor">
+                Meet Your Mentor
+              </a>
             </Button>
+          </div>
+          
+          {/* Trust indicators */}
+          <div className="mt-12 grid grid-cols-3 gap-6 max-w-2xl mx-auto text-center">
+            <div>
+              <div className="text-3xl font-bold text-white mb-1">50+</div>
+              <div className="text-sm text-gray-400">Quality Courses</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-white mb-1">500+</div>
+              <div className="text-sm text-gray-400">Active Students</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-white mb-1">4.9/5</div>
+              <div className="text-sm text-gray-400">Student Rating</div>
+            </div>
           </div>
         </div>
       </div>
