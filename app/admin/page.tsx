@@ -16,44 +16,46 @@ export default async function AdminDashboard() {
   let dbSize = 0
   let dbSizeMB = 0
   
-  try {
-    // Get database file size (only works in development with SQLite)
-    if (process.env.NODE_ENV === 'development') {
-      try {
-        const fs = await import("fs/promises")
-        const path = await import("path")
-        const dbPath = path.join(process.cwd(), "prisma", "dev.db")
-        const stats = await fs.stat(dbPath)
-        dbSize = stats.size
-        dbSizeMB = dbSize / (1024 * 1024)
-      } catch (error) {
-        console.log("Database file not found")
+  if (process.env.DATABASE_URL) {
+    try {
+      // Get database file size (only works in development with SQLite)
+      if (process.env.NODE_ENV === 'development') {
+        try {
+          const fs = await import("fs/promises")
+          const path = await import("path")
+          const dbPath = path.join(process.cwd(), "prisma", "dev.db")
+          const stats = await fs.stat(dbPath)
+          dbSize = stats.size
+          dbSizeMB = dbSize / (1024 * 1024)
+        } catch (error) {
+          console.log("Database file not found")
+        }
       }
-    }
 
-    const [userCount, courseCount, lessonCount, enrollmentCount, paymentCount, mentorCount] = await Promise.all([
-      prisma.user.count(),
-      prisma.course.count(),
-      prisma.lesson.count(),
-      prisma.enrollment.count(),
-      prisma.payment.count(),
-      // @ts-expect-error - Prisma types will be available after VS Code restart
-      prisma.mentor.count(),
-    ])
+      const [userCount, courseCount, lessonCount, enrollmentCount, paymentCount, mentorCount] = await Promise.all([
+        prisma.user.count(),
+        prisma.course.count(),
+        prisma.lesson.count(),
+        prisma.enrollment.count(),
+        prisma.payment.count(),
+        // @ts-expect-error - Prisma types will be available after VS Code restart
+        prisma.mentor.count(),
+      ])
 
-    dbStats = {
-      tables: {
-        users: userCount,
-        courses: courseCount,
-        lessons: lessonCount,
-        enrollments: enrollmentCount,
-        payments: paymentCount,
-        mentors: mentorCount,
-      },
-      totalRecords: userCount + courseCount + lessonCount + enrollmentCount + paymentCount + mentorCount,
+      dbStats = {
+        tables: {
+          users: userCount,
+          courses: courseCount,
+          lessons: lessonCount,
+          enrollments: enrollmentCount,
+          payments: paymentCount,
+          mentors: mentorCount,
+        },
+        totalRecords: userCount + courseCount + lessonCount + enrollmentCount + paymentCount + mentorCount,
+      }
+    } catch (error) {
+      console.error("Error fetching database stats:", error)
     }
-  } catch (error) {
-    console.error("Error fetching database stats:", error)
   }
 
   // Define limits (you can adjust these)

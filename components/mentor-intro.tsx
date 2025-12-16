@@ -22,6 +22,11 @@ interface Mentor {
 }
 
 export async function MentorIntro() {
+  // Skip mentor section if no database is configured
+  if (!process.env.DATABASE_URL) {
+    return null
+  }
+
   let mentors: Mentor[] = []
   
   try {
