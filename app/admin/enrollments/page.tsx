@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
-import { Loader2, UserPlus, Trash2, Users, BookOpen, TrendingUp, CheckCircle2, Clock, Eye, Calendar } from "lucide-react"
+import { Loader2, UserPlus, Trash2, Users, BookOpen, TrendingUp, CheckCircle2, Clock, Eye, Calendar, Download } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -218,9 +218,34 @@ export default function AdminEnrollmentsPage() {
 
   return (
     <div className="container mx-auto p-4 md:p-6">
-      <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold mb-2">Student Progress Tracking</h1>
-        <p className="text-sm md:text-base text-muted-foreground">Monitor student learning progress and manage enrollments</p>
+      <div className="mb-6 md:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold mb-2">Student Progress Tracking</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Monitor student learning progress and manage enrollments</p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={async () => {
+            try {
+              const response = await fetch("/api/admin/export?type=enrollments")
+              const blob = await response.blob()
+              const url = window.URL.createObjectURL(blob)
+              const a = document.createElement("a")
+              a.href = url
+              a.download = `enrollments-export-${new Date().toISOString().split("T")[0]}.csv`
+              document.body.appendChild(a)
+              a.click()
+              window.URL.revokeObjectURL(url)
+              document.body.removeChild(a)
+              toast.success("Enrollments exported successfully!")
+            } catch (error) {
+              toast.error("Failed to export enrollments")
+            }
+          }}
+        >
+          <Download className="mr-2 h-4 w-4" />
+          Export CSV
+        </Button>
       </div>
 
       {/* Stats Overview */}

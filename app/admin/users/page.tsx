@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Loader2, Users, Search, Mail, Calendar, BookOpen, Key, Copy, Check } from "lucide-react"
+import { Loader2, Users, Search, Mail, Calendar, BookOpen, Key, Copy, Check, Download } from "lucide-react"
 import { toast } from "sonner"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
@@ -117,9 +117,34 @@ export default function AdminUsersPage() {
 
   return (
     <div className="container mx-auto p-4 md:p-6">
-      <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold mb-2">User Management</h1>
-        <p className="text-sm md:text-base text-muted-foreground">View and manage all registered users</p>
+      <div className="mb-6 md:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold mb-2">User Management</h1>
+          <p className="text-sm md:text-base text-muted-foreground">View and manage all registered users</p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={async () => {
+            try {
+              const response = await fetch("/api/admin/export?type=all-users")
+              const blob = await response.blob()
+              const url = window.URL.createObjectURL(blob)
+              const a = document.createElement("a")
+              a.href = url
+              a.download = `users-export-${new Date().toISOString().split("T")[0]}.csv`
+              document.body.appendChild(a)
+              a.click()
+              window.URL.revokeObjectURL(url)
+              document.body.removeChild(a)
+              toast.success("Users exported successfully!")
+            } catch (error) {
+              toast.error("Failed to export users")
+            }
+          }}
+        >
+          <Download className="mr-2 h-4 w-4" />
+          Export CSV
+        </Button>
       </div>
 
       {/* Stats */}

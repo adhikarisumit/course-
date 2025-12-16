@@ -86,6 +86,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Link href="/admin/analytics" className={linkClass} onClick={handleClick}>
           Analytics
         </Link>
+        <Link href="/admin/export" className={linkClass} onClick={handleClick}>
+          Export Data
+        </Link>
         {isSuperAdmin && (
           <Link href="/admin/manage-admins" className={linkClass} onClick={handleClick}>
             Manage Admins
@@ -151,7 +154,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/portal/profile" className="cursor-pointer">
+                  <Link href="/admin/profile" className="cursor-pointer">
                     <User className="mr-2 h-4 w-4" />
                     Profile
                   </Link>
