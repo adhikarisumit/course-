@@ -5,8 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { BookOpen, Users, Settings, BarChart, UserCircle, Database, HardDrive, Table } from "lucide-react"
 import prisma from "@/lib/prisma"
-import { promises as fs } from "fs"
-import path from "path"
 
 export default async function AdminDashboard() {
   const session = await auth()
@@ -17,14 +15,18 @@ export default async function AdminDashboard() {
   let dbSizeMB = 0
   
   try {
-    // Get database file size
-    const dbPath = path.join(process.cwd(), "prisma", "dev.db")
-    try {
-      const stats = await fs.stat(dbPath)
-      dbSize = stats.size
-      dbSizeMB = dbSize / (1024 * 1024)
-    } catch (error) {
-      console.log("Database file not found")
+    // Get database file size (only works in development with SQLite)
+    if (process.env.NODE_ENV === 'development') {
+      try {
+        const fs = await import("fs/promises")
+        const path = await import("path")
+        const dbPath = path.join(process.cwd(), "prisma", "dev.db")
+        const stats = await fs.stat(dbPath)
+        dbSize = stats.size
+        dbSizeMB = dbSize / (1024 * 1024)
+      } catch (error) {
+        console.log("Database file not found")
+      }
     }
 
     const [userCount, courseCount, lessonCount, enrollmentCount, paymentCount, mentorCount] = await Promise.all([
