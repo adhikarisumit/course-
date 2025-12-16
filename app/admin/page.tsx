@@ -6,6 +6,10 @@ import { Progress } from "@/components/ui/progress"
 import { BookOpen, Users, Settings, BarChart, UserCircle, Database, HardDrive, Table } from "lucide-react"
 import prisma from "@/lib/prisma"
 
+export const dynamic = 'force-dynamic'
+
+export const dynamic = 'force-dynamic'
+
 export default async function AdminDashboard() {
   const session = await auth()
 

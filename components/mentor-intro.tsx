@@ -22,11 +22,18 @@ interface Mentor {
 }
 
 export async function MentorIntro() {
-  // @ts-expect-error - Prisma types will be available after VS Code restart
-  const mentors = await prisma.mentor.findMany({
-    where: { isActive: true },
-    orderBy: { displayOrder: "asc" },
-  }) as Mentor[]
+  let mentors: Mentor[] = []
+  
+  try {
+    // @ts-expect-error - Prisma types will be available after VS Code restart
+    mentors = await prisma.mentor.findMany({
+      where: { isActive: true },
+      orderBy: { displayOrder: "asc" },
+    }) as Mentor[]
+  } catch (error) {
+    console.error("Failed to fetch mentors:", error)
+    return null
+  }
 
   if (mentors.length === 0) {
     return null
