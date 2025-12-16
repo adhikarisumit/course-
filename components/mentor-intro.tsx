@@ -30,7 +30,6 @@ export async function MentorIntro() {
   let mentors: Mentor[] = []
   
   try {
-    // @ts-expect-error - Prisma types will be available after VS Code restart
     mentors = await prisma.mentor.findMany({
       where: { isActive: true },
       orderBy: { displayOrder: "asc" },

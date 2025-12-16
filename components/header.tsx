@@ -59,13 +59,43 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
     }
   }
 
+  // Mobile auth buttons component
+  function MobileAuthButtons() {
+    const { data: session } = useSession()
+
+    if (session?.user) {
+      return null
+    }
+
+    return (
+      <div className="flex flex-col gap-2 border-t border-border pt-3 w-full">
+        <Button asChild variant="outline" className="w-full">
+          <Link href="/auth/signin" onClick={() => setMobileOpen(false)}>Sign In</Link>
+        </Button>
+        <Button asChild className="w-full">
+          <Link href="/auth/signup" onClick={() => setMobileOpen(false)}>Sign Up</Link>
+        </Button>
+      </div>
+    )
+  }
+
   // User menu component
   function UserMenu() {
-    const { data: session } = useSession()
+    const { data: session, status } = useSession()
+
+    // Show loading skeleton while session is being fetched
+    if (status === "loading") {
+      return (
+        <div className="flex items-center gap-2">
+          <div className="h-9 w-20 bg-muted animate-pulse rounded-md" />
+          <div className="h-9 w-20 bg-muted animate-pulse rounded-md" />
+        </div>
+      )
+    }
 
     if (!session?.user) {
       return (
-        <div className="hidden sm:flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <Button asChild variant="ghost" size="sm">
             <Link href="/auth/signin">Sign In</Link>
           </Button>
@@ -234,6 +264,8 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
                 Shop
               </Link>
             </div>
+            {/* Mobile auth buttons for non-authenticated users */}
+            <MobileAuthButtons />
           </div>
         </div>
       )}
