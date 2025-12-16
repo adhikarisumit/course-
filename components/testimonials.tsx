@@ -8,58 +8,58 @@ import { Star, Quote } from "lucide-react"
 export function Testimonials() {
   const testimonials = [
     {
-      name: "Yuki Tanaka",
+      name: "Sandip Sharma",
       role: "Software Developer",
-      company: "Tech Corp Tokyo",
+      company: "Tech Solutions Nepal",
       image: null,
       rating: 5,
       text: "The curated courses helped me transition from a different career into software development. The structured learning paths made it so much easier to know what to study next.",
-      initials: "YT"
+      initials: "SS"
     },
     {
-      name: "Hiroshi Sato",
+      name: "Rajendra Khadka",
       role: "Web Designer",
-      company: "Creative Studio",
+      company: "Creative Studio KTM",
       image: null,
       rating: 5,
-      text: "Amazing collection of resources! The cheat sheets and downloadable materials have become my daily references. Worth every yen!",
-      initials: "HS"
+      text: "Amazing collection of resources! The cheat sheets and downloadable materials have become my daily references. Worth every rupee!",
+      initials: "RK"
     },
     {
-      name: "Sakura Yamamoto",
+      name: "Anju Sharma",
       role: "Data Analyst",
-      company: "Analytics Plus",
+      company: "Analytics Plus Nepal",
       image: null,
       rating: 5,
       text: "I love how organized everything is. The mentor really understands what students need and provides exactly that. Highly recommended!",
-      initials: "SY"
+      initials: "AS"
     },
     {
-      name: "Kenji Nakamura",
+      name: "Bikesh Shrestha",
       role: "Marketing Manager",
-      company: "Digital Agency",
+      company: "Digital Agency Nepal",
       image: null,
       rating: 5,
       text: "The courses are practical and relevant. I was able to apply what I learned immediately in my job. Great value for money!",
-      initials: "KN"
+      initials: "BS"
     },
     {
-      name: "Aiko Watanabe",
+      name: "Ramesh Gauli",
       role: "UI/UX Designer",
-      company: "Design Studio",
+      company: "Design Studio Pokhara",
       image: null,
       rating: 5,
       text: "Best investment in my career! The quality of courses and support materials exceeded my expectations. Thank you!",
-      initials: "AW"
+      initials: "RG"
     },
     {
-      name: "Takeshi Kobayashi",
+      name: "Anuska Khadka",
       role: "Full Stack Developer",
-      company: "Startup Inc",
+      company: "Startup Nepal",
       image: null,
       rating: 5,
       text: "From beginner to professional—this platform guided me every step of the way. The mentor's expertise shows in every course selection.",
-      initials: "TK"
+      initials: "AK"
     }
   ]
 
