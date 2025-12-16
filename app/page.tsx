@@ -1,23 +1,32 @@
-"use client"
-
-import { useState } from "react"
-import dynamic from 'next/dynamic'
-import { Header } from "@/components/header"
+import dynamic from "next/dynamic"
+import { HomeClient } from "@/components/home-client"
 import { Hero } from "@/components/hero"
+import { Footer } from "@/components/footer"
 
-const MentorIntro = dynamic(() => import('@/components/mentor-intro').then(mod => ({ default: mod.MentorIntro })), { ssr: false })
-const WhyChooseUs = dynamic(() => import('@/components/why-choose-us').then(mod => ({ default: mod.WhyChooseUs })), { ssr: false })
-const Testimonials = dynamic(() => import('@/components/testimonials').then(mod => ({ default: mod.Testimonials })), { ssr: false })
-const SuccessMetrics = dynamic(() => import('@/components/success-metrics').then(mod => ({ default: mod.SuccessMetrics })), { ssr: false })
-const CTASection = dynamic(() => import('@/components/cta-section').then(mod => ({ default: mod.CTASection })), { ssr: false })
-const Footer = dynamic(() => import('@/components/footer').then(mod => ({ default: mod.Footer })), { ssr: false })
+// Lazy load components that are below the fold
+const MentorIntro = dynamic(() => import("@/components/mentor-intro").then(mod => ({ default: mod.MentorIntro })), {
+  loading: () => <div className="min-h-[400px]" />,
+})
+
+const WhyChooseUs = dynamic(() => import("@/components/why-choose-us").then(mod => ({ default: mod.WhyChooseUs })), {
+  loading: () => <div className="min-h-[400px]" />,
+})
+
+const Testimonials = dynamic(() => import("@/components/testimonials").then(mod => ({ default: mod.Testimonials })), {
+  loading: () => <div className="min-h-[400px]" />,
+})
+
+const SuccessMetrics = dynamic(() => import("@/components/success-metrics").then(mod => ({ default: mod.SuccessMetrics })), {
+  loading: () => <div className="min-h-[300px]" />,
+})
+
+const CTASection = dynamic(() => import("@/components/cta-section").then(mod => ({ default: mod.CTASection })), {
+  loading: () => <div className="min-h-[300px]" />,
+})
 
 export default function Home() {
-  const [searchQuery, setSearchQuery] = useState("")
-
   return (
-    <div className="min-h-screen">
-      <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+    <HomeClient>
       <main>
         <Hero />
         <MentorIntro />
@@ -27,7 +36,7 @@ export default function Home() {
         <CTASection />
       </main>
       <Footer />
-    </div>
+    </HomeClient>
   )
 }
 

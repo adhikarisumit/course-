@@ -33,19 +33,20 @@ export default async function AdminDashboard() {
         }
       }
 
-      const [userCount, courseCount, lessonCount, enrollmentCount, paymentCount, mentorCount] = await Promise.all([
+      const [userCount, studentCount, courseCount, lessonCount, enrollmentCount, paymentCount, mentorCount] = await Promise.all([
         prisma.user.count(),
+        prisma.user.count({ where: { role: "user" } }), // Only count actual students, not admins
         prisma.course.count(),
         prisma.lesson.count(),
         prisma.enrollment.count(),
         prisma.payment.count(),
-        // @ts-expect-error - Prisma types will be available after VS Code restart
         prisma.mentor.count(),
       ])
 
       dbStats = {
         tables: {
           users: userCount,
+          students: studentCount,
           courses: courseCount,
           lessons: lessonCount,
           enrollments: enrollmentCount,
@@ -59,10 +60,12 @@ export default async function AdminDashboard() {
     }
   }
 
-  // Define limits (you can adjust these)
-  const maxDbSizeMB = 100 // Maximum recommended database size in MB
-  const usagePercentage = (dbSizeMB / maxDbSizeMB) * 100
-  const remainingMB = maxDbSizeMB - dbSizeMB
+  // SQLite has no practical storage limit (281 TB theoretical max)
+  // We'll show percentage based on 1 GB for monitoring purposes
+  const monitoringLimitMB = 1024 // 1 GB monitoring threshold (not a hard limit)
+  const usagePercentage = (dbSizeMB / monitoringLimitMB) * 100
+  const remainingMB = monitoringLimitMB - dbSizeMB
+  const isUnlimited = true // SQLite = Free forever, no storage limits
 
   return (
     <div className="container mx-auto p-4 md:p-6">
@@ -151,6 +154,63 @@ export default async function AdminDashboard() {
       </div>
 
       <div className="mt-8 grid gap-4 lg:grid-cols-2">
+        <Card className="border-green-200 dark:border-green-800">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <span className="text-green-600">💎</span>
+              Free Forever Services
+            </CardTitle>
+            <CardDescription>Your platform runs on 100% free infrastructure</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                <div>
+                  <p className="text-sm font-semibold">SQLite Database</p>
+                  <p className="text-xs text-muted-foreground">Current: {dbSizeMB.toFixed(2)} MB</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-bold text-green-600">∞ UNLIMITED</p>
+                  <p className="text-xs text-muted-foreground">Free Forever</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div>
+                  <p className="text-sm font-semibold">NextAuth v5</p>
+                  <p className="text-xs text-muted-foreground">Authentication</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-bold text-blue-600">✓ FREE</p>
+                  <p className="text-xs text-muted-foreground">Open Source</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                <div>
+                  <p className="text-sm font-semibold">UploadThing</p>
+                  <p className="text-xs text-muted-foreground">File uploads (512MB/file)</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-bold text-purple-600">2 GB</p>
+                  <p className="text-xs text-muted-foreground">Free Tier</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-950/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                <div>
+                  <p className="text-sm font-semibold">Vercel Hosting</p>
+                  <p className="text-xs text-muted-foreground">100 GB bandwidth/month</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-bold text-orange-600">✓ FREE</p>
+                  <p className="text-xs text-muted-foreground">Hobby Tier</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Quick Stats</CardTitle>
@@ -163,7 +223,7 @@ export default async function AdminDashboard() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Students</p>
-                <p className="text-2xl font-bold">{dbStats?.tables.users || 0}</p>
+                <p className="text-2xl font-bold">{dbStats?.tables.students || 0}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Enrollments</p>
@@ -179,7 +239,7 @@ export default async function AdminDashboard() {
               <CardTitle>Database Monitor</CardTitle>
               <Database className="h-5 w-5 text-muted-foreground" />
             </div>
-            <CardDescription>Track database usage and storage</CardDescription>
+            <CardDescription>SQLite - Free Forever ✨ No Storage Limits</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -187,29 +247,35 @@ export default async function AdminDashboard() {
               <div className="space-y-3 pb-4 border-b">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <HardDrive className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Storage Usage</span>
+                    <HardDrive className="h-4 w-4 text-green-600" />
+                    <span className="text-sm font-medium">Current Usage</span>
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {usagePercentage.toFixed(1)}% used
+                  <span className="text-xs font-semibold text-green-600">
+                    ♾️ UNLIMITED
                   </span>
                 </div>
                 
-                <Progress value={usagePercentage} className="h-2" />
+                <Progress value={Math.min(usagePercentage, 100)} className="h-2" />
                 
                 <div className="grid grid-cols-3 gap-3 text-center">
-                  <div className="bg-muted/50 rounded-lg p-2">
-                    <p className="text-xs text-muted-foreground">Consumed</p>
-                    <p className="text-sm font-bold text-primary">{dbSizeMB.toFixed(2)} MB</p>
+                  <div className="bg-green-50 dark:bg-green-950/20 rounded-lg p-2 border border-green-200 dark:border-green-800">
+                    <p className="text-xs text-muted-foreground">Current Size</p>
+                    <p className="text-sm font-bold text-green-700 dark:text-green-400">{dbSizeMB.toFixed(2)} MB</p>
                   </div>
-                  <div className="bg-muted/50 rounded-lg p-2">
-                    <p className="text-xs text-muted-foreground">Total Limit</p>
-                    <p className="text-sm font-bold">{maxDbSizeMB} MB</p>
+                  <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-2 border border-blue-200 dark:border-blue-800">
+                    <p className="text-xs text-muted-foreground">Storage Limit</p>
+                    <p className="text-sm font-bold text-blue-700 dark:text-blue-400">∞ Unlimited</p>
                   </div>
-                  <div className="bg-muted/50 rounded-lg p-2">
-                    <p className="text-xs text-muted-foreground">Remaining</p>
-                    <p className="text-sm font-bold text-green-600">{remainingMB.toFixed(2)} MB</p>
+                  <div className="bg-purple-50 dark:bg-purple-950/20 rounded-lg p-2 border border-purple-200 dark:border-purple-800">
+                    <p className="text-xs text-muted-foreground">Plan</p>
+                    <p className="text-sm font-bold text-purple-700 dark:text-purple-400">FREE Forever</p>
                   </div>
+                </div>
+                
+                <div className="mt-3 p-2 bg-green-50 dark:bg-green-950/20 rounded-md border border-green-200 dark:border-green-800">
+                  <p className="text-xs text-green-700 dark:text-green-400 text-center">
+                    💎 SQLite: No storage costs, no limits (281 TB theoretical max)
+                  </p>
                 </div>
               </div>
 

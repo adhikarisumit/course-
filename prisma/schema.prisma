@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -87,6 +87,10 @@ model Course {
   lessons     Lesson[]
   enrollments Enrollment[]
   payments    Payment[]
+  
+  @@index([isPublished])
+  @@index([category])
+  @@index([createdAt])
 }
 
 model Lesson {
@@ -104,6 +108,9 @@ model Lesson {
   
   course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   progress    LessonProgress[]
+  
+  @@index([courseId])
+  @@index([order])
 }
 
 model Enrollment {
@@ -116,6 +123,9 @@ model Enrollment {
   completed   Boolean  @default(false)
   
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  @@index([courseId])
+  @@index([enrolledAt])
   course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   
   @@unique([userId, courseId])
@@ -166,6 +176,8 @@ model Mentor {
   displayOrder    Int      @default(0) // For sorting mentors
   totalStudents   Int      @default(0)
   totalCourses    Int      @default(0)
+  
+  @@index([isActive, displayOrder])
   rating          Float    @default(5.0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

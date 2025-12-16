@@ -3,11 +3,9 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
-import CartProvider from "@/components/cart-context"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/components/auth-provider"
 import { Toaster } from "@/components/ui/sonner"
-import DebugTheme from "@/components/debug-theme"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
@@ -31,16 +29,12 @@ export default function RootLayout({
         <meta name="description" content="proteclink — learning resources and curated courses" />
         <meta property="og:title" content="proteclink" />
         <meta name="twitter:title" content="proteclink" />
-        <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js" async></script>
       </head>
       <body className={`font-sans antialiased`} suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true} enableColorScheme={false}>
           <AuthProvider>
-            <CartProvider>
-              {children}
-              {process.env.NODE_ENV === "development" && <DebugTheme />}
-              <Toaster />
-            </CartProvider>
+            {children}
+            <Toaster />
           </AuthProvider>
         </ThemeProvider>
         <Analytics />

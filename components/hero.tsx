@@ -17,51 +17,6 @@ export function Hero() {
       {/* Dark overlay for both light and dark modes */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-900/60 via-gray-900/50 to-gray-900/70"></div>
       <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-gray-900/60"></div>
-
-      {/* Animated code snippets */}
-      <div className="absolute inset-0 overflow-hidden opacity-10 pointer-events-none">
-        <div className="code-animation text-green-400 font-mono text-xs leading-relaxed whitespace-pre">
-{`const learn = async () => {
-  const knowledge = await fetchCourses();
-  return knowledge.map(k => k.apply());
-}
-
-function buildSkills(resources) {
-  return resources.reduce((acc, r) => {
-    return [...acc, ...r.practice()];
-  }, []);
-}
-
-class Developer {
-  constructor(name) {
-    this.name = name;
-    this.skills = [];
-  }
-  
-  async learnNew(course) {
-    const newSkill = await course.complete();
-    this.skills.push(newSkill);
-    return this;
-  }
-}
-
-const student = new Developer('You');
-student.learnNew(course).then(dev => {
-  console.log('Skills acquired!', dev.skills);
-});
-
-const learn = async () => {
-  const knowledge = await fetchCourses();
-  return knowledge.map(k => k.apply());
-}
-
-function buildSkills(resources) {
-  return resources.reduce((acc, r) => {
-    return [...acc, ...r.practice()];
-  }, []);
-}`}
-        </div>
-      </div>
       
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-3xl mx-auto text-center">

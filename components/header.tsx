@@ -1,9 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Cpu, Search, ShoppingCart, Menu, X, User, LogOut, LayoutDashboard, Settings } from "lucide-react"
+import { Cpu, Search, Menu, X, User, LogOut, LayoutDashboard, Settings } from "lucide-react"
 import Link from "next/link"
-import { useCart } from "@/components/cart-context"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -29,33 +28,6 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
     const coursesSection = document.getElementById("courses")
     if (coursesSection) {
       coursesSection.scrollIntoView({ behavior: "smooth" })
-    }
-  }
-
-  // CartIcon component moved inside header file to keep header self-contained
-  function CartIcon() {
-    try {
-      const { count } = useCart()
-
-      return (
-        <Link href="/shop/cart" className="relative flex items-center p-1 rounded hover:bg-accent/20" aria-label="Open cart">
-          <ShoppingCart className="h-5 w-5 sm:h-4 sm:w-4" aria-hidden="true" />
-          <span className="sr-only">Cart</span>
-          {count > 0 && (
-            <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold rounded-full bg-destructive text-white">
-              {count}
-            </span>
-          )}
-        </Link>
-      )
-    } catch (e) {
-      // If cart context isn't available for some reason, render icon without badge
-      return (
-        <Link href="/shop/cart" className="flex items-center p-1 rounded hover:bg-accent/20" aria-label="Open cart">
-          <ShoppingCart className="h-5 w-5 sm:h-4 sm:w-4" aria-hidden="true" />
-          <span className="sr-only">Cart</span>
-        </Link>
-      )
     }
   }
 
@@ -194,20 +166,18 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
             </div>
           </div>
           <nav className="flex items-center gap-6">
-            <Link href="/courses" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
-              Courses
+            <Link href="/" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
+              Home
             </Link>
-            <Link href="/#resources" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
-              Resources
+            <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
+              About
             </Link>
-            <Link href="/playground" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
-              Playground
+            <Link href="/#mentor" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
+              Mentor
             </Link>
-            <Link href="/shop" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
-              Shop
+            <Link href="/contact" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
+              Contact
             </Link>
-            {/* Cart icon only (visible on all sizes). Accessible label provided for screen readers. */}
-            <CartIcon />
             <UserMenu />
             <ThemeToggle />
             {/* mobile menu toggle */}
@@ -251,17 +221,17 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
             </div>
             {/* Mobile nav links */}
             <div className="flex flex-col gap-3 border-t border-border pt-3 items-end">
-              <Link href="/courses" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
-                Courses
+              <Link href="/" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
+                Home
               </Link>
-              <Link href="/#resources" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
-                Resources
+              <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
+                About
               </Link>
-              <Link href="/playground" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
-                Playground
+              <Link href="/#mentor" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
+                Mentor
               </Link>
-              <Link href="/shop" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
-                Shop
+              <Link href="/contact" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
+                Contact
               </Link>
             </div>
             {/* Mobile auth buttons for non-authenticated users */}
