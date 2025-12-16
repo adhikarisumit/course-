@@ -14,3 +14,6 @@ Thumbs.db
 README.md
 
 /lib/generated/prisma
+
+# Platform settings (contains sensitive info)
+settings.json

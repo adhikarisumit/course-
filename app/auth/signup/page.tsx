@@ -53,9 +53,17 @@ export default function SignUpPage() {
         return
       }
 
+      // Check if email verification is required
+      if (data.requiresVerification) {
+        toast.success(data.message || "Account created! Please check your email to verify your account.")
+        // Redirect to signin page with message
+        router.push("/auth/signin?message=verify-email")
+        return
+      }
+
       toast.success("Account created successfully!")
       
-      // Auto sign in after registration
+      // Auto sign in after registration (if no verification required)
       const result = await signIn("credentials", {
         email: formData.email,
         password: formData.password,

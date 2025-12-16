@@ -7,21 +7,21 @@ const SETTINGS_FILE = path.join(process.cwd(), "settings.json")
 
 const defaultSettings = {
   site: {
-    name: "Course Platform",
-    description: "Learn and grow with our courses",
-    url: "",
-    contactEmail: "",
+    name: "ProtecLink",
+    description: "Master technology skills with expert-curated courses and resources",
+    url: "https://proteclink.com",
+    contactEmail: "sumitadhikari2341@gmail.com",
   },
   payment: {
     currency: "JPY",
     stripeEnabled: false,
     paypalEnabled: false,
     bankTransferEnabled: true,
-    bankDetails: "",
+    bankDetails: "Bank: Nepal Bank\nAccount Name: ProtecLink\nAccount Number: XXXXX-XXXXX\nBranch: Kathmandu",
   },
   email: {
-    fromEmail: "",
-    fromName: "",
+    fromEmail: "noreply@proteclink.com",
+    fromName: "ProtecLink",
     smtpHost: "",
     smtpPort: "587",
     smtpUser: "",
