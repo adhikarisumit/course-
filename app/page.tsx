@@ -1,26 +1,30 @@
-import dynamic from "next/dynamic"
+import dynamicImport from "next/dynamic"
 import { HomeClient } from "@/components/home-client"
 import { Hero } from "@/components/hero"
 import { Footer } from "@/components/footer"
 
+// Force dynamic rendering to always fetch fresh data
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 // Lazy load components that are below the fold
-const MentorIntro = dynamic(() => import("@/components/mentor-intro").then(mod => ({ default: mod.MentorIntro })), {
+const MentorIntro = dynamicImport(() => import("@/components/mentor-intro").then(mod => ({ default: mod.MentorIntro })), {
   loading: () => <div className="min-h-[400px]" />,
 })
 
-const WhyChooseUs = dynamic(() => import("@/components/why-choose-us").then(mod => ({ default: mod.WhyChooseUs })), {
+const WhyChooseUs = dynamicImport(() => import("@/components/why-choose-us").then(mod => ({ default: mod.WhyChooseUs })), {
   loading: () => <div className="min-h-[400px]" />,
 })
 
-const Testimonials = dynamic(() => import("@/components/testimonials").then(mod => ({ default: mod.Testimonials })), {
+const Testimonials = dynamicImport(() => import("@/components/testimonials").then(mod => ({ default: mod.Testimonials })), {
   loading: () => <div className="min-h-[400px]" />,
 })
 
-const SuccessMetrics = dynamic(() => import("@/components/success-metrics").then(mod => ({ default: mod.SuccessMetrics })), {
+const SuccessMetrics = dynamicImport(() => import("@/components/success-metrics").then(mod => ({ default: mod.SuccessMetrics })), {
   loading: () => <div className="min-h-[300px]" />,
 })
 
-const CTASection = dynamic(() => import("@/components/cta-section").then(mod => ({ default: mod.CTASection })), {
+const CTASection = dynamicImport(() => import("@/components/cta-section").then(mod => ({ default: mod.CTASection })), {
   loading: () => <div className="min-h-[300px]" />,
 })
 
