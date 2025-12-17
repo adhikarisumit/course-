@@ -12,7 +12,8 @@ function DeleteUserButton({ userId, userRole, onDeleted }: { userId: string, use
         toast.success("User deleted successfully");
         onDeleted();
       } else {
-        toast.error("Failed to delete user");
+        const data = await res.json();
+        toast.error(data?.error || "Failed to delete user");
       }
     } catch (e) {
       toast.error("Failed to delete user");
