@@ -14,6 +14,8 @@ import { toast } from "sonner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import dynamic from "next/dynamic"
+const DeleteAllChatsButton = dynamic(() => import("./delete-all-chats-button"), { ssr: false });
 
 interface Settings {
   site: {
@@ -185,6 +187,8 @@ export default function AdminSettingsPage() {
             </Button>
           </div>
         </div>
+        {/* Danger zone: Delete all chat histories */}
+        <DeleteAllChatsButton />
 
         {/* Status Indicators */}
         <div className="flex flex-wrap gap-2 items-center">

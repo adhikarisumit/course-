@@ -9,7 +9,9 @@ import Link from "next/link"
 import Image from "next/image"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
+
 import { SignOutButton } from "@/components/sign-out-button"
+import ClientChatWithTeacherModalWrapper from "./client-chat-with-teacher-modal-wrapper"
 
 export default async function DashboardPage() {
   const session = await auth()
@@ -46,6 +48,9 @@ export default async function DashboardPage() {
     .join("")
     .toUpperCase() || "U"
 
+  // Find the first admin user to chat with (for demo, real app may allow selection)
+  const admin = await prisma.user.findFirst({ where: { role: "admin" } });
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6 md:py-8">
@@ -73,6 +78,14 @@ export default async function DashboardPage() {
               <Separator className="my-4" />
               
               <div className="space-y-2">
+                {/* Chat with Teacher button for students */}
+                {session.user.role === "student" && admin && (
+                  <ClientChatWithTeacherModalWrapper
+                    currentUserId={session.user.id}
+                    teacherId={admin.id}
+                    teacherName={admin.name || "Teacher"}
+                  />
+                )}
                 <Button asChild variant="outline" className="w-full justify-start">
                   <Link href="/portal/profile">
                     <User className="mr-2 h-4 w-4" />

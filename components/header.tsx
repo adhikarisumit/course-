@@ -66,8 +66,9 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
     }
 
     if (!session?.user) {
+      // Show sign in/up on navbar for tablet/desktop only (sm and up), not on mobile
       return (
-        <div className="flex items-center gap-2">
+        <div className="hidden sm:flex items-center gap-2">
           <Button asChild variant="ghost" size="sm">
             <Link href="/auth/signin">Sign In</Link>
           </Button>
@@ -235,7 +236,9 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
               </Link>
             </div>
             {/* Mobile auth buttons for non-authenticated users */}
-            <MobileAuthButtons />
+            <div className="block sm:hidden">
+              <MobileAuthButtons />
+            </div>
           </div>
         </div>
       )}
