@@ -187,8 +187,7 @@ export default function AdminSettingsPage() {
             </Button>
           </div>
         </div>
-        {/* Danger zone: Delete all chat histories */}
-        <DeleteAllChatsButton />
+
 
         {/* Status Indicators */}
         <div className="flex flex-wrap gap-2 items-center">

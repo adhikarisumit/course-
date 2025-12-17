@@ -22,6 +22,7 @@ function DeleteUserButton({ userId, userRole, onDeleted }: { userId: string, use
 }
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useSession } from "next-auth/react"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -46,6 +47,7 @@ interface User {
 }
 
 export default function AdminUsersPage() {
+  const { data: session } = useSession();
   const [loading, setLoading] = useState(true)
   const [users, setUsers] = useState<User[]>([])
   const [searchTerm, setSearchTerm] = useState("")
@@ -246,10 +248,10 @@ export default function AdminUsersPage() {
                   {studentUsers.map((user) => (
                     <div
                       key={user.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                      className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
                     >
-                      <div className="flex-1 space-y-1">
-                        <div className="flex items-center gap-2">
+                      <div className="flex-1 space-y-1 w-full min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 min-w-0">
                           <p className="font-medium">{user.name || "No name"}</p>
                           <Badge variant="secondary">student</Badge>
                           {user._count.enrollments > 0 && (
@@ -258,7 +260,7 @@ export default function AdminUsersPage() {
                             </Badge>
                           )}
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground min-w-0">
                           <div className="flex items-center gap-1">
                             <Mail className="h-3 w-3" />
                             <span>{user.email}</span>
@@ -269,7 +271,7 @@ export default function AdminUsersPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex flex-col gap-2 items-end">
+                      <div className="flex flex-col gap-2 items-stretch sm:items-end w-full sm:w-auto mt-4 sm:mt-0">
                         {/* Reset Password Dialog */}
                         <Dialog
                           open={dialogOpen && selectedUser?.id === user.id}
@@ -387,17 +389,25 @@ export default function AdminUsersPage() {
                           </DialogContent>
                         </Dialog>
                         {/* Chat and Delete Chat for students */}
-                        <ChatModalWrapper
-                          user={{ id: user.id, name: user.name || user.email }}
-                          trigger={
-                            <Button variant="secondary" size="sm">
-                              <Mail className="h-4 w-4 mr-2" />
-                              Message
-                            </Button>
-                          }
-                        />
-                        <DeleteStudentChatButton userId={user.id} userName={user.name || user.email} />
-                        <DeleteUserButton userId={user.id} userRole={user.role} onDeleted={loadUsers} />
+                        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                          {(session?.user?.role === "super" || session?.user?.email === "sumitadhikari2341@gmail.com") ? (
+                            <>
+                              <ChatModalWrapper
+                                user={{ id: user.id, name: user.name || user.email }}
+                                trigger={
+                                  <Button variant="secondary" size="sm" className="w-full sm:w-auto">
+                                    <Mail className="h-4 w-4 mr-2" />
+                                    Message
+                                  </Button>
+                                }
+                              />
+                              <DeleteStudentChatButton userId={user.id} userName={user.name || user.email} />
+                              <DeleteUserButton userId={user.id} userRole={user.role} onDeleted={loadUsers} />
+                            </>
+                          ) : (
+                            <DeleteUserButton userId={user.id} userRole={user.role} onDeleted={loadUsers} />
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -420,14 +430,14 @@ export default function AdminUsersPage() {
                   {adminUsers.map((user) => (
                     <div
                       key={user.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                      className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
                     >
-                      <div className="flex-1 space-y-1">
-                        <div className="flex items-center gap-2">
+                      <div className="flex-1 space-y-1 w-full min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 min-w-0">
                           <p className="font-medium">{user.name || "No name"}</p>
                           <Badge variant="default">admin</Badge>
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground min-w-0">
                           <div className="flex items-center gap-1">
                             <Mail className="h-3 w-3" />
                             <span>{user.email}</span>
@@ -438,7 +448,7 @@ export default function AdminUsersPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex flex-col gap-2 items-end">
+                      <div className="flex flex-col gap-2 items-stretch sm:items-end w-full sm:w-auto mt-4 sm:mt-0">
                         {/* Reset Password Dialog for admins */}
                         <Dialog
                           open={dialogOpen && selectedUser?.id === user.id}
@@ -555,6 +565,18 @@ export default function AdminUsersPage() {
                             </div>
                           </DialogContent>
                         </Dialog>
+                        {/* Only super admin can message admins */}
+                        {(session?.user?.role === "super" || session?.user?.email === "sumitadhikari2341@gmail.com") && (
+                          <ChatModalWrapper
+                            user={{ id: user.id, name: user.name || user.email }}
+                            trigger={
+                              <Button variant="secondary" size="sm" className="w-full sm:w-auto">
+                                <Mail className="h-4 w-4 mr-2" />
+                                Message
+                              </Button>
+                            }
+                          />
+                        )}
                         {/* No chat or delete chat for admins */}
                       </div>
                     </div>
