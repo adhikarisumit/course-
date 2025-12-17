@@ -61,6 +61,15 @@ export async function GET(
       isEnrolled,
       progress: enrollment?.progress || 0,
       lessons: lessonsWithProgress,
+      courseType: (course as any).courseType,
+      meetingLink: (course as any).meetingLink,
+      meetingPlatform: (course as any).meetingPlatform,
+      scheduledStartTime: (course as any).scheduledStartTime,
+      scheduledEndTime: (course as any).scheduledEndTime,
+      isRecurring: (course as any).isRecurring,
+      recurringSchedule: (course as any).recurringSchedule,
+      features: (course as any).features,
+      accessDurationMonths: (course as any).accessDurationMonths,
     })
   } catch (error) {
     console.error("Error fetching course:", error)

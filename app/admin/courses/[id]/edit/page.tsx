@@ -10,8 +10,9 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
-import { Loader2, ArrowLeft, Save } from "lucide-react"
+import { Loader2, ArrowLeft, Save, Video, Calendar } from "lucide-react"
 import Link from "next/link"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 export default function EditCoursePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -29,7 +30,17 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
     isPaid: false,
     isPublished: true,
     accessDurationMonths: "6",
+    courseType: "recorded",
+    meetingLink: "",
+    meetingPlatform: "zoom",
+    scheduledStartTime: "",
+    scheduledEndTime: "",
+    isRecurring: false,
+    recurringSchedule: "",
   })
+  
+  const [features, setFeatures] = useState<string[]>([])
+  const [learningPoints, setLearningPoints] = useState<string[]>([])
 
   useEffect(() => {
     loadCourse()
@@ -52,7 +63,30 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
         isPaid: course.isPaid || false,
         isPublished: course.isPublished !== undefined ? course.isPublished : true,
         accessDurationMonths: course.accessDurationMonths ? course.accessDurationMonths.toString() : "6",
+        courseType: course.courseType || "recorded",
+        meetingLink: course.meetingLink || "",
+        meetingPlatform: course.meetingPlatform || "zoom",
+        scheduledStartTime: course.scheduledStartTime ? new Date(course.scheduledStartTime).toISOString().slice(0, 16) : "",
+        scheduledEndTime: course.scheduledEndTime ? new Date(course.scheduledEndTime).toISOString().slice(0, 16) : "",
+        isRecurring: course.isRecurring || false,
+        recurringSchedule: course.recurringSchedule || "",
       })
+      
+      if (course.features) {
+        try {
+          setFeatures(JSON.parse(course.features))
+        } catch {
+          setFeatures([])
+        }
+      }
+      
+      if (course.whatYouWillLearn) {
+        try {
+          setLearningPoints(JSON.parse(course.whatYouWillLearn))
+        } catch {
+          setLearningPoints([])
+        }
+      }
     } catch (error) {
       toast.error("Failed to load course")
       router.push("/admin/courses")
@@ -66,14 +100,30 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
     setSaving(true)
 
     try {
+      const payload: any = {
+        ...formData,
+        price: formData.isPaid ? parseFloat(formData.price) : 0,
+        accessDurationMonths: parseInt(formData.accessDurationMonths) || 6,
+        features: JSON.stringify(features),
+        whatYouWillLearn: JSON.stringify(learningPoints),
+      }
+
+      if (formData.courseType === "live") {
+        payload.scheduledStartTime = formData.scheduledStartTime ? new Date(formData.scheduledStartTime).toISOString() : null
+        payload.scheduledEndTime = formData.scheduledEndTime ? new Date(formData.scheduledEndTime).toISOString() : null
+      } else {
+        payload.meetingLink = null
+        payload.meetingPlatform = null
+        payload.scheduledStartTime = null
+        payload.scheduledEndTime = null
+        payload.isRecurring = false
+        payload.recurringSchedule = null
+      }
+
       const response = await fetch(`/api/admin/courses/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          price: formData.isPaid ? parseFloat(formData.price) : 0,
-          accessDurationMonths: parseInt(formData.accessDurationMonths) || 6,
-        }),
+        body: JSON.stringify(payload),
       })
 
       if (!response.ok) throw new Error("Failed to update course")
@@ -116,6 +166,37 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Course Type */}
+              <div className="space-y-3">
+                <Label>Course Type *</Label>
+                <RadioGroup 
+                  value={formData.courseType} 
+                  onValueChange={(value) => setFormData({ ...formData, courseType: value })}
+                  className="flex gap-4"
+                >
+                  <div className="flex items-center space-x-2 border rounded-lg p-4 flex-1 cursor-pointer hover:bg-accent" onClick={() => setFormData({ ...formData, courseType: "recorded" })}>
+                    <RadioGroupItem value="recorded" id="recorded" />
+                    <Label htmlFor="recorded" className="flex items-center gap-2 cursor-pointer flex-1">
+                      <Video className="h-4 w-4" />
+                      <div>
+                        <div className="font-medium">Recorded Course</div>
+                        <div className="text-xs text-muted-foreground">Pre-recorded video lessons</div>
+                      </div>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 border rounded-lg p-4 flex-1 cursor-pointer hover:bg-accent" onClick={() => setFormData({ ...formData, courseType: "live" })}>
+                    <RadioGroupItem value="live" id="live" />
+                    <Label htmlFor="live" className="flex items-center gap-2 cursor-pointer flex-1">
+                      <Calendar className="h-4 w-4" />
+                      <div>
+                        <div className="font-medium">Live Course</div>
+                        <div className="text-xs text-muted-foreground">Scheduled live sessions</div>
+                      </div>
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
               {/* Title */}
               <div className="space-y-2">
                 <Label htmlFor="title">Course Title *</Label>
@@ -187,12 +268,116 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
                 <Label htmlFor="duration">Duration</Label>
                 <Input
                   id="duration"
-                  placeholder="e.g., 10 hours"
+                  placeholder={formData.courseType === "live" ? "e.g., 2 hours" : "e.g., 10 hours"}
                   value={formData.duration}
                   onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
                 />
-                <p className="text-xs text-muted-foreground">Optional - e.g., "10 hours", "5 weeks"</p>
+                <p className="text-xs text-muted-foreground">
+                  {formData.courseType === "live" 
+                    ? "Duration of each live session (e.g., '2 hours')" 
+                    : "Total course duration (e.g., '10 hours', '5 weeks')"}
+                </p>
               </div>
+
+              {/* Live Course Fields */}
+              {formData.courseType === "live" && (
+                <>
+                  <div className="border rounded-lg p-4 space-y-4 bg-accent/50">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      Live Session Details
+                    </h3>
+
+                    {/* Meeting Platform */}
+                    <div className="space-y-2">
+                      <Label htmlFor="meetingPlatform">Meeting Platform *</Label>
+                      <Select 
+                        value={formData.meetingPlatform} 
+                        onValueChange={(value) => setFormData({ ...formData, meetingPlatform: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="zoom">Zoom</SelectItem>
+                          <SelectItem value="google-meet">Google Meet</SelectItem>
+                          <SelectItem value="teams">Microsoft Teams</SelectItem>
+                          <SelectItem value="custom">Custom Platform</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Meeting Link */}
+                    <div className="space-y-2">
+                      <Label htmlFor="meetingLink">Meeting Link *</Label>
+                      <Input
+                        id="meetingLink"
+                        required={formData.courseType === "live"}
+                        placeholder="https://zoom.us/j/... or https://meet.google.com/..."
+                        value={formData.meetingLink}
+                        onChange={(e) => setFormData({ ...formData, meetingLink: e.target.value })}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Enter the meeting link for your live sessions
+                      </p>
+                    </div>
+
+                    {/* Schedule */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="scheduledStartTime">Start Date & Time *</Label>
+                        <Input
+                          id="scheduledStartTime"
+                          type="datetime-local"
+                          required={formData.courseType === "live"}
+                          value={formData.scheduledStartTime}
+                          onChange={(e) => setFormData({ ...formData, scheduledStartTime: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="scheduledEndTime">End Date & Time *</Label>
+                        <Input
+                          id="scheduledEndTime"
+                          type="datetime-local"
+                          required={formData.courseType === "live"}
+                          value={formData.scheduledEndTime}
+                          onChange={(e) => setFormData({ ...formData, scheduledEndTime: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Recurring */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label htmlFor="isRecurring">Recurring Session</Label>
+                          <p className="text-sm text-muted-foreground">Enable for weekly/monthly sessions</p>
+                        </div>
+                        <Switch
+                          id="isRecurring"
+                          checked={formData.isRecurring}
+                          onCheckedChange={(checked) => setFormData({ ...formData, isRecurring: checked })}
+                        />
+                      </div>
+
+                      {formData.isRecurring && (
+                        <div className="space-y-2">
+                          <Label htmlFor="recurringSchedule">Recurring Schedule</Label>
+                          <Input
+                            id="recurringSchedule"
+                            placeholder="e.g., Every Monday at 7 PM, Weekly on Tuesdays"
+                            value={formData.recurringSchedule}
+                            onChange={(e) => setFormData({ ...formData, recurringSchedule: e.target.value })}
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Describe the recurring schedule (e.g., "Every Monday at 7 PM")
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* Access Duration */}
               <div className="space-y-2">
@@ -240,6 +425,80 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
                     <p className="text-xs text-muted-foreground">Enter price in Japanese Yen (¥)</p>
                   </div>
                 )}
+              </div>
+
+              {/* What You'll Learn */}
+              <div className="space-y-3">
+                <Label>What You&apos;ll Learn (Course Overview)</Label>
+                <p className="text-sm text-muted-foreground">Add learning points shown in course overview</p>
+                <div className="space-y-2">
+                  {learningPoints.map((point, index) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        value={point}
+                        onChange={(e) => {
+                          const newPoints = [...learningPoints]
+                          newPoints[index] = e.target.value
+                          setLearningPoints(newPoints)
+                        }}
+                        placeholder="e.g., Master the fundamental concepts"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setLearningPoints(learningPoints.filter((_, i) => i !== index))}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setLearningPoints([...learningPoints, ""])}
+                  >
+                    Add Learning Point
+                  </Button>
+                </div>
+              </div>
+
+              {/* Course Features */}
+              <div className="space-y-3">
+                <Label>What&apos;s Included (Course Features)</Label>
+                <p className="text-sm text-muted-foreground">Add features/benefits shown on enrollment page</p>
+                <div className="space-y-2">
+                  {features.map((feature, index) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        value={feature}
+                        onChange={(e) => {
+                          const newFeatures = [...features]
+                          newFeatures[index] = e.target.value
+                          setFeatures(newFeatures)
+                        }}
+                        placeholder="e.g., Lifetime access, Certificate of completion"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setFeatures(features.filter((_, i) => i !== index))}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFeatures([...features, ""])}
+                  >
+                    Add Feature
+                  </Button>
+                </div>
               </div>
 
               {/* Published */}

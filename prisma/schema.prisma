@@ -81,6 +81,22 @@ model Course {
   level                 String?  // beginner, intermediate, advanced
   duration              String?  // e.g., "10 hours"
   accessDurationMonths  Int      @default(6) // Course access duration in months
+  
+  // Live course fields
+  courseType            String   @default("recorded") // recorded, live
+  meetingLink           String?  // Zoom, Google Meet, Teams, etc.
+  meetingPlatform       String?  // zoom, google-meet, teams, custom
+  scheduledStartTime    DateTime? // When the live session starts
+  scheduledEndTime      DateTime? // When the live session ends
+  isRecurring           Boolean  @default(false) // Is this a recurring live session
+  recurringSchedule     String?  // Cron expression or schedule description
+  
+  // Course features/benefits (What's included)
+  features              String?  // JSON array of course features/benefits
+  
+  // Course overview/learning objectives
+  whatYouWillLearn      String?  // What students will learn (multiline text or JSON)
+  
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
   
@@ -91,6 +107,8 @@ model Course {
   @@index([isPublished])
   @@index([category])
   @@index([createdAt])
+  @@index([courseType])
+  @@index([scheduledStartTime])
 }
 
 model Lesson {

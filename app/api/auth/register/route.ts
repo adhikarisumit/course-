@@ -13,14 +13,83 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Normalize email
+    const normalizedEmail = email.toLowerCase().trim()
+
+    // Strict email validation
+    const emailRegex = /^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$/
+    if (!emailRegex.test(normalizedEmail)) {
+      return NextResponse.json(
+        { error: "Please enter a valid email address" },
+        { status: 400 }
+      )
+    }
+
+    // Validate email length and format
+    if (normalizedEmail.length > 254 || normalizedEmail.length < 5) {
+      return NextResponse.json(
+        { error: "Email address is invalid" },
+        { status: 400 }
+      )
+    }
+
+    // Check for valid domain
+    const [localPart, domain] = normalizedEmail.split('@')
+    if (!domain || domain.length < 3 || !domain.includes('.')) {
+      return NextResponse.json(
+        { error: "Email domain is invalid" },
+        { status: 400 }
+      )
+    }
+
+    // Block common disposable/temporary email domains
+    const disposableDomains = [
+      'tempmail.com', '10minutemail.com', 'guerrillamail.com', 'mailinator.com',
+      'trashmail.com', 'throwaway.email', 'getnada.com', 'temp-mail.org',
+      'fakeinbox.com', 'yopmail.com', 'maildrop.cc', 'sharklasers.com'
+    ]
+    
+    if (disposableDomains.includes(domain.toLowerCase())) {
+      return NextResponse.json(
+        { error: "Temporary email addresses are not allowed. Please use a valid email address" },
+        { status: 400 }
+      )
+    }
+
+    // Validate domain structure
+    const domainParts = domain.split('.')
+    if (domainParts.length < 2) {
+      return NextResponse.json(
+        { error: "Email domain is invalid" },
+        { status: 400 }
+      )
+    }
+
+    // Check TLD is valid (at least 2 characters)
+    const tld = domainParts[domainParts.length - 1]
+    if (tld.length < 2 || !/^[a-zA-Z]+$/.test(tld)) {
+      return NextResponse.json(
+        { error: "Email domain extension is invalid" },
+        { status: 400 }
+      )
+    }
+
+    // Validate local part
+    if (localPart.length > 64 || localPart.startsWith('.') || localPart.endsWith('.') || localPart.includes('..')) {
+      return NextResponse.json(
+        { error: "Email format is invalid" },
+        { status: 400 }
+      )
+    }
+
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email }
+      where: { email: normalizedEmail }
     })
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "User already exists" },
+        { error: "An account with this email already exists" },
         { status: 400 }
       )
     }
@@ -32,7 +101,7 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.create({
       data: {
         name,
-        email,
+        email: normalizedEmail,
         password: hashedPassword,
         role: "student",
       },

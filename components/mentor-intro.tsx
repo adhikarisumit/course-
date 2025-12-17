@@ -71,23 +71,26 @@ export async function MentorIntro() {
               const achievements = mentor.achievements ? mentor.achievements.split(',').map((a: string) => a.trim()) : []
               
               return (
-                <Card key={mentor.id} className="overflow-hidden border hover:shadow-lg transition-shadow">
-                  <CardContent className="p-0">
+                <Card key={mentor.id} className="overflow-hidden border hover:shadow-lg transition-shadow h-full flex flex-col">
+                  <CardContent className="p-0 flex flex-col h-full">
                     {/* Image Section */}
                     <div className="relative h-[140px] bg-gradient-to-br from-primary/20 to-primary/5">
                       <div className="absolute inset-0 flex items-center justify-center">
                         {mentor.image ? (
-                          <div className="relative w-20 h-20 rounded-full overflow-hidden border-3 border-white shadow-lg">
+                          <div className="relative w-28 h-28 rounded-full overflow-hidden border-3 border-white shadow-lg">
                             <Image
                               src={mentor.image}
                               alt={mentor.name}
                               fill
+                              quality={100}
+                              priority
+                              sizes="(max-width: 640px) 112px, 112px"
                               className="object-cover"
                             />
                           </div>
                         ) : (
-                          <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center">
-                            <GraduationCap className="w-10 h-10 text-white" />
+                          <div className="relative w-28 h-28 rounded-full bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center">
+                            <GraduationCap className="w-14 h-14 text-white" />
                           </div>
                         )}
                       </div>
@@ -103,7 +106,7 @@ export async function MentorIntro() {
                     </div>
 
                     {/* Content Section */}
-                    <div className="p-4">
+                    <div className="p-4 flex flex-col flex-1">
                       <h3 className="text-base font-bold mb-1">{mentor.name}</h3>
                       <p className="text-primary font-semibold mb-1 text-xs">{mentor.role}</p>
                       {mentor.company && (
@@ -134,8 +137,8 @@ export async function MentorIntro() {
                           </Badge>
                         ))}
                       </div>
-
-                      <Button asChild className="w-full" size="sm">
+                      <div className="flex-1" />
+                      <Button asChild className="w-full mt-auto" size="sm">
                         <Link href="/courses">
                           View Courses
                         </Link>

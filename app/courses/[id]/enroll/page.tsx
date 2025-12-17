@@ -130,27 +130,42 @@ Please activate my access. I have attached the payment receipt.`
               <h1 className="text-3xl font-bold mb-4">{course.title}</h1>
               <p className="text-muted-foreground mb-6">{course.description}</p>
 
-              <div className="space-y-3">
-                <h3 className="font-semibold text-lg">What&apos;s included:</h3>
-                <ul className="space-y-2">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span>{course.lessons.length} comprehensive lessons</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span>{course.accessDurationMonths} months access</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span>Certificate of completion</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span>Access on mobile and desktop</span>
-                  </li>
-                </ul>
-              </div>
+              {(() => {
+                let featuresArray = []
+                
+                try {
+                  featuresArray = course.features ? JSON.parse(course.features) : []
+                } catch {
+                  featuresArray = []
+                }
+                
+                // Replace placeholders in features
+                if (featuresArray.length > 0) {
+                  featuresArray = featuresArray.map((f: string) => 
+                    f.replace(/\{lessons\}/g, course.lessons.length.toString())
+                     .replace(/\{months\}/g, course.accessDurationMonths.toString())
+                  )
+                }
+                
+                // Only show section if there are features
+                if (featuresArray.length === 0) {
+                  return null
+                }
+                
+                return (
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-lg">What&apos;s included:</h3>
+                    <ul className="space-y-2">
+                      {featuresArray.map((feature: string, index: number) => (
+                        <li key={index} className="flex items-center gap-2">
+                          <CheckCircle className="h-5 w-5 text-green-500" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )
+              })()}
             </div>
 
             {/* Payment Card */}

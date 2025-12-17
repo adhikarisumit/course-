@@ -51,10 +51,23 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const { title, description, videoUrl, category, level, duration, price, isPaid, isPublished, accessDurationMonths } = body
+    const { 
+      title, description, videoUrl, category, level, duration, price, isPaid, isPublished, accessDurationMonths,
+      courseType, meetingLink, meetingPlatform, scheduledStartTime, scheduledEndTime, isRecurring, recurringSchedule,
+      features, whatYouWillLearn
+    } = body
 
     if (!title) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 })
+    }
+
+    // Validate live course fields
+    if (courseType === "live") {
+      if (!meetingLink || !scheduledStartTime || !scheduledEndTime) {
+        return NextResponse.json({ 
+          error: "Meeting link and schedule are required for live courses" 
+        }, { status: 400 })
+      }
     }
 
     const course = await prisma.course.update({
@@ -70,6 +83,15 @@ export async function PUT(
         isPaid: isPaid || false,
         isPublished: isPublished !== undefined ? isPublished : true,
         accessDurationMonths: accessDurationMonths || 6,
+        courseType: courseType || "recorded",
+        meetingLink: meetingLink || null,
+        meetingPlatform: meetingPlatform || null,
+        scheduledStartTime: scheduledStartTime ? new Date(scheduledStartTime) : null,
+        scheduledEndTime: scheduledEndTime ? new Date(scheduledEndTime) : null,
+        isRecurring: isRecurring || false,
+        recurringSchedule: recurringSchedule || null,
+        features: features || null,
+        whatYouWillLearn: whatYouWillLearn || null,
       } as any,
     })
 

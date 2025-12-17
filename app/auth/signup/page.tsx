@@ -19,9 +19,32 @@ export default function SignUpPage() {
     password: "",
     confirmPassword: "",
   })
+  const [emailError, setEmailError] = useState("")
+
+  // Strict email validation regex
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$/
+    return emailRegex.test(email)
+  }
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const email = e.target.value
+    setFormData({ ...formData, email })
+    
+    if (email && !validateEmail(email)) {
+      setEmailError("Please enter a valid email address")
+    } else {
+      setEmailError("")
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!validateEmail(formData.email)) {
+      toast.error("Please enter a valid email address")
+      return
+    }
     
     if (formData.password !== formData.confirmPassword) {
       toast.error("Passwords do not match")
@@ -111,10 +134,14 @@ export default function SignUpPage() {
                 type="email"
                 placeholder="you@example.com"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={handleEmailChange}
                 required
                 disabled={isLoading}
+                className={emailError ? "border-red-500" : ""}
               />
+              {emailError && (
+                <p className="text-sm text-red-500">{emailError}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { CheckCircle, ChevronLeft, ChevronRight, BookOpen, Lock, Loader2 } from "lucide-react"
+import { CheckCircle, ChevronLeft, ChevronRight, BookOpen, Lock, Loader2, Video, Calendar, ExternalLink } from "lucide-react"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
 import { YouTubePlayer } from "@/components/youtube-player"
@@ -32,6 +32,13 @@ interface Course {
   isEnrolled: boolean
   progress: number
   lessons: Lesson[]
+  courseType?: string
+  meetingLink?: string | null
+  meetingPlatform?: string | null
+  scheduledStartTime?: string | null
+  scheduledEndTime?: string | null
+  isRecurring?: boolean
+  recurringSchedule?: string | null
 }
 
 export default function LearnPage({ params }: { params: Promise<{ id: string }> }) {
@@ -299,7 +306,46 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
           </div>
 
           {/* Sidebar - Lesson List */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-4">
+            {/* Live Session Card */}
+            {course.courseType === "live" && course.meetingLink && (
+              <Card className="bg-primary/5 border-primary/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2 text-primary">
+                    <Video className="h-4 w-4" />
+                    Live Session
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {course.scheduledStartTime && (
+                    <div className="text-xs space-y-1">
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <Calendar className="h-3 w-3" />
+                        <span>Next Session</span>
+                      </div>
+                      <p className="font-medium text-sm">
+                        {new Date(course.scheduledStartTime).toLocaleString('en-US', {
+                          dateStyle: 'medium',
+                          timeStyle: 'short'
+                        })}
+                      </p>
+                      {course.isRecurring && course.recurringSchedule && (
+                        <p className="text-muted-foreground">
+                          🔁 {course.recurringSchedule}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  <Button asChild size="sm" className="w-full">
+                    <a href={course.meetingLink} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-3 w-3 mr-2" />
+                      Join Session
+                    </a>
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
             <Card className="sticky top-4">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">

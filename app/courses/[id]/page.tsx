@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import Link from "next/link"
 import Image from "next/image"
-import { BookOpen, Clock, Award, Lock, CheckCircle, Play, ArrowLeft } from "lucide-react"
+import { BookOpen, Clock, Award, Lock, CheckCircle, Play, ArrowLeft, Video, Calendar, ExternalLink } from "lucide-react"
 import { YouTubePlayer } from "@/components/youtube-player"
 
 export default async function CoursePage({ params }: { params: Promise<{ id: string }> }) {
@@ -136,22 +136,70 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
               <CardContent className="space-y-4">
                 {isEnrolled && enrollment ? (
                   <>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Progress</span>
-                        <span className="font-medium">{enrollment.progress}%</span>
-                      </div>
-                      <Progress value={enrollment.progress} />
-                      <p className="text-sm text-muted-foreground">
-                        {completedLessons} of {course.lessons.length} lessons completed
-                      </p>
-                    </div>
-                    <Button asChild className="w-full" size="lg">
-                      <Link href={`/courses/${course.id}/learn`}>
-                        <Play className="h-4 w-4 mr-2" />
-                        Continue Learning
-                      </Link>
-                    </Button>
+                    {(course as any).courseType === "live" && (course as any).meetingLink ? (
+                      <>
+                        <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 space-y-3">
+                          <div className="flex items-center gap-2 text-primary font-semibold">
+                            <Video className="h-5 w-5" />
+                            <span>Live Session</span>
+                          </div>
+                          {(course as any).scheduledStartTime && (
+                            <div className="space-y-1 text-sm">
+                              <div className="flex items-center gap-2 text-muted-foreground">
+                                <Calendar className="h-4 w-4" />
+                                <span>Scheduled Time</span>
+                              </div>
+                              <p className="font-medium">
+                                {new Date((course as any).scheduledStartTime).toLocaleString('en-US', {
+                                  dateStyle: 'full',
+                                  timeStyle: 'short'
+                                })}
+                              </p>
+                              {(course as any).scheduledEndTime && (
+                                <p className="text-xs text-muted-foreground">
+                                  to {new Date((course as any).scheduledEndTime).toLocaleString('en-US', {
+                                    timeStyle: 'short'
+                                  })}
+                                </p>
+                              )}
+                              {(course as any).isRecurring && (course as any).recurringSchedule && (
+                                <p className="text-xs text-muted-foreground mt-2">
+                                  🔁 {(course as any).recurringSchedule}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                          <Button asChild className="w-full" size="lg">
+                            <a href={(course as any).meetingLink} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="h-4 w-4 mr-2" />
+                              Join Live Session
+                            </a>
+                          </Button>
+                          <p className="text-xs text-center text-muted-foreground">
+                            Platform: {(course as any).meetingPlatform === 'google-meet' ? 'Google Meet' : (course as any).meetingPlatform === 'teams' ? 'Microsoft Teams' : (course as any).meetingPlatform?.charAt(0).toUpperCase() + (course as any).meetingPlatform?.slice(1)}
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span>Progress</span>
+                            <span className="font-medium">{enrollment.progress}%</span>
+                          </div>
+                          <Progress value={enrollment.progress} />
+                          <p className="text-sm text-muted-foreground">
+                            {completedLessons} of {course.lessons.length} lessons completed
+                          </p>
+                        </div>
+                        <Button asChild className="w-full" size="lg">
+                          <Link href={`/courses/${course.id}/learn`}>
+                            <Play className="h-4 w-4 mr-2" />
+                            Continue Learning
+                          </Link>
+                        </Button>
+                      </>
+                    )}
                   </>
                 ) : course.isPaid ? (
                   <>
@@ -174,6 +222,10 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
                 )}
 
                 <div className="pt-4 border-t space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Type</span>
+                    <span className="font-medium capitalize">{(course as any).courseType || "recorded"}</span>
+                  </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Lessons</span>
                     <span className="font-medium">{course.lessons.length}</span>
@@ -260,13 +312,28 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
                   <h3>About This Course</h3>
                   <p>{course.description}</p>
                   
-                  <h3>What You&apos;ll Learn</h3>
-                  <ul>
-                    <li>Master the fundamental concepts</li>
-                    <li>Build real-world projects</li>
-                    <li>Get hands-on experience</li>
-                    <li>Earn a certificate of completion</li>
-                  </ul>
+                  {(() => {
+                    const learningPoints = (course as any).whatYouWillLearn
+                    if (!learningPoints) return null
+                    
+                    try {
+                      const points = JSON.parse(learningPoints)
+                      if (!Array.isArray(points) || points.length === 0) return null
+                      
+                      return (
+                        <>
+                          <h3>What You&apos;ll Learn</h3>
+                          <ul>
+                            {points.map((point: string, index: number) => (
+                              <li key={index}>{point}</li>
+                            ))}
+                          </ul>
+                        </>
+                      )
+                    } catch {
+                      return null
+                    }
+                  })()}
                 </div>
               </TabsContent>
             </CardContent>

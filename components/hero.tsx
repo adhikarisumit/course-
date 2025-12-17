@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react"
 
 export function Hero() {
   return (
-    <section className="relative py-20 md:py-32 overflow-hidden bg-gray-900">
+    <section className="relative py-12 sm:py-16 md:py-24 lg:py-32 overflow-hidden bg-gray-900">
       {/* Programming keyboard background image - very visible */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-75"
@@ -18,21 +18,21 @@ export function Hero() {
       <div className="absolute inset-0 bg-gradient-to-br from-gray-900/60 via-gray-900/50 to-gray-900/70"></div>
       <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-gray-900/60"></div>
       
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-balance bg-gradient-to-br from-white to-gray-200 bg-clip-text text-transparent">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-balance bg-gradient-to-br from-white to-gray-200 bg-clip-text text-transparent leading-tight">
             Transform Your Career with Expert-Curated Learning
           </h1>
-          <p className="text-lg md:text-xl text-gray-300 mb-4 text-pretty">
+          <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-3 sm:mb-4 text-pretty px-2">
             Access premium courses, comprehensive resources, and structured learning paths designed by educational experts. 
             Start your journey to success today.
           </p>
-          <div className="mb-8 inline-block">
-            <mark className="bg-yellow-300 dark:bg-yellow-400 text-gray-900 px-4 py-2 rounded-lg font-medium text-sm md:text-base">
+          <div className="mb-6 sm:mb-8 inline-block px-2">
+            <mark className="bg-yellow-300 dark:bg-yellow-400 text-gray-900 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-xs sm:text-sm md:text-base inline-block">
               ✨ We curate and guide—connecting you with the best learning resources worldwide
             </mark>
           </div>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
             <Button asChild size="lg" className="gap-2 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all cursor-pointer">
               <a href="/courses">
                 Explore Courses
@@ -47,18 +47,18 @@ export function Hero() {
           </div>
           
           {/* Trust indicators */}
-          <div className="mt-12 grid grid-cols-3 gap-6 max-w-2xl mx-auto text-center">
+          <div className="mt-8 sm:mt-10 md:mt-12 grid grid-cols-3 gap-3 sm:gap-4 md:gap-6 max-w-2xl mx-auto text-center px-2">
             <div>
-              <div className="text-3xl font-bold text-white mb-1">50+</div>
-              <div className="text-sm text-gray-400">Quality Courses</div>
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1">50+</div>
+              <div className="text-xs sm:text-sm text-gray-400">Quality Courses</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-white mb-1">500+</div>
-              <div className="text-sm text-gray-400">Active Students</div>
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1">500+</div>
+              <div className="text-xs sm:text-sm text-gray-400">Active Students</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-white mb-1">4.9/5</div>
-              <div className="text-sm text-gray-400">Student Rating</div>
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1">4.9/5</div>
+              <div className="text-xs sm:text-sm text-gray-400">Student Rating</div>
             </div>
           </div>
         </div>
