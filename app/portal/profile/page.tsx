@@ -7,9 +7,8 @@ import { Separator } from "@/components/ui/separator"
 import { Mail, Calendar, Shield, User as UserIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import ProfileClient from "@/app/portal/profile/profile-client"
 import prisma from "@/lib/prisma"
-import dynamic from "next/dynamic"
-const DeleteChatHistoryButton = dynamic(() => import("./delete-chat-history-button"), { ssr: false });
 
 export default async function ProfilePage() {
   const session = await auth()
@@ -58,7 +57,7 @@ export default async function ProfilePage() {
           <p className="text-muted-foreground">Manage your account information and view your learning progress</p>
         </div>
         {/* Chat history delete button (admin only) */}
-        {session.user.role === "admin" && <DeleteChatHistoryButton userId={user.id} />}
+        {session.user.role === "admin" && <ProfileClient user={user} />}
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
