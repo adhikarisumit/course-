@@ -6,12 +6,18 @@ function DeleteUserButton({ userId, userRole, onDeleted }: { userId: string, use
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     setLoading(true);
-    const res = await fetch(`/api/admin/users/${userId}`, { method: "DELETE" });
-    setLoading(false);
-    if (res.ok) {
-      onDeleted();
-    } else {
-      alert("Failed to delete user");
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, { method: "DELETE" });
+      if (res.ok) {
+        toast.success("User deleted successfully");
+        onDeleted();
+      } else {
+        toast.error("Failed to delete user");
+      }
+    } catch (e) {
+      toast.error("Failed to delete user");
+    } finally {
+      setLoading(false);
     }
   };
   return (

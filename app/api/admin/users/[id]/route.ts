@@ -19,6 +19,21 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     return NextResponse.json({ error: "Cannot delete super admin" }, { status: 403 })
   }
 
-  await prisma.user.delete({ where: { id: params.id } })
-  return NextResponse.json({ success: true })
+  // Delete related data
+  await prisma.message.deleteMany({
+    where: {
+      OR: [
+        { senderId: params.id },
+        { receiverId: params.id },
+      ],
+    },
+  });
+  await prisma.enrollment.deleteMany({ where: { userId: params.id } });
+  await prisma.payment.deleteMany({ where: { userId: params.id } });
+  await prisma.session.deleteMany({ where: { userId: params.id } });
+  await prisma.account.deleteMany({ where: { userId: params.id } });
+  await prisma.lessonProgress.deleteMany({ where: { userId: params.id } });
+
+  await prisma.user.delete({ where: { id: params.id } });
+  return NextResponse.json({ success: true });
 }
