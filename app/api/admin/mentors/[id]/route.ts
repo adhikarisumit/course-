@@ -9,7 +9,6 @@ export async function GET(
   try {
     const { id } = await params
 
-    // @ts-expect-error - Prisma types will be available after VS Code restart
     const mentor = await prisma.mentor.findUnique({
       where: { id },
     })
@@ -39,7 +38,6 @@ export async function PUT(
     const { id } = await params
     const data = await req.json()
 
-    // @ts-expect-error - Prisma types will be available after VS Code restart
     const mentor = await prisma.mentor.update({
       where: { id },
       data: {
@@ -80,7 +78,6 @@ export async function DELETE(
 
     const { id } = await params
 
-    // @ts-expect-error - Prisma types will be available after VS Code restart
     await prisma.mentor.delete({
       where: { id },
     })

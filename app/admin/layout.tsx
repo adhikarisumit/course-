@@ -94,9 +94,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             Manage Admins
           </Link>
         )}
-        <Link href="/admin/settings" className={linkClass} onClick={handleClick}>
-          Settings
-        </Link>
       </>
     )
   }

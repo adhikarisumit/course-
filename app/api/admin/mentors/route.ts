@@ -4,7 +4,6 @@ import prisma from "@/lib/prisma"
 
 export async function GET(req: NextRequest) {
   try {
-    // @ts-expect-error - Prisma types will be available after VS Code restart
     const mentors = await prisma.mentor.findMany({
       orderBy: { displayOrder: "asc" },
     })
@@ -26,7 +25,6 @@ export async function POST(req: NextRequest) {
 
     const data = await req.json()
 
-    // @ts-expect-error - Prisma types will be available after VS Code restart
     const mentor = await prisma.mentor.create({
       data: {
         name: data.name,

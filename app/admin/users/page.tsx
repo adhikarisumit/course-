@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Loader2, Users, Search, Mail, Calendar, BookOpen, Key, Copy, Check, Download } from "lucide-react"
+import { Loader2, Users, Search, Mail, Calendar, BookOpen, Key, Copy, Check, Download, CheckCircle, Shield } from "lucide-react"
 import { toast } from "sonner"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
@@ -17,8 +17,8 @@ const DeleteStudentChatButton = dynamic(() => import("./delete-student-chat-butt
 
 function DeleteUserButton({ userId, userRole, currentUserRole, onDeleted }: { userId: string, userRole: string, currentUserRole: string, onDeleted: () => void }) {
   const [loading, setLoading] = useState(false);
-  // Allow admin and super admin to delete users, but can't delete super admins
-  if ((currentUserRole !== "super" && currentUserRole !== "admin") || userRole === "super") return null;
+  // Allow super admin to delete anyone, admin to delete students only, can't delete super admins
+  if (currentUserRole !== "super" && (currentUserRole !== "admin" || userRole === "admin") || userRole === "super") return null;
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     setLoading(true);
@@ -44,11 +44,72 @@ function DeleteUserButton({ userId, userRole, currentUserRole, onDeleted }: { us
   );
 }
 
+function VerifyProfileButton({ userId, userRole, currentUserRole, isVerified, onVerified }: { 
+  userId: string, 
+  userRole: string, 
+  currentUserRole: string, 
+  isVerified: boolean,
+  onVerified: () => void 
+}) {
+  const [loading, setLoading] = useState(false);
+  
+  // Only super admin can verify profiles, and only for students
+  if (currentUserRole !== "super" || userRole !== "student") return null;
+  
+  const handleToggle = async () => {
+    setLoading(true);
+    try {
+      const action = isVerified ? "unverify" : "verify";
+      const res = await fetch(`/api/admin/users/${userId}`, { 
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action })
+      });
+      
+      if (res.ok) {
+        toast.success(`Profile ${isVerified ? "unverified" : "verified"} successfully`);
+        onVerified();
+      } else {
+        const data = await res.json();
+        toast.error(data?.error || "Failed to update verification status");
+      }
+    } catch (e) {
+      toast.error("Failed to update verification status");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  return (
+    <Button 
+      variant={isVerified ? "secondary" : "default"} 
+      size="sm" 
+      onClick={handleToggle} 
+      disabled={loading}
+    >
+      {loading ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : isVerified ? (
+        <>
+          <CheckCircle className="h-4 w-4 mr-2" />
+          Verified
+        </>
+      ) : (
+        <>
+          <Shield className="h-4 w-4 mr-2" />
+          Verify
+        </>
+      )}
+    </Button>
+  );
+}
+
 interface User {
   id: string
   name: string | null
   email: string
   role: string
+  profileVerified: boolean
   createdAt: string
   _count: {
     enrollments: number
@@ -265,6 +326,12 @@ export default function AdminUsersPage() {
                         <div className="flex flex-wrap items-center gap-2 min-w-0">
                           <p className="font-medium">{user.name || "No name"}</p>
                           <Badge variant="secondary">student</Badge>
+                          {user.profileVerified && (
+                            <Badge variant="default" className="bg-blue-600 hover:bg-blue-700">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Verified
+                            </Badge>
+                          )}
                           {user._count.enrollments > 0 && (
                             <Badge variant="outline">
                               {user._count.enrollments} course{user._count.enrollments > 1 ? "s" : ""}
@@ -403,6 +470,13 @@ export default function AdminUsersPage() {
                         )}
                         {/* Chat and Delete Chat for students */}
                         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                          <VerifyProfileButton 
+                            userId={user.id} 
+                            userRole={user.role} 
+                            currentUserRole={session?.user?.role || ""} 
+                            isVerified={user.profileVerified}
+                            onVerified={loadUsers} 
+                          />
                           {(session?.user?.role === "super" || session?.user?.email === "sumitadhikari2341@gmail.com") ? (
                             <>
                               <ChatModalWrapper
@@ -579,18 +653,6 @@ export default function AdminUsersPage() {
                             </div>
                           </DialogContent>
                         </Dialog>
-                        )}
-                        {/* Only super admin can message admins */}
-                        {(session?.user?.role === "super" || session?.user?.email === "sumitadhikari2341@gmail.com") && (
-                          <ChatModalWrapper
-                            user={{ id: user.id, name: user.name || user.email }}
-                            trigger={
-                              <Button variant="secondary" size="sm" className="w-full sm:w-auto">
-                                <Mail className="h-4 w-4 mr-2" />
-                                Message
-                              </Button>
-                            }
-                          />
                         )}
                         <DeleteUserButton userId={user.id} userRole={user.role} currentUserRole={session?.user?.role || ""} onDeleted={loadUsers} />
                         {/* No chat or delete chat for admins */}

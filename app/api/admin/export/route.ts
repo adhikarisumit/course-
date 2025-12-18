@@ -51,6 +51,7 @@ async function exportStudents() {
       email: true,
       createdAt: true,
       emailVerified: true,
+      profileVerified: true,
       _count: {
         select: {
           enrollments: true,
@@ -62,13 +63,13 @@ async function exportStudents() {
   })
 
   const csv = [
-    ["ID", "Name", "Email", "Joined Date", "Email Verified", "Enrollments", "Payments"],
+    ["ID", "Name", "Email", "Joined Date", "Profile Verified", "Enrollments", "Payments"],
     ...students.map((student) => [
       student.id,
       student.name || "N/A",
       student.email,
       new Date(student.createdAt).toLocaleDateString(),
-      student.emailVerified ? "Yes" : "No",
+      student.profileVerified ? "Yes" : "No",
       student._count.enrollments.toString(),
       student._count.payments.toString(),
     ]),
@@ -93,6 +94,7 @@ async function exportAllUsers() {
       role: true,
       createdAt: true,
       emailVerified: true,
+      profileVerified: true,
       _count: {
         select: {
           enrollments: true,
@@ -104,14 +106,14 @@ async function exportAllUsers() {
   })
 
   const csv = [
-    ["ID", "Name", "Email", "Role", "Joined Date", "Email Verified", "Enrollments", "Payments"],
+    ["ID", "Name", "Email", "Role", "Joined Date", "Profile Verified", "Enrollments", "Payments"],
     ...users.map((user) => [
       user.id,
       user.name || "N/A",
       user.email,
       user.role,
       new Date(user.createdAt).toLocaleDateString(),
-      user.emailVerified ? "Yes" : "No",
+      user.profileVerified ? "Yes" : "No",
       user._count.enrollments.toString(),
       user._count.payments.toString(),
     ]),

@@ -87,13 +87,14 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // Create admin user
+    // Create admin user (auto-verified since created by super admin)
     const admin = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
         role: "admin",
+        emailVerified: new Date(), // Auto-verify admins
       },
       select: {
         id: true,

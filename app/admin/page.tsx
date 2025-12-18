@@ -3,7 +3,7 @@ import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { BookOpen, Users, Settings, BarChart, UserCircle, Database, HardDrive, Table } from "lucide-react"
+import { BookOpen, Users, BarChart, UserCircle, Database, HardDrive, Table } from "lucide-react"
 import prisma from "@/lib/prisma"
 
 export const dynamic = 'force-dynamic'
@@ -129,21 +129,6 @@ export default async function AdminDashboard() {
               <BarChart className="h-5 w-5 text-muted-foreground" />
             </div>
             <CardDescription>Track platform performance</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button className="w-full" variant="outline" disabled>
-              Coming Soon
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Settings</CardTitle>
-              <Settings className="h-5 w-5 text-muted-foreground" />
-            </div>
-            <CardDescription>Configure platform settings</CardDescription>
           </CardHeader>
           <CardContent>
             <Button className="w-full" variant="outline" disabled>

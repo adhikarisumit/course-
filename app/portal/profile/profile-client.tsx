@@ -1,14 +1,16 @@
 "use client";
 import DeleteChatHistoryButton from "./delete-chat-history-button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Mail, Calendar, Shield, User as UserIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 
-export default function ProfileClient({ user }: { user: any }) {
+interface User {
+  id: string;
+  name: string | null;
+  email: string;
+  image: string | null;
+  role: string;
+  isFrozen: boolean;
+}
+
+export default function ProfileClient({ user }: { user: User }) {
   // ...existing UI code from ProfilePage, but use user prop instead of fetching
   return (
     <div>

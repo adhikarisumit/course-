@@ -37,7 +37,6 @@ export async function GET() {
       prisma.lesson.count(),
       prisma.enrollment.count(),
       prisma.payment.count(),
-      // @ts-expect-error - Prisma types will be available after VS Code restart
       prisma.mentor.count(),
     ])
 

@@ -17,7 +17,6 @@ export default function SignInPage() {
     email: "",
     password: "",
   })
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)

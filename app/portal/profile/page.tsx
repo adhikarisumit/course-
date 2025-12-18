@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Mail, Calendar, Shield, User as UserIcon } from "lucide-react"
+import { Mail, Calendar, Shield, User as UserIcon, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import ProfileClient from "@/app/portal/profile/profile-client"
@@ -73,11 +73,24 @@ export default async function ProfilePage() {
                 <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
               </Avatar>
               <div>
-                <h3 className="text-xl font-semibold">{user.name}</h3>
-                <Badge variant="outline" className="mt-2">
-                  <Shield className="mr-1 h-3 w-3" />
-                  {user.role}
-                </Badge>
+                <h3 className="text-xl font-semibold flex items-center gap-2">
+                  {user.name}
+                  {user.profileVerified && (
+                    <CheckCircle className="h-5 w-5 text-blue-600" />
+                  )}
+                </h3>
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge variant="outline">
+                    <Shield className="mr-1 h-3 w-3" />
+                    {user.role}
+                  </Badge>
+                  {user.profileVerified && (
+                    <Badge variant="default" className="bg-blue-600 hover:bg-blue-700">
+                      <CheckCircle className="mr-1 h-3 w-3" />
+                      Verified
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
 

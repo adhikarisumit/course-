@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await auth()
     if (!session?.user) {
@@ -71,6 +71,24 @@ export async function GET() {
     }
     if (session.user.role !== "admin") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const simple = searchParams.get("simple") === "true"
+
+    if (simple) {
+      // Return simplified course data for certificate generator
+      const courses = await prisma.course.findMany({
+        select: {
+          id: true,
+          title: true,
+          _count: {
+            select: { enrollments: true },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      })
+      return NextResponse.json(courses)
     }
 
     // @ts-ignore: isDeleted may not be in generated types, but exists in DB

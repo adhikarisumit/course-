@@ -148,12 +148,6 @@ export default async function AdminProfilePage() {
                     <span>Enrollments</span>
                   </Link>
                 </Button>
-                <Button asChild variant="outline" className="h-20 flex-col gap-2">
-                  <Link href="/admin/settings">
-                    <Shield className="h-6 w-6" />
-                    <span>Settings</span>
-                  </Link>
-                </Button>
               </div>
             </CardContent>
           </Card>

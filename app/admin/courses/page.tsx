@@ -1,10 +1,7 @@
 "use client";
-import { auth } from "@/auth"
-import { redirect } from "next/navigation"
-import prisma from "@/lib/prisma"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import React, { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
@@ -52,7 +49,7 @@ function AdminCoursesPageClient() {
         const data = await res.json()
         toast({ title: "Error", description: data.error || "Failed to delete course", variant: "destructive" })
       }
-    } catch (e) {
+    } catch (_e) {
       toast({ title: "Error", description: "Failed to delete course", variant: "destructive" })
     } finally {
       setLoadingId(null)

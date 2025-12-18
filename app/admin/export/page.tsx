@@ -161,7 +161,7 @@ export default function ExportPage() {
               <ul className="text-sm text-muted-foreground space-y-1 ml-6 list-disc">
                 <li>Student ID, name, and email</li>
                 <li>Registration date</li>
-                <li>Email verification status</li>
+                <li>Profile verification status</li>
                 <li>Total enrollments count</li>
                 <li>Total payments count</li>
               </ul>
@@ -176,6 +176,7 @@ export default function ExportPage() {
                 <li>All user types (students, admins, mentors)</li>
                 <li>User roles and permissions</li>
                 <li>Account creation dates</li>
+                <li>Profile verification status</li>
                 <li>Activity metrics</li>
               </ul>
             </div>

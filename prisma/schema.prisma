@@ -19,6 +19,8 @@ model User {
   image         String?
   password      String?
   role          String    @default("student") // student, admin
+  isFrozen      Boolean   @default(false) // For admin freeze/unfreeze functionality
+  profileVerified Boolean @default(false) // Super admin verified profile
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
@@ -219,4 +221,36 @@ model Message {
   @@index([senderId])
   @@index([receiverId])
   @@index([createdAt])
+}
+
+model CheatSheet {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  fileUrl     String   // URL to the cheat sheet file
+  category    String?  // e.g., "JavaScript", "React", "Database"
+  tags        String?  // JSON array of tags
+  isActive    Boolean  @default(true)
+  downloadCount Int    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([isActive])
+}
+
+model SoftwareLink {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  url         String   // Link to the software/tool
+  category    String?  // e.g., "Development", "Design", "Productivity"
+  tags        String?  // JSON array of tags
+  isActive    Boolean  @default(true)
+  clickCount  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([isActive])
 }
