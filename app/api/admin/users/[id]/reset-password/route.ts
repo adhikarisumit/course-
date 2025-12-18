@@ -11,7 +11,7 @@ export async function POST(
     const { id } = await params
     const session = await auth()
 
-    if (!session?.user || session.user.role !== "admin") {
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -25,13 +25,21 @@ export async function POST(
       )
     }
 
-    // Check if user exists
+    // Check if user exists first
     const user = await prisma.user.findUnique({
       where: { id },
     })
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
+
+    // Permission checks
+    if (session.user.role !== "super") {
+      // Regular admins can only reset student passwords
+      if (user.role !== "student") {
+        return NextResponse.json({ error: "Forbidden: You can only reset student passwords" }, { status: 403 })
+      }
     }
 
     // Hash the new password

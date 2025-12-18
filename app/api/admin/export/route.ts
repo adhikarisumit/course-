@@ -6,9 +6,9 @@ export async function GET(request: NextRequest) {
   try {
     const session = await auth()
 
-    if (!session?.user || session.user.role !== "admin") {
+    if (!session?.user || session.user.role !== "super") {
       return NextResponse.json(
-        { error: "Unauthorized" },
+        { error: "Unauthorized: Only super admin can export data" },
         { status: 401 }
       )
     }

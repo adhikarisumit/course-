@@ -10,8 +10,11 @@ import { Clock, BookOpen, Lock, CheckCircle, ArrowLeft } from "lucide-react"
 export default async function CoursesPage() {
   const session = await auth()
   
+  // @ts-ignore: isDeleted may not be in generated types, but exists in DB
   const courses = await prisma.course.findMany({
-    where: { isPublished: true },
+    where: {
+      isPublished: true,
+    },
     include: {
       lessons: true,
       enrollments: session?.user ? {
@@ -19,7 +22,7 @@ export default async function CoursesPage() {
       } : undefined,
     },
     orderBy: { createdAt: "desc" },
-  })
+  }) as any[];
 
   return (
     <div className="min-h-screen bg-background">

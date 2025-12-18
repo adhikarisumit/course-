@@ -16,8 +16,11 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
   const { id } = await params
   const session = await auth()
 
-  const course = await prisma.course.findUnique({
-    where: { id },
+  // @ts-ignore: isDeleted may not be in generated types, but exists in DB
+  const course = await prisma.course.findFirst({
+    where: {
+      id,
+    },
     include: {
       lessons: {
         orderBy: { order: "asc" },
@@ -26,7 +29,7 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
         where: { userId: session.user.id },
       } : undefined,
     },
-  })
+  }) as any;
 
   if (!course) {
     notFound()

@@ -73,6 +73,7 @@ export async function GET() {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
+    // @ts-ignore: isDeleted may not be in generated types, but exists in DB
     const courses = await prisma.course.findMany({
       include: {
         lessons: true,

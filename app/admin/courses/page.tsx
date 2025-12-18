@@ -8,7 +8,7 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import React, { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
-import { Plus, BookOpen, Users, Edit, ArrowLeft } from "lucide-react"
+import { Plus, BookOpen, Users, Edit, ArrowLeft, UserCog } from "lucide-react"
 import Link from "next/link"
 
 export default function AdminCoursesPageWrapper() {
@@ -36,7 +36,7 @@ function AdminCoursesPageClient() {
   const { toast } = useToast()
 
   React.useEffect(() => {
-    fetch("/api/courses")
+    fetch("/api/admin/courses")
       .then((res) => res.json())
       .then((data) => setCourses(data))
   }, [])
@@ -76,12 +76,20 @@ function AdminCoursesPageClient() {
               <h1 className="text-2xl md:text-3xl font-bold mb-2">Manage Courses</h1>
               <p className="text-sm md:text-base text-muted-foreground">Create and manage your course content</p>
             </div>
-            <Button asChild>
-              <Link href="/admin/courses/create">
-                <Plus className="mr-2 h-4 w-4" />
-                Create Course
-              </Link>
-            </Button>
+            <div className="flex gap-2">
+              <Button asChild variant="outline">
+                <Link href="/admin/users">
+                  <UserCog className="mr-2 h-4 w-4" />
+                  Manage Users
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link href="/admin/courses/create">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Course
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
 

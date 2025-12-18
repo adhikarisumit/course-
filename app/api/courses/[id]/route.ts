@@ -9,7 +9,27 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Delete the course and cascade to lessons, enrollments, etc.
+    // Hard delete: remove course and all related data from database
+    // Delete lessons first
+    await prisma.lesson.deleteMany({
+      where: { courseId: id },
+    });
+
+    // Delete enrollments
+    await prisma.enrollment.deleteMany({
+      where: { courseId: id },
+    });
+
+    // Delete lesson progress
+    await prisma.lessonProgress.deleteMany({
+      where: {
+        lesson: {
+          courseId: id,
+        },
+      },
+    });
+
+    // Finally delete the course
     await prisma.course.delete({
       where: { id },
     });
@@ -35,8 +55,13 @@ export async function GET(
     const { id } = await params
     const session = await auth()
 
-    const course = await prisma.course.findUnique({
-      where: { id },
+    // @ts-ignore: isDeleted may not be in generated types, but exists in DB
+    const course = await prisma.course.findFirst({
+      where: {
+        id,
+        // @ts-ignore
+        isDeleted: false,
+      },
       include: {
         lessons: {
           orderBy: { order: "asc" },
@@ -45,9 +70,9 @@ export async function GET(
           ? {
               where: { userId: session.user.id },
             }
-          : false,
+          : undefined,
       },
-    })
+    }) as any;
 
     if (!course) {
       return NextResponse.json({ error: "Course not found" }, { status: 404 })
@@ -62,13 +87,13 @@ export async function GET(
       ? await prisma.lessonProgress.findMany({
           where: {
             userId: session.user.id,
-            lessonId: { in: course.lessons.map((l) => l.id) },
+            lessonId: { in: course.lessons.map((l: any) => l.id) },
           },
         })
       : []
 
     // Add completion status to lessons
-    const lessonsWithProgress = course.lessons.map((lesson) => ({
+    const lessonsWithProgress = course.lessons.map((lesson: any) => ({
       ...lesson,
       isCompleted: lessonProgress.some(
         (p) => p.lessonId === lesson.id && p.completed

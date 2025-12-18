@@ -1,8 +1,24 @@
 "use client"
 
-function DeleteUserButton({ userId, userRole, onDeleted }: { userId: string, userRole: string, onDeleted: () => void }) {
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useSession } from "next-auth/react"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Loader2, Users, Search, Mail, Calendar, BookOpen, Key, Copy, Check, Download } from "lucide-react"
+import { toast } from "sonner"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { ChatModalWrapper } from "./chat-modal-wrapper"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import dynamic from "next/dynamic"
+const DeleteStudentChatButton = dynamic(() => import("./delete-student-chat-button"), { ssr: false });
+
+function DeleteUserButton({ userId, userRole, currentUserRole, onDeleted }: { userId: string, userRole: string, currentUserRole: string, onDeleted: () => void }) {
   const [loading, setLoading] = useState(false);
-  if (userRole === "super") return null;
+  // Allow admin and super admin to delete users, but can't delete super admins
+  if ((currentUserRole !== "super" && currentUserRole !== "admin") || userRole === "super") return null;
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     setLoading(true);
@@ -27,20 +43,6 @@ function DeleteUserButton({ userId, userRole, onDeleted }: { userId: string, use
     </Button>
   );
 }
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useSession } from "next-auth/react"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Loader2, Users, Search, Mail, Calendar, BookOpen, Key, Copy, Check, Download } from "lucide-react"
-import { toast } from "sonner"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { ChatModalWrapper } from "./chat-modal-wrapper"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import dynamic from "next/dynamic"
-const DeleteStudentChatButton = dynamic(() => import("./delete-student-chat-button"), { ssr: false });
 
 interface User {
   id: string
@@ -159,6 +161,7 @@ export default function AdminUsersPage() {
           <h1 className="text-2xl md:text-3xl font-bold mb-2">User Management</h1>
           <p className="text-sm md:text-base text-muted-foreground">View and manage all registered users</p>
         </div>
+        {session?.user?.role === "super" && (
         <Button
           variant="outline"
           onClick={async () => {
@@ -182,6 +185,7 @@ export default function AdminUsersPage() {
           <Download className="mr-2 h-4 w-4" />
           Export CSV
         </Button>
+        )}
       </div>
 
       {/* Stats */}
@@ -279,7 +283,8 @@ export default function AdminUsersPage() {
                         </div>
                       </div>
                       <div className="flex flex-col gap-2 items-stretch sm:items-end w-full sm:w-auto mt-4 sm:mt-0">
-                        {/* Reset Password Dialog */}
+                        {/* Reset Password Dialog - only for students or super admin */}
+                        {(session?.user?.role === "super" || user.role === "student") && (
                         <Dialog
                           open={dialogOpen && selectedUser?.id === user.id}
                           onOpenChange={(open) => {
@@ -395,6 +400,7 @@ export default function AdminUsersPage() {
                             </div>
                           </DialogContent>
                         </Dialog>
+                        )}
                         {/* Chat and Delete Chat for students */}
                         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                           {(session?.user?.role === "super" || session?.user?.email === "sumitadhikari2341@gmail.com") ? (
@@ -409,10 +415,10 @@ export default function AdminUsersPage() {
                                 }
                               />
                               <DeleteStudentChatButton userId={user.id} userName={user.name || user.email} />
-                              <DeleteUserButton userId={user.id} userRole={user.role} onDeleted={loadUsers} />
+                              <DeleteUserButton userId={user.id} userRole={user.role} currentUserRole={session?.user?.role || ""} onDeleted={loadUsers} />
                             </>
                           ) : (
-                            <DeleteUserButton userId={user.id} userRole={user.role} onDeleted={loadUsers} />
+                            <DeleteUserButton userId={user.id} userRole={user.role} currentUserRole={session?.user?.role || ""} onDeleted={loadUsers} />
                           )}
                         </div>
                       </div>
@@ -456,7 +462,8 @@ export default function AdminUsersPage() {
                         </div>
                       </div>
                       <div className="flex flex-col gap-2 items-stretch sm:items-end w-full sm:w-auto mt-4 sm:mt-0">
-                        {/* Reset Password Dialog for admins */}
+                        {/* Reset Password Dialog for admins - only super admin can reset admin passwords */}
+                        {session?.user?.role === "super" && (
                         <Dialog
                           open={dialogOpen && selectedUser?.id === user.id}
                           onOpenChange={(open) => {
@@ -572,6 +579,7 @@ export default function AdminUsersPage() {
                             </div>
                           </DialogContent>
                         </Dialog>
+                        )}
                         {/* Only super admin can message admins */}
                         {(session?.user?.role === "super" || session?.user?.email === "sumitadhikari2341@gmail.com") && (
                           <ChatModalWrapper
@@ -584,6 +592,7 @@ export default function AdminUsersPage() {
                             }
                           />
                         )}
+                        <DeleteUserButton userId={user.id} userRole={user.role} currentUserRole={session?.user?.role || ""} onDeleted={loadUsers} />
                         {/* No chat or delete chat for admins */}
                       </div>
                     </div>
