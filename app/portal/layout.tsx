@@ -25,5 +25,21 @@ export default async function PortalLayout({
     }
   }
 
-  return <>{children}</>
+  return (
+    <>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            document.addEventListener('DOMContentLoaded', function () {
+              document.body.addEventListener('copy', function(e) { e.preventDefault(); });
+              document.body.addEventListener('cut', function(e) { e.preventDefault(); });
+              document.body.addEventListener('paste', function(e) { e.preventDefault(); });
+              document.body.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+            });
+          `,
+        }}
+      />
+      {children}
+    </>
+  )
 }

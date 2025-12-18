@@ -279,16 +279,16 @@ export default function ManageAdminsPage() {
               {admins.map((admin) => (
                 <div
                   key={admin.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 border rounded-lg hover:bg-accent/50 transition-colors"
                 >
                   <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <p className="font-medium">{admin.name || "No name"}</p>
                       <Badge variant="secondary">
                         {admin.email === SUPER_ADMIN_EMAIL ? "Super Admin" : "Manager"}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <Mail className="h-3 w-3" />
                         <span>{admin.email}</span>
@@ -300,21 +300,24 @@ export default function ManageAdminsPage() {
                     </div>
                   </div>
                   {admin.email !== SUPER_ADMIN_EMAIL && (
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDeleteAdmin(admin.id, admin.email)}
-                      disabled={deleting === admin.id}
-                    >
-                      {deleting === admin.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <>
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Remove
-                        </>
-                      )}
-                    </Button>
+                    <div className="flex sm:block justify-end">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDeleteAdmin(admin.id, admin.email)}
+                        disabled={deleting === admin.id}
+                        className="w-full sm:w-auto"
+                      >
+                        {deleting === admin.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Remove
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   )}
                 </div>
               ))}
