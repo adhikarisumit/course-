@@ -1,28 +1,65 @@
+"use client";
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import prisma from "@/lib/prisma"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import React, { useState } from "react"
+import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
 import { Plus, BookOpen, Users, Edit, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
-export default async function AdminCoursesPage() {
-  const session = await auth()
+export default function AdminCoursesPageWrapper() {
+  return <AdminCoursesPageClient />
+}
 
-  if (!session?.user) {
-    redirect("/auth/signin")
+type Course = {
+  id: string;
+  title: string;
+  description?: string;
+  isPublished: boolean;
+  lessons?: { id: string }[];
+  _count?: { enrollments: number };
+  category?: string;
+  level?: string;
+  isPaid?: boolean;
+  price?: number;
+};
+
+function AdminCoursesPageClient() {
+  const [courses, setCourses] = useState<Course[]>([])
+  const [loadingId, setLoadingId] = useState<string | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
+  const { toast } = useToast()
+
+  React.useEffect(() => {
+    fetch("/api/courses")
+      .then((res) => res.json())
+      .then((data) => setCourses(data))
+  }, [])
+
+  const handleDelete = async (id: string) => {
+    setLoadingId(id)
+    try {
+      const res = await fetch(`/api/courses/${id}`, { method: "DELETE" })
+      if (res.ok) {
+        setCourses((prev) => prev.filter((c) => c.id !== id))
+        toast({ title: "Course deleted" })
+      } else {
+        const data = await res.json()
+        toast({ title: "Error", description: data.error || "Failed to delete course", variant: "destructive" })
+      }
+    } catch (e) {
+      toast({ title: "Error", description: "Failed to delete course", variant: "destructive" })
+    } finally {
+      setLoadingId(null)
+      setDialogOpen(false)
+      setSelectedCourse(null)
+    }
   }
-
-  const courses = await prisma.course.findMany({
-    include: {
-      lessons: true,
-      _count: {
-        select: { enrollments: true },
-      },
-    },
-    orderBy: { createdAt: "desc" },
-  })
 
   return (
     <div className="min-h-screen bg-background">
@@ -83,11 +120,11 @@ export default async function AdminCoursesPage() {
                     <div className="flex items-center gap-4 text-sm">
                       <div className="flex items-center gap-1">
                         <BookOpen className="h-4 w-4 text-muted-foreground" />
-                        <span>{course.lessons.length} lessons</span>
+                        <span>{course.lessons?.length || 0} lessons</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Users className="h-4 w-4 text-muted-foreground" />
-                        <span>{course._count.enrollments} students</span>
+                        <span>{course._count?.enrollments || 0} students</span>
                       </div>
                     </div>
 
@@ -96,9 +133,7 @@ export default async function AdminCoursesPage() {
                       {course.category && <Badge variant="outline">{course.category}</Badge>}
                       {course.level && <Badge variant="outline">{course.level}</Badge>}
                       {course.isPaid ? (
-                        <Badge variant="outline">
-                          ¥{course.price}
-                        </Badge>
+                        <Badge variant="outline">¥{course.price}</Badge>
                       ) : (
                         <Badge variant="outline">Free</Badge>
                       )}
@@ -122,6 +157,15 @@ export default async function AdminCoursesPage() {
                           <Link href={`/courses/${course.id}`}>View</Link>
                         </Button>
                       </div>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="w-full mt-2"
+                        onClick={() => { setDialogOpen(true); setSelectedCourse(course) }}
+                        disabled={loadingId === course.id}
+                      >
+                        Delete
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -129,6 +173,18 @@ export default async function AdminCoursesPage() {
             ))}
           </div>
         )}
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Course</DialogTitle>
+            </DialogHeader>
+            <p>Are you sure you want to delete <b>{selectedCourse?.title ?? ''}</b>? This action cannot be undone.</p>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={loadingId !== null}>Cancel</Button>
+              <Button variant="destructive" onClick={() => selectedCourse && handleDelete(selectedCourse.id)} disabled={loadingId !== null || !selectedCourse}>Delete</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
