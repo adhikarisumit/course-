@@ -6,10 +6,21 @@ export async function GET(request: NextRequest) {
   try {
     const session = await auth()
 
-    if (!session?.user || session.user.role !== "super") {
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      )
+    }
+
+    // Check if user is super admin by email
+    const SUPER_ADMIN_EMAIL = "sumitadhikari2341@gmail.com"
+    const isSuperAdmin = session.user.email === SUPER_ADMIN_EMAIL
+
+    if (!isSuperAdmin) {
       return NextResponse.json(
         { error: "Unauthorized: Only super admin can export data" },
-        { status: 401 }
+        { status: 403 }
       )
     }
 
