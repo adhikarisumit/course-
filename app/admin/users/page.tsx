@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label"
 import { ChatModalWrapper } from "./chat-modal-wrapper"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import dynamic from "next/dynamic"
-const DeleteStudentChatButton = dynamic(() => import("./delete-student-chat-button"), { ssr: false });
 
 function DeleteUserButton({ userId, userRole, currentUserRole, onDeleted }: { userId: string, userRole: string, currentUserRole: string, onDeleted: () => void }) {
   const [loading, setLoading] = useState(false);
@@ -488,7 +487,6 @@ export default function AdminUsersPage() {
                                   </Button>
                                 }
                               />
-                              <DeleteStudentChatButton userId={user.id} userName={user.name || user.email} />
                               <DeleteUserButton userId={user.id} userRole={user.role} currentUserRole={session?.user?.role || ""} onDeleted={loadUsers} />
                             </>
                           ) : (

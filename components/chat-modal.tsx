@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { X } from "lucide-react";
 
 interface Message {
   id: string;
@@ -70,24 +72,46 @@ export function ChatModal({ open, onOpenChange, userId, currentUserId, userName 
     }
   };
 
+  // Delete message
+  const deleteMessage = async (messageId: string) => {
+    const res = await fetch(`/api/message/${messageId}`, {
+      method: "DELETE",
+    });
+    if (res.ok) {
+      // Remove the message from local state
+      setMessages(prev => prev.filter(msg => msg.id !== messageId));
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md w-full">
         <DialogHeader>
-          <DialogTitle>Chat with {userName || "User"}</DialogTitle>
+          <DialogTitle>Chat with Teacher</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col gap-2 max-h-80 overflow-y-auto py-2">
-          {messages.length === 0 && <div className="text-center text-muted-foreground text-xs">No messages yet.</div>}
-          {messages.map(msg => (
-            <div key={msg.id} className={`flex ${msg.senderId === currentUserId ? "justify-end" : "justify-start"}`}>
-              <div className={`rounded-lg px-3 py-2 text-sm max-w-[70%] ${msg.senderId === currentUserId ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
-                {msg.content}
-                <div className="text-[10px] text-muted-foreground mt-1 text-right">{new Date(msg.createdAt).toLocaleString()}</div>
+        <ScrollArea className="h-80 py-2 pr-3">
+          <div className="flex flex-col gap-2 pr-2">
+            {messages.length === 0 && <div className="text-center text-muted-foreground text-xs">No messages yet.</div>}
+            {messages.map(msg => (
+              <div key={msg.id} className={`flex ${msg.senderId === currentUserId ? "justify-end" : "justify-start"}`}>
+                <div className={`group relative rounded-lg px-3 py-2 text-sm max-w-[70%] ${msg.senderId === currentUserId ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+                  {msg.content}
+                  <div className="text-[10px] text-muted-foreground mt-1 text-right">{new Date(msg.createdAt).toLocaleString()}</div>
+                  {msg.senderId === currentUserId && (
+                    <button
+                      onClick={() => deleteMessage(msg.id)}
+                      className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity bg-destructive text-destructive-foreground rounded-full p-1 hover:bg-destructive/80"
+                      title="Delete message"
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+        </ScrollArea>
         <DialogFooter className="pt-2">
           <div className="flex w-full gap-2 items-end">
             <Textarea

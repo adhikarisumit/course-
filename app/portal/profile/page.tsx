@@ -7,7 +7,6 @@ import { Separator } from "@/components/ui/separator"
 import { Mail, Calendar, Shield, User as UserIcon, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import ProfileClient from "@/app/portal/profile/profile-client"
 import prisma from "@/lib/prisma"
 
 export default async function ProfilePage() {
@@ -41,12 +40,12 @@ export default async function ProfilePage() {
 
   const initials = user.name
     ?.split(" ")
-    .map((n) => n[0])
+    .map((n: string) => n[0])
     .join("")
     .toUpperCase() || "U"
 
   const totalEnrollments = user.enrollments.length
-  const completedCourses = user.enrollments.filter((e) => e.completed).length
+  const completedCourses = user.enrollments.filter((e: any) => e.completed).length
   const activeCourses = totalEnrollments - completedCourses
 
   return (
@@ -56,8 +55,7 @@ export default async function ProfilePage() {
           <h1 className="text-3xl font-bold mb-2">My Profile</h1>
           <p className="text-muted-foreground">Manage your account information and view your learning progress</p>
         </div>
-        {/* Chat history delete button (admin only) */}
-        {session.user.role === "admin" && <ProfileClient user={user} />}
+        {/* Quick Actions */}
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">

@@ -33,11 +33,15 @@ export async function POST(req: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
   const currentUserId = session.user.id;
   const { receiverId, content } = await req.json();
+
   if (!receiverId || !content) {
     return NextResponse.json({ error: "Missing receiverId or content" }, { status: 400 });
   }
+
+  // Create the message
   const message = await prisma.message.create({
     data: {
       senderId: currentUserId,
@@ -45,5 +49,6 @@ export async function POST(req: NextRequest) {
       content,
     },
   });
-  return NextResponse.json({ message });
+
+  return NextResponse.json({ message }, { status: 201 });
 }
