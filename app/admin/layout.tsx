@@ -68,6 +68,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     return (
       <>
+        <Link href="/" className={linkClass} onClick={handleClick}>
+          Home
+        </Link>
         <Link href="/admin" className={linkClass} onClick={handleClick}>
           Dashboard
         </Link>

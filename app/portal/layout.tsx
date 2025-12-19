@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import prisma from "@/lib/prisma"
+import PortalHeader from "@/components/portal-header"
 
 export default async function PortalLayout({
   children,
@@ -27,6 +28,7 @@ export default async function PortalLayout({
 
   return (
     <>
+      <PortalHeader />
       <script
         dangerouslySetInnerHTML={{
           __html: `
