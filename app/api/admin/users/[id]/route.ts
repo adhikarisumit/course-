@@ -39,6 +39,89 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   return NextResponse.json(updatedUser)
 }
 
+// PUT /api/admin/users/[id] - Update user details
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const session = await auth()
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  const { id } = await params
+  const { name, email } = await req.json()
+
+  // Validate input
+  if (!name?.trim() || !email?.trim()) {
+    return NextResponse.json({ error: "Name and email are required" }, { status: 400 })
+  }
+
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email)) {
+    return NextResponse.json({ error: "Invalid email format" }, { status: 400 })
+  }
+
+  // Check if user exists
+  const userToUpdate = await prisma.user.findUnique({ where: { id } })
+  if (!userToUpdate) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 })
+  }
+
+  // Permission checks
+  if (session.user.role === "admin") {
+    // Admins can only edit students
+    if (userToUpdate.role !== "student") {
+      return NextResponse.json({ error: "Forbidden: Admins can only edit student profiles" }, { status: 403 })
+    }
+  } else if (session.user.role === "super") {
+    // Super admins can edit anyone except other super admins
+    if (userToUpdate.role === "super") {
+      return NextResponse.json({ error: "Forbidden: Cannot edit super admin profiles" }, { status: 403 })
+    }
+  } else {
+    return NextResponse.json({ error: "Forbidden: Insufficient permissions" }, { status: 403 })
+  }
+
+  // Check for email duplicates (excluding current user)
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      email: email.toLowerCase(),
+      id: { not: id }
+    }
+  })
+
+  if (existingUser) {
+    return NextResponse.json({ error: "Email already in use by another user" }, { status: 400 })
+  }
+
+  // Check if email is being changed
+  const emailChanged = userToUpdate.email !== email.toLowerCase().trim()
+  const nameChanged = userToUpdate.name !== name.trim()
+
+  // Update user
+  const updatedUser = await prisma.user.update({
+    where: { id },
+    data: {
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      sessionVersion: { increment: 1 }, // Increment to invalidate all existing sessions
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      profileVerified: true,
+    }
+  })
+
+  // No need to delete sessions anymore since we're using sessionVersion invalidation
+
+  return NextResponse.json({
+    ...updatedUser,
+    userSignedOut: emailChanged || nameChanged // Include this flag so frontend knows to show appropriate message
+  })
+}
+
 // DELETE /api/admin/users/[id]
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()

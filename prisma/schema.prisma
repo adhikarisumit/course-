@@ -21,6 +21,7 @@ model User {
   role          String    @default("student") // student, admin
   isFrozen      Boolean   @default(false) // For admin freeze/unfreeze functionality
   profileVerified Boolean @default(false) // Super admin verified profile
+  sessionVersion Int       @default(0) // For JWT invalidation when profile changes
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   

@@ -31,10 +31,34 @@ export default async function PortalLayout({
         dangerouslySetInnerHTML={{
           __html: `
             document.addEventListener('DOMContentLoaded', function () {
-              document.body.addEventListener('copy', function(e) { e.preventDefault(); });
-              document.body.addEventListener('cut', function(e) { e.preventDefault(); });
-              document.body.addEventListener('paste', function(e) { e.preventDefault(); });
-              document.body.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+              document.body.addEventListener('copy', function(e) {
+                // Allow copy in profile edit modal
+                if (e.target && e.target.closest('[data-profile-edit-modal]')) {
+                  return;
+                }
+                e.preventDefault();
+              });
+              document.body.addEventListener('cut', function(e) {
+                // Allow cut in profile edit modal
+                if (e.target && e.target.closest('[data-profile-edit-modal]')) {
+                  return;
+                }
+                e.preventDefault();
+              });
+              document.body.addEventListener('paste', function(e) {
+                // Allow paste in profile edit modal
+                if (e.target && e.target.closest('[data-profile-edit-modal]')) {
+                  return;
+                }
+                e.preventDefault();
+              });
+              document.body.addEventListener('contextmenu', function(e) {
+                // Allow context menu in profile edit modal
+                if (e.target && e.target.closest('[data-profile-edit-modal]')) {
+                  return;
+                }
+                e.preventDefault();
+              });
             });
           `,
         }}

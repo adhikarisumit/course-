@@ -43,6 +43,116 @@ function DeleteUserButton({ userId, userRole, currentUserRole, onDeleted }: { us
   );
 }
 
+function EditUserButton({ user, currentUserRole, onUpdated }: { 
+  user: User, 
+  currentUserRole: string, 
+  onUpdated: () => void 
+}) {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: user.name || "",
+    email: user.email,
+  });
+
+  // Only allow admins to edit students, and super admins to edit anyone except other super admins
+  const canEdit = (currentUserRole === "super" && user.role !== "super") || 
+                  (currentUserRole === "admin" && user.role === "student");
+  
+  if (!canEdit) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const response = await fetch(`/api/admin/users/${user.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to update user");
+      }
+
+      const data = await response.json();
+
+      if (data.userSignedOut) {
+        toast.success(`User details updated successfully! ${user.name || user.email} has been signed out and must sign in again.`);
+      } else {
+        toast.success("User details updated successfully!");
+      }
+
+      setOpen(false);
+      onUpdated();
+    } catch (error) {
+      console.error("Error updating user:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to update user");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          Edit User
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit User</DialogTitle>
+          <DialogDescription>
+            Update user information. Changes will be saved immediately.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit}>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="col-span-3"
+                placeholder="Enter full name"
+                required
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="email" className="text-right">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="col-span-3"
+                placeholder="Enter email address"
+                required
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? "Saving..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function VerifyProfileButton({ userId, userRole, currentUserRole, isVerified, onVerified }: { 
   userId: string, 
   userRole: string, 
@@ -487,10 +597,14 @@ export default function AdminUsersPage() {
                                   </Button>
                                 }
                               />
+                              <EditUserButton user={user} currentUserRole={session?.user?.role || ""} onUpdated={loadUsers} />
                               <DeleteUserButton userId={user.id} userRole={user.role} currentUserRole={session?.user?.role || ""} onDeleted={loadUsers} />
                             </>
                           ) : (
-                            <DeleteUserButton userId={user.id} userRole={user.role} currentUserRole={session?.user?.role || ""} onDeleted={loadUsers} />
+                            <>
+                              <EditUserButton user={user} currentUserRole={session?.user?.role || ""} onUpdated={loadUsers} />
+                              <DeleteUserButton userId={user.id} userRole={user.role} currentUserRole={session?.user?.role || ""} onDeleted={loadUsers} />
+                            </>
                           )}
                         </div>
                       </div>
@@ -652,6 +766,7 @@ export default function AdminUsersPage() {
                           </DialogContent>
                         </Dialog>
                         )}
+                        <EditUserButton user={user} currentUserRole={session?.user?.role || ""} onUpdated={loadUsers} />
                         <DeleteUserButton userId={user.id} userRole={user.role} currentUserRole={session?.user?.role || ""} onDeleted={loadUsers} />
                         {/* No chat or delete chat for admins */}
                       </div>

@@ -8,6 +8,7 @@ import { Mail, Calendar, Shield, User as UserIcon, CheckCircle } from "lucide-re
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import prisma from "@/lib/prisma"
+import { ProfileEdit } from "@/components/profile-edit"
 
 export default async function ProfilePage() {
   const session = await auth()
@@ -55,7 +56,16 @@ export default async function ProfilePage() {
           <h1 className="text-3xl font-bold mb-2">My Profile</h1>
           <p className="text-muted-foreground">Manage your account information and view your learning progress</p>
         </div>
-        {/* Quick Actions */}
+        <div className="flex gap-2">
+          <ProfileEdit
+            user={{
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              image: user.image,
+            }}
+          />
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
