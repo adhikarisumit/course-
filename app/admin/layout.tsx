@@ -34,7 +34,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     if (status === "loading") return
-    
+
+    // Ensure admin user exists (backup safety measure)
+    fetch('/api/ensure-admin')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('✅ Admin user verified/created')
+        }
+      })
+      .catch(error => {
+        console.warn('⚠️ Could not verify admin user:', error)
+      })
+
     if (!session?.user) {
       router.push("/auth/signin")
       return
@@ -85,6 +97,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </Link>
         <Link href="/admin/mentors" className={linkClass} onClick={handleClick}>
           Mentors
+        </Link>
+        <Link href="/admin/resource-purchases" className={linkClass} onClick={handleClick}>
+          Resource Purchases
         </Link>
         <Link href="/admin/analytics" className={linkClass} onClick={handleClick}>
           Analytics

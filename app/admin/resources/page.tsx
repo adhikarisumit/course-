@@ -286,7 +286,7 @@ export default function AdminResourcesPage() {
           userEmail: grantForm.userEmail,
           resourceId: grantForm.resourceId,
           amount: 0, // Free access granted by admin
-          currency: "usd",
+          currency: "jpy",
           status: "completed"
         }),
       })
@@ -508,7 +508,7 @@ export default function AdminResourcesPage() {
 
                 {!formData.isFree && (
                   <div className="space-y-2">
-                    <Label htmlFor="price">Price ($)</Label>
+                    <Label htmlFor="price">Price (¥)</Label>
                     <Input
                       id="price"
                       type="number"
@@ -614,7 +614,7 @@ export default function AdminResourcesPage() {
                         {resource.isFree ? (
                           <Badge variant="secondary" className="text-xs">Free</Badge>
                         ) : (
-                          <Badge variant="default" className="text-xs">${resource.price}</Badge>
+                          <Badge variant="default" className="text-xs">¥{resource.price}</Badge>
                         )}
                       </TableCell>
                       <TableCell>
@@ -759,7 +759,7 @@ export default function AdminResourcesPage() {
                   <SelectContent>
                     {paidResources.map((resource) => (
                       <SelectItem key={resource.id} value={resource.id}>
-                        {resource.title} (${resource.price})
+                        {resource.title} (¥{resource.price})
                       </SelectItem>
                     ))}
                   </SelectContent>

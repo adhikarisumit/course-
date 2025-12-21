@@ -73,7 +73,7 @@ Please activate my access. I have attached the payment receipt.
 
 Resource Details:
 - Title: ${resource.title}
-- Price: $${resource.price}
+- Price: ¥${resource.price}
 - Type: ${resource.type}`
 
     const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
@@ -134,7 +134,7 @@ Resource Details:
           <CardTitle className="flex items-center gap-2">
             {resource.title}
             <span className="text-lg font-normal text-muted-foreground">
-              - ${resource.price}
+              - ¥{resource.price}
             </span>
           </CardTitle>
           <CardDescription>{resource.description}</CardDescription>
@@ -143,7 +143,7 @@ Resource Details:
           <div className="bg-muted p-4 rounded-lg">
             <h3 className="font-semibold mb-2">Payment Instructions</h3>
             <div className="space-y-2 text-sm">
-              <p>1. Send payment of <strong>${resource.price}</strong> via PayPay</p>
+              <p>1. Send payment of <strong>¥{resource.price}</strong> via PayPay</p>
               <p>2. Use PayPay ID: <code className="bg-background px-2 py-1 rounded">aatit</code></p>
               <p>3. Send confirmation email with payment receipt</p>
               <p>4. Access will be activated within 24 hours</p>

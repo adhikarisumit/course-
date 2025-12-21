@@ -1,41 +1,27 @@
 import { NextRequest, NextResponse } from "next/server"
-import prisma from "@/lib/prisma"
+import { getCachedResources, PerformanceMonitor } from "@/lib/performance"
 
 export async function GET(request: NextRequest) {
+  const monitor = PerformanceMonitor.getInstance()
+  const endTimer = monitor.startTimer('resources-api')
+
   try {
     const { searchParams } = new URL(request.url)
     const types = searchParams.getAll("type")
-    const category = searchParams.get("category")
-    const isFree = searchParams.get("isFree")
+    const category = searchParams.get("category") || undefined
+    const isFree = searchParams.get("isFree") === "true" ? true : searchParams.get("isFree") === "false" ? false : undefined
 
-    const where: any = {
-      isActive: true,
-    }
+    // Use cached version for better performance
+    const resources = await getCachedResources(types, category, isFree)
 
-    if (types.length > 0) {
-      where.type = {
-        in: types
-      }
-    }
+    // Cache for 5 minutes with stale-while-revalidate
+    const response = NextResponse.json(resources)
+    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
 
-    if (category) {
-      where.category = {
-        contains: category,
-        mode: "insensitive",
-      }
-    }
-
-    if (isFree !== null) {
-      where.isFree = isFree === "true"
-    }
-
-    const resources = await prisma.resource.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-    })
-
-    return NextResponse.json(resources)
+    endTimer()
+    return response
   } catch (error) {
+    endTimer()
     console.error("Error fetching resources:", error)
     return NextResponse.json(
       { message: "Internal server error" },

@@ -263,7 +263,7 @@ model ResourcePurchase {
   userId     String
   resourceId String
   amount     Float
-  currency   String   @default("usd")
+  currency   String   @default("jpy")
   status     String   @default("completed") // For future payment processing
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

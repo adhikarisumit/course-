@@ -160,7 +160,7 @@ export default function CheatSheetsPage() {
                       </Badge>
                     ) : (
                       <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300">
-                        ${resource.price}
+                        ¥{resource.price}
                       </Badge>
                     )}
                   </div>
@@ -180,7 +180,7 @@ export default function CheatSheetsPage() {
                       ) : (
                         <>
                           <Download className="mr-2 h-4 w-4" />
-                          Purchase - ${resource.price}
+                          Purchase - ¥{resource.price}
                         </>
                       )
                     ) : (

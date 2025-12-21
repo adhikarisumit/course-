@@ -30,11 +30,47 @@ const nextConfig = {
       '@radix-ui/react-accordion',
       '@radix-ui/react-select',
       '@radix-ui/react-tabs',
+      'sonner',
+      'date-fns',
     ],
   },
+  turbopack: {},
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 2,
+  },
+  // Performance optimizations
+  webpack: (config, { dev, isServer }) => {
+    // Optimize bundle splitting
+    if (!dev && !isServer) {
+      config.optimization.splitChunks.chunks = 'all'
+      config.optimization.splitChunks.cacheGroups = {
+        ...config.optimization.splitChunks.cacheGroups,
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all',
+          priority: 10,
+        },
+        radix: {
+          test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
+          name: 'radix-ui',
+          chunks: 'all',
+          priority: 20,
+        },
+      }
+    }
+
+    // Add performance hints
+    if (!dev) {
+      config.performance = {
+        hints: 'warning',
+        maxEntrypointSize: 512000,
+        maxAssetSize: 512000,
+      }
+    }
+
+    return config
   },
 }
 

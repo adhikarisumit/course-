@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
 
+// Cache analytics for 5 minutes to reduce database load
 export async function GET(_request: NextRequest) {
   try {
     const session = await auth()
@@ -19,178 +20,159 @@ export async function GET(_request: NextRequest) {
     const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
     const lastDayLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
 
-    // Get all enrollments with course data
-    const allEnrollments = await prisma.enrollment.findMany({
-      include: {
-        course: true,
-      },
-    })
-
-    // Get enrollments this month
-    const enrollmentsThisMonth = await prisma.enrollment.count({
-      where: {
-        enrolledAt: {
-          gte: firstDayThisMonth,
-        },
-      },
-    })
-
-    // Get enrollments last month
-    const enrollmentsLastMonth = await prisma.enrollment.count({
-      where: {
-        enrolledAt: {
-          gte: firstDayLastMonth,
-          lte: lastDayLastMonth,
-        },
-      },
-    })
-
-    // Calculate revenue
-    const revenueThisMonth = allEnrollments
-      .filter((e) => new Date(e.enrolledAt) >= firstDayThisMonth)
-      .reduce((sum, e) => sum + e.course.price, 0)
-
-    const revenueLastMonth = allEnrollments
-      .filter(
-        (e) =>
-          new Date(e.enrolledAt) >= firstDayLastMonth &&
-          new Date(e.enrolledAt) <= lastDayLastMonth
-      )
-      .reduce((sum, e) => sum + e.course.price, 0)
-
-    const totalRevenue = allEnrollments.reduce(
-      (sum, e) => sum + e.course.price,
-      0
-    )
-
-    // Get users
-    const allUsers = await prisma.user.findMany()
-    const usersThisMonth = allUsers.filter(
-      (u) => new Date(u.createdAt) >= firstDayThisMonth
-    ).length
-    const usersLastMonth = allUsers.filter(
-      (u) =>
-        new Date(u.createdAt) >= firstDayLastMonth &&
-        new Date(u.createdAt) <= lastDayLastMonth
-    ).length
-
-    const usersByRole = {
-      admin: allUsers.filter((u) => u.role === "admin").length,
-      student: allUsers.filter((u) => u.role === "student").length,
-    }
-
-    // Get courses
-    const allCourses = await prisma.course.findMany({
-      include: {
-        lessons: true,
-        enrollments: true,
-      },
-    })
-
-    const publishedCourses = allCourses.filter(
-      (c) => c.isPublished === true
-    ).length
-    const averagePrice =
-      allCourses.length > 0
-        ? allCourses.reduce((sum, c) => sum + c.price, 0) / allCourses.length
-        : 0
-
-    // Calculate completion stats based on enrollment.completed field
-    const completedEnrollments = allEnrollments.filter(e => e.completed).length
-    const inProgressEnrollments = allEnrollments.filter(e => !e.completed && e.progress > 0).length
-    const notStartedEnrollments = allEnrollments.filter(e => e.progress === 0).length
-
-    const completionRate =
-      allEnrollments.length > 0
-        ? (completedEnrollments / allEnrollments.length) * 100
-        : 0
-
-    // Top courses by enrollments
-    const topCourses = allCourses
-      .map((course) => {
-        const enrollments = course.enrollments.length
-        const revenue = enrollments * course.price
-        
-        // Calculate completion rate for this course
-        const courseCompleted = course.enrollments.filter(e => e.completed).length
-        const completionRate =
-          enrollments > 0 ? (courseCompleted / enrollments) * 100 : 0
-
-        return {
-          id: course.id,
-          title: course.title,
-          enrollments,
-          revenue,
-          completionRate,
+    // Use Promise.all for parallel queries to improve performance
+    const [
+      enrollmentsThisMonth,
+      enrollmentsLastMonth,
+      totalEnrollments,
+      enrollmentsWithCoursesThisMonth,
+      enrollmentsWithCoursesLastMonth,
+      allEnrollmentsWithCourses,
+      usersThisMonth,
+      usersLastMonth,
+      totalUsers,
+      usersByRole,
+      courseStats,
+      resourceStats,
+      paymentStats
+    ] = await Promise.all([
+      // Enrollment counts
+      prisma.enrollment.count({
+        where: { enrolledAt: { gte: firstDayThisMonth } }
+      }),
+      prisma.enrollment.count({
+        where: {
+          enrolledAt: { gte: firstDayLastMonth, lte: lastDayLastMonth }
         }
-      })
-      .sort((a, b) => b.enrollments - a.enrollments)
-      .slice(0, 5)
+      }),
+      prisma.enrollment.count(),
 
-    // Calculate growth percentages
-    const enrollmentGrowth =
-      enrollmentsLastMonth > 0
-        ? ((enrollmentsThisMonth - enrollmentsLastMonth) /
-            enrollmentsLastMonth) *
-          100
-        : enrollmentsThisMonth > 0
-        ? 100
-        : 0
+      // Revenue calculations using proper joins and aggregation
+      prisma.enrollment.findMany({
+        where: { enrolledAt: { gte: firstDayThisMonth } },
+        include: { course: { select: { price: true } } }
+      }),
+      prisma.enrollment.findMany({
+        where: {
+          enrolledAt: { gte: firstDayLastMonth, lte: lastDayLastMonth }
+        },
+        include: { course: { select: { price: true } } }
+      }),
+      prisma.enrollment.findMany({
+        include: { course: { select: { price: true } } }
+      }),
 
-    const revenueGrowth =
-      revenueLastMonth > 0
-        ? ((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 100
-        : revenueThisMonth > 0
-        ? 100
-        : 0
+      // User counts
+      prisma.user.count({
+        where: { createdAt: { gte: firstDayThisMonth } }
+      }),
+      prisma.user.count({
+        where: {
+          createdAt: { gte: firstDayLastMonth, lte: lastDayLastMonth }
+        }
+      }),
+      prisma.user.count(),
 
-    const userGrowth =
-      usersLastMonth > 0
-        ? ((usersThisMonth - usersLastMonth) / usersLastMonth) * 100
-        : usersThisMonth > 0
-        ? 100
-        : 0
+      // Users by role
+      prisma.user.groupBy({
+        by: ['role'],
+        _count: { role: true }
+      }),
+
+      // Course statistics
+      prisma.course.aggregate({
+        where: { isPublished: true },
+        _count: { id: true },
+        _avg: { price: true }
+      }),
+
+      // Resource statistics
+      prisma.resource.aggregate({
+        _count: { id: true },
+        where: { isActive: true }
+      }),
+
+      // Payment statistics
+      prisma.payment.count()
+    ])
+
+    // Calculate revenue from enrollment data
+    const revenueThisMonth = enrollmentsWithCoursesThisMonth.reduce((sum, enrollment) => sum + (enrollment.course?.price || 0), 0)
+    const revenueLastMonth = enrollmentsWithCoursesLastMonth.reduce((sum, enrollment) => sum + (enrollment.course?.price || 0), 0)
+    const totalRevenueAmount = allEnrollmentsWithCourses.reduce((sum, enrollment) => sum + (enrollment.course?.price || 0), 0)
+
+    // Calculate completion stats efficiently
+    const completionStats = await prisma.enrollment.aggregate({
+      _count: {
+        id: true,
+      },
+      where: { completed: true }
+    })
+
+    const inProgressStats = await prisma.enrollment.aggregate({
+      _count: {
+        id: true,
+      },
+      where: {
+        completed: false,
+        progress: { gt: 0 }
+      }
+    })
+
+    // Format users by role
+    const formattedUsersByRole = usersByRole.reduce((acc, curr) => {
+      acc[curr.role] = curr._count.role
+      return acc
+    }, {} as Record<string, number>)
 
     const analytics = {
-      revenue: {
-        total: totalRevenue,
-        thisMonth: revenueThisMonth,
-        lastMonth: revenueLastMonth,
-        growth: revenueGrowth,
-      },
       enrollments: {
-        total: allEnrollments.length,
         thisMonth: enrollmentsThisMonth,
         lastMonth: enrollmentsLastMonth,
-        growth: enrollmentGrowth,
+        total: totalEnrollments,
+        growth: enrollmentsLastMonth > 0 ?
+          ((enrollmentsThisMonth - enrollmentsLastMonth) / enrollmentsLastMonth * 100) : 0
+      },
+      revenue: {
+        thisMonth: revenueThisMonth,
+        lastMonth: revenueLastMonth,
+        total: totalRevenueAmount,
+        growth: revenueLastMonth > 0 ?
+          ((revenueThisMonth - revenueLastMonth) / revenueLastMonth * 100) : 0
       },
       users: {
-        total: allUsers.length,
         thisMonth: usersThisMonth,
         lastMonth: usersLastMonth,
-        growth: userGrowth,
-        byRole: usersByRole,
+        total: totalUsers,
+        byRole: formattedUsersByRole
       },
       courses: {
-        total: allCourses.length,
-        published: publishedCourses,
-        draft: allCourses.length - publishedCourses,
-        averagePrice,
+        published: courseStats._count.id,
+        averagePrice: courseStats._avg.price || 0
+      },
+      resources: {
+        active: resourceStats._count.id
       },
       completion: {
-        rate: completionRate,
-        completed: completedEnrollments,
-        inProgress: inProgressEnrollments,
-        notStarted: notStartedEnrollments,
+        completed: completionStats._count.id,
+        inProgress: inProgressStats._count.id,
+        completionRate: totalEnrollments > 0 ?
+          (completionStats._count.id / totalEnrollments * 100) : 0
       },
-      topCourses,
+      payments: {
+        total: paymentStats
+      }
     }
 
-    return NextResponse.json(analytics)
+    // Cache analytics for 2 minutes (analytics don't need to be real-time)
+    const response = NextResponse.json(analytics)
+    response.headers.set('Cache-Control', 'private, max-age=120')
+
+    return response
   } catch (error) {
     console.error("Error fetching analytics:", error)
     return NextResponse.json(
-      { error: "Failed to fetch analytics" },
+      { error: "Internal server error" },
       { status: 500 }
     )
   }
