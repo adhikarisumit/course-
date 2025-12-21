@@ -21,7 +21,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { LogOut, User, LayoutDashboard, Menu } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { MessageCircle, LayoutDashboard, Menu, User, LogOut } from "lucide-react"
 import { useSession, signOut } from "next-auth/react"
 
 const SUPER_ADMIN_EMAIL = "sumitadhikari2341@gmail.com"

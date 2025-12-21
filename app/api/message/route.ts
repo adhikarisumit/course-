@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 
-// GET /api/message?userId=otherUserId
+// GET /api/message?userId=otherUserId or /api/message?unread=true
 export async function GET(req: NextRequest) {
   const session = await auth();
   if (!session?.user) {
@@ -11,6 +11,19 @@ export async function GET(req: NextRequest) {
   const currentUserId = session.user.id;
   const { searchParams } = new URL(req.url);
   const userId = searchParams.get("userId");
+  const unread = searchParams.get("unread");
+
+  if (unread === "true") {
+    // Get count of unread messages for current user
+    const unreadCount = await prisma.message.count({
+      where: {
+        receiverId: currentUserId,
+        read: false,
+      },
+    });
+    return NextResponse.json({ unreadCount });
+  }
+
   if (!userId) {
     return NextResponse.json({ error: "Missing userId" }, { status: 400 });
   }

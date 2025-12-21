@@ -49,6 +49,21 @@ export function ChatModal({ open, onOpenChange, userId, currentUserId, userName 
     };
   }, [open, userId]);
 
+  // Mark messages as read when modal opens
+  useEffect(() => {
+    if (open && messages.length > 0) {
+      const unreadMessages = messages.filter(msg => msg.receiverId === currentUserId && !msg.read);
+      if (unreadMessages.length > 0) {
+        // Mark messages as read
+        fetch("/api/message/mark-read", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId }),
+        }).catch(console.error);
+      }
+    }
+  }, [open, messages, currentUserId, userId]);
+
   // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

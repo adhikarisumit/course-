@@ -236,9 +236,15 @@ export default function AdminUsersPage() {
   const [copied, setCopied] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({})
 
   useEffect(() => {
     loadUsers()
+    loadUnreadCounts()
+
+    // Refresh unread counts every 30 seconds
+    const interval = setInterval(loadUnreadCounts, 30000)
+    return () => clearInterval(interval)
   }, [])
 
   const loadUsers = async () => {
@@ -254,6 +260,18 @@ export default function AdminUsersPage() {
       toast.error("Failed to load users")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadUnreadCounts = async () => {
+    try {
+      const response = await fetch("/api/admin/messages/unread-counts")
+      if (response.ok) {
+        const data = await response.json()
+        setUnreadCounts(data.unreadCounts || {})
+      }
+    } catch (error) {
+      console.error("Failed to load unread counts:", error)
     }
   }
 
@@ -590,10 +608,19 @@ export default function AdminUsersPage() {
                             <>
                               <ChatModalWrapper
                                 user={{ id: user.id, name: user.name || user.email }}
+                                onMessageRead={loadUnreadCounts}
                                 trigger={
-                                  <Button variant="secondary" size="sm" className="w-full sm:w-auto">
+                                  <Button variant="secondary" size="sm" className="w-full sm:w-auto relative">
                                     <Mail className="h-4 w-4 mr-2" />
                                     Message
+                                    {unreadCounts[user.id] > 0 && (
+                                      <Badge
+                                        variant="destructive"
+                                        className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                                      >
+                                        {unreadCounts[user.id] > 99 ? "99+" : unreadCounts[user.id]}
+                                      </Badge>
+                                    )}
                                   </Button>
                                 }
                               />
