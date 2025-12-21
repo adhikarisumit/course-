@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator"
 
 import { SignOutButton } from "@/components/sign-out-button"
 import ClientChatWithTeacherModalWrapper from "./client-chat-with-teacher-modal-wrapper"
+import NoticeBoard from "@/components/notice-board"
 
 export default async function DashboardPage() {
   const session = await auth()
@@ -147,6 +148,11 @@ export default async function DashboardPage() {
               <div className="text-2xl font-bold">{stats.totalHours}h</div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Notice Board */}
+        <div className="mb-8">
+          <NoticeBoard />
         </div>
 
         {/* Enrolled Courses */}
