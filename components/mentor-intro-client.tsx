@@ -2,12 +2,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, Users, BookOpen, Star, MessageCircle } from "lucide-react";
+import { GraduationCap, Users, BookOpen, Star } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSession } from "next-auth/react";
-import { ChatModal } from "@/components/chat-modal";
 
 export interface Mentor {
   id: string;
@@ -27,46 +26,10 @@ export interface Mentor {
 export default function MentorIntroClient({ mentors, totalStudents, totalCourses, avgRating }: { mentors: Mentor[], totalStudents: number, totalCourses: number, avgRating: string }) {
   const { data: session } = useSession();
   const [openBio, setOpenBio] = useState<{ [id: string]: boolean }>({});
-  const [chatModalOpen, setChatModalOpen] = useState<{ [id: string]: boolean }>({});
-  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
 
   const toggleBio = (id: string) => {
     setOpenBio((prev) => ({ ...prev, [id]: !prev[id] }));
   };
-
-  const toggleChatModal = (mentorId: string) => {
-    setChatModalOpen((prev) => ({ ...prev, [mentorId]: !prev[mentorId] }));
-  };
-
-  // Load unread counts for mentors
-  useEffect(() => {
-    if (session?.user) {
-      loadUnreadCounts();
-      // Refresh unread counts every 30 seconds
-      const interval = setInterval(loadUnreadCounts, 30000);
-      return () => clearInterval(interval);
-    }
-  }, [session]);
-
-  const loadUnreadCounts = async () => {
-    if (!session?.user) return;
-    try {
-      const response = await fetch("/api/message/unread-counts");
-      if (response.ok) {
-        const data = await response.json();
-        setUnreadCounts(data.unreadCounts || {});
-      }
-    } catch (error) {
-      console.error("Failed to load unread counts:", error);
-    }
-  };
-
-  // Refresh unread counts when chat modal opens or closes
-  useEffect(() => {
-    if (Object.values(chatModalOpen).some(open => open)) {
-      loadUnreadCounts();
-    }
-  }, [chatModalOpen]);
 
   return (
     <section id="mentor" className="py-16 md:py-24 bg-gradient-to-br from-background via-primary/5 to-background">
@@ -171,34 +134,6 @@ export default function MentorIntroClient({ mentors, totalStudents, totalCourses
                             View Courses
                           </Link>
                         </Button>
-                        {session?.user && (
-                          <>
-                            <Button
-                              onClick={() => toggleChatModal(mentor.id)}
-                              className="w-full relative"
-                              size="sm"
-                              variant="outline"
-                            >
-                              <MessageCircle className="w-4 h-4 mr-2" />
-                              Chat
-                              {unreadCounts[mentor.id] > 0 && (
-                                <Badge
-                                  variant="destructive"
-                                  className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
-                                >
-                                  {unreadCounts[mentor.id] > 99 ? "99+" : unreadCounts[mentor.id]}
-                                </Badge>
-                              )}
-                            </Button>
-                            <ChatModal
-                              open={chatModalOpen[mentor.id] || false}
-                              onOpenChange={() => toggleChatModal(mentor.id)}
-                              userId={mentor.id}
-                              currentUserId={session.user.id}
-                              userName={mentor.name}
-                            />
-                          </>
-                        )}
                       </div>
                     </div>
                   </CardContent>
