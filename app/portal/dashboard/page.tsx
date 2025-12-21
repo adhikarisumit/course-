@@ -55,105 +55,66 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6 md:py-8">
-        {/* Header with Profile */}
-        <div className="mb-6 md:mb-8 flex flex-col lg:flex-row items-start justify-between gap-4">
-          <div className="w-full lg:flex-1">
+        {/* Header with Profile and Notice Board */}
+        <div className="mb-6 md:mb-8 flex flex-col xl:flex-row items-start gap-6">
+          <div className="w-full xl:flex-1 ml-4 xl:ml-0">
             <h1 className="text-2xl md:text-3xl font-bold mb-2">Welcome back, {session.user.name}!</h1>
             <p className="text-sm md:text-base text-muted-foreground">Track your learning progress and continue your courses</p>
           </div>
-          
-          {/* Quick Actions Card */}
-          <Card className="w-full lg:min-w-[280px] lg:max-w-[280px]">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4 mb-4">
-                <Avatar className="h-16 w-16">
-                  <AvatarImage src={session.user.image || undefined} alt={session.user.name || "User"} />
-                  <AvatarFallback className="text-xl">{initials}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold truncate">{session.user.name}</h3>
-                  <p className="text-sm text-muted-foreground truncate">{session.user.email}</p>
+
+          {/* Notice Board */}
+          <div className="w-full xl:flex-1">
+            <NoticeBoard compact />
+          </div>
+
+          {/* Profile Card */}
+          <div className="w-full xl:flex-[0.5]">
+            <Card className="w-full">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <Avatar className="h-16 w-16">
+                    <AvatarImage src={session.user.image || undefined} alt={session.user.name || "User"} />
+                    <AvatarFallback className="text-xl">{initials}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold truncate">{session.user.name}</h3>
+                    <p className="text-sm text-muted-foreground truncate">{session.user.email}</p>
+                  </div>
                 </div>
-              </div>
-              
-              <Separator className="my-4" />
-              
-              <div className="space-y-2">
-                {/* Chat with Teacher button for students */}
-                {session.user.role === "student" && admin && (
-                  <ClientChatWithTeacherModalWrapper
-                    currentUserId={session.user.id}
-                    teacherId={admin.id}
-                    teacherName={admin.name || "Teacher"}
-                  />
-                )}
-                <Button asChild variant="outline" className="w-full justify-start">
-                  <Link href="/portal/profile">
-                    <User className="mr-2 h-4 w-4" />
-                    View Profile
-                  </Link>
-                </Button>
-                {session.user.role === "admin" && (
+
+                <Separator className="my-4" />
+
+                <div className="space-y-2">
+                  {/* Chat with Teacher button for students */}
+                  {session.user.role === "student" && admin && (
+                    <ClientChatWithTeacherModalWrapper
+                      currentUserId={session.user.id}
+                      teacherId={admin.id}
+                      teacherName={admin.name || "Teacher"}
+                    />
+                  )}
                   <Button asChild variant="outline" className="w-full justify-start">
-                    <Link href="/admin/courses">
-                      <Settings className="mr-2 h-4 w-4" />
-                      Manage Courses
+                    <Link href="/portal/profile">
+                      <User className="mr-2 h-4 w-4" />
+                      View Profile
                     </Link>
                   </Button>
-                )}
-                <SignOutButton />
-              </div>
-            </CardContent>
-          </Card>
+                  {session.user.role === "admin" && (
+                    <Button asChild variant="outline" className="w-full justify-start">
+                      <Link href="/admin/courses">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Manage Courses
+                      </Link>
+                    </Button>
+                  )}
+                  <SignOutButton />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Courses</CardTitle>
-              <BookOpen className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalCourses}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">In Progress</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.inProgress}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Completed</CardTitle>
-              <Award className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.completed}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Learning Hours</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalHours}h</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Notice Board */}
-        <div className="mb-8">
-          <NoticeBoard />
-        </div>
 
         {/* Enrolled Courses */}
         <Card>

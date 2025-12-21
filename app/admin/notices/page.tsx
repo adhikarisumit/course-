@@ -157,14 +157,21 @@ export default function NoticesPage() {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-64">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading notices...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 p-4 md:p-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Notice Board Management</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">Notice Board Management</h1>
           <p className="text-muted-foreground">Create and manage notices for students</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -172,12 +179,12 @@ export default function NoticesPage() {
             <Button onClick={() => {
               setEditingNotice(null);
               setFormData({ title: '', content: '', priority: 'normal', isPublished: false });
-            }}>
+            }} className="w-full sm:w-auto">
               <Plus className="mr-2 h-4 w-4" />
               Create Notice
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
             <form onSubmit={handleSubmit}>
               <DialogHeader>
                 <DialogTitle>{editingNotice ? 'Edit Notice' : 'Create Notice'}</DialogTitle>
@@ -203,7 +210,8 @@ export default function NoticesPage() {
                     value={formData.content}
                     onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                     placeholder="Enter notice content"
-                    rows={6}
+                    rows={4}
+                    className="resize-none"
                     required
                   />
                 </div>
@@ -226,12 +234,16 @@ export default function NoticesPage() {
                     id="isPublished"
                     checked={formData.isPublished}
                     onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
+                    className="rounded"
                   />
                   <Label htmlFor="isPublished">Publish immediately</Label>
                 </div>
               </div>
-              <DialogFooter>
-                <Button type="submit">
+              <DialogFooter className="flex flex-col sm:flex-row gap-2">
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="w-full sm:w-auto">
+                  Cancel
+                </Button>
+                <Button type="submit" className="w-full sm:w-auto">
                   {editingNotice ? 'Update Notice' : 'Create Notice'}
                 </Button>
               </DialogFooter>
@@ -244,41 +256,48 @@ export default function NoticesPage() {
         {notices.map((notice) => (
           <Card key={notice.id}>
             <CardHeader>
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CardTitle className="text-lg">{notice.title}</CardTitle>
-                    <Badge variant={getPriorityColor(notice.priority)}>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <CardTitle className="text-lg break-words">{notice.title}</CardTitle>
+                    <Badge variant={getPriorityColor(notice.priority)} className="shrink-0">
                       {notice.priority}
                     </Badge>
-                    <Badge variant={notice.isPublished ? 'default' : 'secondary'}>
+                    <Badge variant={notice.isPublished ? 'default' : 'secondary'} className="shrink-0">
                       {notice.isPublished ? 'Published' : 'Draft'}
                     </Badge>
                   </div>
-                  <CardDescription>
+                  <CardDescription className="break-words">
                     By {notice.author.name} • Created {new Date(notice.createdAt).toLocaleDateString()}
                     {notice.publishedAt && ` • Published ${new Date(notice.publishedAt).toLocaleDateString()}`}
                   </CardDescription>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 shrink-0">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => togglePublish(notice)}
+                    className="flex-1 sm:flex-none"
                   >
                     {notice.isPublished ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    <span className="sr-only sm:not-sr-only sm:ml-2">
+                      {notice.isPublished ? 'Unpublish' : 'Publish'}
+                    </span>
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleEdit(notice)}
+                    className="flex-1 sm:flex-none"
                   >
                     <Edit className="h-4 w-4" />
+                    <span className="sr-only sm:not-sr-only sm:ml-2">Edit</span>
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
                         <Trash2 className="h-4 w-4" />
+                        <span className="sr-only sm:not-sr-only sm:ml-2">Delete</span>
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
@@ -301,7 +320,7 @@ export default function NoticesPage() {
             </CardHeader>
             <CardContent>
               <div className="prose prose-sm max-w-none">
-                <p className="whitespace-pre-wrap">{notice.content}</p>
+                <p className="whitespace-pre-wrap break-words text-sm sm:text-base">{notice.content}</p>
               </div>
             </CardContent>
           </Card>
@@ -309,11 +328,11 @@ export default function NoticesPage() {
 
         {notices.length === 0 && (
           <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <div className="text-center">
+            <CardContent className="flex flex-col items-center justify-center py-8 sm:py-12 px-4">
+              <div className="text-center max-w-md">
                 <h3 className="text-lg font-semibold mb-2">No notices yet</h3>
-                <p className="text-muted-foreground mb-4">Create your first notice to get started.</p>
-                <Button onClick={() => setDialogOpen(true)}>
+                <p className="text-muted-foreground mb-4 text-sm sm:text-base">Create your first notice to get started.</p>
+                <Button onClick={() => setDialogOpen(true)} className="w-full sm:w-auto">
                   <Plus className="mr-2 h-4 w-4" />
                   Create Notice
                 </Button>
