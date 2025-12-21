@@ -1,4 +1,4 @@
-import { BookOpen, Target, Users, Award } from "lucide-react"
+import { BookOpen, Target, Users, Award, GraduationCap, Zap, Shield, Heart } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 
 export default function AboutPage() {
@@ -7,18 +7,18 @@ export default function AboutPage() {
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold mb-6">About Proteclink</h1>
         <p className="text-lg text-muted-foreground mb-12">
-          Your centralized platform for discovering quality online courses and educational resources from around the
-          web.
+          A comprehensive learning management platform designed to empower educators and students with modern tools for
+          exceptional online education experiences.
         </p>
 
         <div className="grid md:grid-cols-2 gap-6 mb-12">
           <Card>
             <CardContent className="pt-6">
-              <Target className="h-10 w-10 mb-4 text-primary" />
-              <h3 className="text-xl font-semibold mb-2">Our Mission</h3>
+              <GraduationCap className="h-10 w-10 mb-4 text-primary" />
+              <h3 className="text-xl font-semibold mb-2">Complete LMS Solution</h3>
               <p className="text-muted-foreground">
-                To make quality education accessible by curating the best online courses and learning resources in one
-                place.
+                Full-featured learning management system with course creation, student enrollment, progress tracking,
+                and comprehensive analytics.
               </p>
             </CardContent>
           </Card>
@@ -26,52 +26,83 @@ export default function AboutPage() {
           <Card>
             <CardContent className="pt-6">
               <Users className="h-10 w-10 mb-4 text-primary" />
-              <h3 className="text-xl font-semibold mb-2">Community Driven</h3>
+              <h3 className="text-xl font-semibold mb-2">Multi-Role Platform</h3>
               <p className="text-muted-foreground">
-                Built by learners, for learners. We continuously update our catalog based on community feedback and
-                trends.
+                Supports administrators, instructors, mentors, and students with role-based access and personalized
+                dashboards.
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="pt-6">
-              <BookOpen className="h-10 w-10 mb-4 text-primary" />
-              <h3 className="text-xl font-semibold mb-2">Curated Content</h3>
+              <Zap className="h-10 w-10 mb-4 text-primary" />
+              <h3 className="text-xl font-semibold mb-2">Modern Technology</h3>
               <p className="text-muted-foreground">
-                Every course and resource is carefully selected to ensure high quality and relevance to modern learning
-                needs.
+                Built with Next.js, TypeScript, and cutting-edge web technologies for fast, secure, and scalable
+                performance.
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="pt-6">
-              <Award className="h-10 w-10 mb-4 text-primary" />
-              <h3 className="text-xl font-semibold mb-2">Quality First</h3>
+              <Shield className="h-10 w-10 mb-4 text-primary" />
+              <h3 className="text-xl font-semibold mb-2">Secure & Reliable</h3>
               <p className="text-muted-foreground">
-                We prioritize courses from reputable platforms with proven track records of student success and
-                satisfaction.
+                Enterprise-grade security with authentication, data protection, and reliable infrastructure for
+                peace of mind.
               </p>
             </CardContent>
           </Card>
         </div>
 
         <div className="prose prose-neutral dark:prose-invert max-w-none">
-          <h2 className="text-2xl font-bold mb-4">Our Story</h2>
+          <h2 className="text-2xl font-bold mb-4">Our Vision</h2>
           <p className="text-muted-foreground mb-4">
-            Proteclink was created to solve a common problem: finding quality educational content scattered across the
-            internet. With thousands of courses available on various platforms, it can be overwhelming to discover the
-            right learning path.
+            Proteclink was built to revolutionize online education by providing institutions and educators with a
+            powerful, user-friendly platform that simplifies course management and enhances the learning experience.
           </p>
           <p className="text-muted-foreground mb-4">
-            We bring together courses from leading platforms like Udemy, Coursera, edX, Youtube and more, along with free
-            resources like study notes, documentation, and video tutorials. Our goal is to be your one-stop destination
-            for continuous learning.
+            Our platform combines intuitive course creation tools, robust student management, real-time communication,
+            and comprehensive analytics to create an ecosystem where education thrives. From individual instructors
+            to large educational institutions, Proteclink scales to meet diverse needs.
           </p>
+          <p className="text-muted-foreground mb-6">
+            We believe in the power of education to transform lives, and we're committed to providing the tools that
+            make exceptional online learning possible.
+          </p>
+
+          <h2 className="text-2xl font-bold mb-4">Key Features</h2>
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">For Educators</h3>
+              <ul className="text-muted-foreground space-y-1">
+                <li>• Course creation and management</li>
+                <li>• Student progress monitoring</li>
+                <li>• Interactive lessons and resources</li>
+                <li>• Communication tools</li>
+                <li>• Performance analytics</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-2">For Students</h3>
+              <ul className="text-muted-foreground space-y-1">
+                <li>• Personalized learning paths</li>
+                <li>• Progress tracking</li>
+                <li>• Resource library access</li>
+                <li>• Direct instructor communication</li>
+                <li>• Certificate generation</li>
+              </ul>
+            </div>
+          </div>
+
+          <h2 className="text-2xl font-bold mb-4">Built for the Future</h2>
           <p className="text-muted-foreground">
-            Whether you're a beginner starting your journey or an experienced professional looking to upskill, Proteclink
-            helps you find the perfect resources to achieve your learning goals.
+            Proteclink is designed with modern educational needs in mind. Our platform supports various content types,
+            adaptive learning, and integrates seamlessly with existing educational workflows. Whether you're teaching
+            programming, design, business, or any other subject, Proteclink provides the foundation for successful
+            online education.
           </p>
         </div>
       </div>
