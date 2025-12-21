@@ -159,7 +159,7 @@ async function exportPayments() {
   })
 
   const csv = [
-    ["ID", "Student Name", "Student Email", "Course", "Amount", "Currency", "Status", "Date", "Stripe Payment ID"],
+    ["ID", "Student Name", "Student Email", "Course", "Amount", "Currency", "Status", "Date", "Reference"],
     ...payments.map((payment) => [
       payment.id,
       payment.user.name || "N/A",
@@ -169,7 +169,7 @@ async function exportPayments() {
       payment.currency,
       payment.status,
       new Date(payment.createdAt).toLocaleDateString(),
-      payment.stripePaymentId || "N/A",
+      payment.stripePaymentId || "PayPal",
     ]),
   ]
     .map((row) => row.map((cell) => `"${cell}"`).join(","))

@@ -3,7 +3,7 @@ import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { BookOpen, Users, BarChart, UserCircle, Database, HardDrive, Table } from "lucide-react"
+import { BookOpen, Users, BarChart, UserCircle, Database, HardDrive, Table, DollarSign } from "lucide-react"
 import prisma from "@/lib/prisma"
 
 export const dynamic = 'force-dynamic'
@@ -103,6 +103,21 @@ export default async function AdminDashboard() {
           <CardContent>
             <Link href="/admin/enrollments">
               <Button className="w-full">Manage Enrollments</Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Payments</CardTitle>
+              <DollarSign className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <CardDescription>Record and manage PayPal payments</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/admin/payments">
+              <Button className="w-full">Manage Payments</Button>
             </Link>
           </CardContent>
         </Card>
