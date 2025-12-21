@@ -32,13 +32,6 @@ export default async function DashboardPage() {
     orderBy: { enrolledAt: "desc" },
   })
 
-  // Fetch active mentors for chat functionality
-  const mentors = await prisma.mentor.findMany({
-    where: { isActive: true },
-    orderBy: { displayOrder: "asc" },
-    take: 3, // Limit to 3 mentors for dashboard
-  })
-
   const stats = {
     totalCourses: enrollments.length,
     inProgress: enrollments.filter((e: any) => !e.completed).length,
@@ -218,48 +211,6 @@ export default async function DashboardPage() {
             )}
           </CardContent>
         </Card>
-
-        {/* Chat with Teachers */}
-        {mentors.length > 0 && (
-          <Card className="mt-8">
-            <CardHeader>
-              <CardTitle>Chat with Teachers</CardTitle>
-              <CardDescription>Get help and guidance from our expert educators</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {mentors.map((mentor: any) => (
-                  <Card key={mentor.id} className="p-4">
-                    <div className="flex items-center gap-3 mb-3">
-                      {mentor.image ? (
-                        <Image
-                          src={mentor.image}
-                          alt={mentor.name}
-                          width={40}
-                          height={40}
-                          className="rounded-full"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                          <User className="w-5 h-5" />
-                        </div>
-                      )}
-                      <div>
-                        <h4 className="font-semibold text-sm">{mentor.name}</h4>
-                        <p className="text-xs text-muted-foreground">{mentor.role}</p>
-                      </div>
-                    </div>
-                    <ClientChatWithTeacherModalWrapper
-                      currentUserId={session.user.id}
-                      teacherId={mentor.id}
-                      teacherName={mentor.name}
-                    />
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Student Resources Footer */}
         <Card className="mt-8">
