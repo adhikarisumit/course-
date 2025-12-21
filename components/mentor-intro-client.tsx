@@ -180,7 +180,7 @@ export default function MentorIntroClient({ mentors, totalStudents, totalCourses
                               variant="outline"
                             >
                               <MessageCircle className="w-4 h-4 mr-2" />
-                              Chat with Teacher
+                              Chat
                               {unreadCounts[mentor.id] > 0 && (
                                 <Badge
                                   variant="destructive"

@@ -21,9 +21,10 @@ interface ChatModalProps {
   userId: string; // The other user's id (student or admin)
   currentUserId: string; // The logged-in user's id
   userName?: string;
+  title?: string;
 }
 
-export function ChatModal({ open, onOpenChange, userId, currentUserId, userName }: ChatModalProps) {
+export function ChatModal({ open, onOpenChange, userId, currentUserId, userName, title }: ChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -102,7 +103,7 @@ export function ChatModal({ open, onOpenChange, userId, currentUserId, userName 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md w-full">
         <DialogHeader>
-          <DialogTitle>Chat with Teacher</DialogTitle>
+          <DialogTitle>{title || `Chat with ${userName || "User"}`}</DialogTitle>
         </DialogHeader>
         <ScrollArea className="h-80 py-2 pr-3">
           <div className="flex flex-col gap-2 pr-2">

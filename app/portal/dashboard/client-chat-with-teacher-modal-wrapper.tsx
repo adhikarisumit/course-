@@ -73,6 +73,7 @@ export default function ClientChatWithTeacherModalWrapper({ currentUserId, teach
         userId={teacherId}
         currentUserId={currentUserId}
         userName={teacherName}
+        title="Chat with Teacher"
       />
     </>
   );
