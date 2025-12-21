@@ -109,8 +109,8 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
       }
 
       if (formData.courseType === "live") {
-        payload.scheduledStartTime = formData.scheduledStartTime ? new Date(formData.scheduledStartTime).toISOString() : null
-        payload.scheduledEndTime = formData.scheduledEndTime ? new Date(formData.scheduledEndTime).toISOString() : null
+        payload.scheduledStartTime = formData.scheduledStartTime ? formData.scheduledStartTime + ':00Z' : null
+        payload.scheduledEndTime = formData.scheduledEndTime ? formData.scheduledEndTime + ':00Z' : null
       } else {
         payload.meetingLink = null
         payload.meetingPlatform = null
