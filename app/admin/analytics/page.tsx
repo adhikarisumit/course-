@@ -32,11 +32,17 @@ interface AnalyticsData {
     draft: number
     averagePrice: number
   }
+  resources: {
+    active: number
+  }
   completion: {
     rate: number
     completed: number
     inProgress: number
     notStarted: number
+  }
+  payments: {
+    total: number
   }
   topCourses: Array<{
     id: string

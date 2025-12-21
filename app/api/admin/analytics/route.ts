@@ -34,7 +34,8 @@ export async function GET(_request: NextRequest) {
       usersByRole,
       courseStats,
       resourceStats,
-      paymentStats
+      paymentStats,
+      topCoursesData
     ] = await Promise.all([
       // Enrollment counts
       prisma.enrollment.count({
@@ -93,7 +94,25 @@ export async function GET(_request: NextRequest) {
       }),
 
       // Payment statistics
-      prisma.payment.count()
+      prisma.payment.count(),
+
+      // Top courses by enrollment
+      prisma.course.findMany({
+        take: 5,
+        include: {
+          _count: {
+            select: { enrollments: true }
+          },
+          enrollments: {
+            select: {
+              course: { select: { price: true } }
+            }
+          }
+        },
+        orderBy: {
+          enrollments: { _count: 'desc' }
+        }
+      })
     ])
 
     // Calculate revenue from enrollment data
@@ -125,6 +144,15 @@ export async function GET(_request: NextRequest) {
       return acc
     }, {} as Record<string, number>)
 
+    // Format top courses
+    const topCourses = topCoursesData.map(course => ({
+      id: course.id,
+      title: course.title,
+      enrollments: course._count.enrollments,
+      revenue: course.enrollments.reduce((sum, enrollment) => sum + (enrollment.course?.price || 0), 0),
+      completionRate: 0 // TODO: Calculate completion rate
+    }))
+
     const analytics = {
       enrollments: {
         thisMonth: enrollmentsThisMonth,
@@ -144,24 +172,30 @@ export async function GET(_request: NextRequest) {
         thisMonth: usersThisMonth,
         lastMonth: usersLastMonth,
         total: totalUsers,
+        growth: usersLastMonth > 0 ?
+          ((usersThisMonth - usersLastMonth) / usersLastMonth * 100) : 0,
         byRole: formattedUsersByRole
       },
       courses: {
+        total: courseStats._count.id, // Assuming all courses are counted, not just published
         published: courseStats._count.id,
+        draft: 0, // TODO: Add draft course count
         averagePrice: courseStats._avg.price || 0
       },
       resources: {
         active: resourceStats._count.id
       },
       completion: {
+        rate: totalEnrollments > 0 ?
+          (completionStats._count.id / totalEnrollments * 100) : 0,
         completed: completionStats._count.id,
         inProgress: inProgressStats._count.id,
-        completionRate: totalEnrollments > 0 ?
-          (completionStats._count.id / totalEnrollments * 100) : 0
+        notStarted: totalEnrollments - completionStats._count.id - inProgressStats._count.id
       },
       payments: {
         total: paymentStats
-      }
+      },
+      topCourses
     }
 
     // Cache analytics for 2 minutes (analytics don't need to be real-time)
