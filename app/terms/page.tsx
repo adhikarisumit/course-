@@ -9,45 +9,79 @@ export default function TermsPage() {
 
         <h2 className="text-2xl font-bold mt-8 mb-4">Agreement to Terms</h2>
         <p className="text-muted-foreground">
-          By accessing Proteclink, you agree to be bound by these Terms of Service and all applicable laws and
-          regulations. If you do not agree with any of these terms, you are prohibited from using this site.
+          By accessing and using Proteclink, you agree to be bound by these Terms of Service and all applicable laws and
+          regulations. If you do not agree with any of these terms, you are prohibited from using this platform.
         </p>
 
-        <h2 className="text-2xl font-bold mt-8 mb-4">Use License</h2>
-        <p className="text-muted-foreground mb-4">Proteclink grants you permission to:</p>
+        <h2 className="text-2xl font-bold mt-8 mb-4">Platform Description</h2>
+        <p className="text-muted-foreground">
+          Proteclink is a comprehensive learning management system (LMS) that provides educational institutions,
+          instructors, and students with tools for course creation, management, and delivery. Our platform facilitates
+          online education through structured courses, interactive lessons, progress tracking, and communication features.
+        </p>
+
+        <h2 className="text-2xl font-bold mt-8 mb-4">User Accounts and Roles</h2>
+        <p className="text-muted-foreground mb-4">Proteclink supports multiple user roles:</p>
         <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-          <li>Browse and search for educational courses and resources</li>
-          <li>Download provided study materials and resources for personal use</li>
-          <li>Access external course links for educational purposes</li>
+          <li><strong>Students:</strong> Access courses, track progress, communicate with instructors</li>
+          <li><strong>Instructors:</strong> Create and manage courses, interact with students</li>
+          <li><strong>Administrators:</strong> Oversee platform operations and user management</li>
         </ul>
         <p className="text-muted-foreground mt-4">
-          This license shall automatically terminate if you violate any of these restrictions.
+          Users must provide accurate information and maintain the security of their account credentials.
         </p>
 
-        <h2 className="text-2xl font-bold mt-8 mb-4">Disclaimer</h2>
+        <h2 className="text-2xl font-bold mt-8 mb-4">Course Content and Intellectual Property</h2>
         <p className="text-muted-foreground mb-4">
-          Proteclink is a course directory and resource aggregator. We provide links to external educational platforms and
-          content:
+          Course content uploaded by instructors remains their intellectual property. By uploading content to Proteclink:
         </p>
         <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-          <li>We do not host or own the courses linked on our platform</li>
-          <li>Course availability, pricing, and content are controlled by the respective platforms</li>
-          <li>We are not responsible for the quality, accuracy, or availability of external courses</li>
-          <li>All course purchases and enrollments are subject to the terms of the hosting platform</li>
+          <li>You grant Proteclink a license to host and distribute your content within the platform</li>
+          <li>You warrant that you have rights to share the content and it doesn't violate third-party rights</li>
+          <li>You agree not to upload copyrighted material without proper authorization</li>
+          <li>Content may be subject to platform review and removal if it violates these terms</li>
         </ul>
 
-        <h2 className="text-2xl font-bold mt-8 mb-4">Educational Purpose</h2>
+        <h2 className="text-2xl font-bold mt-8 mb-4">Payment Terms</h2>
+        <p className="text-muted-foreground mb-4">
+          Some courses and resources may require payment. Payment terms include:
+        </p>
+        <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+          <li>All payments are processed through secure third-party payment processors</li>
+          <li>Course access is granted upon successful payment completion</li>
+          <li>Refunds are subject to the refund policy of the course instructor or institution</li>
+          <li>Payment information is not stored on Proteclink servers</li>
+        </ul>
+
+        <h2 className="text-2xl font-bold mt-8 mb-4">User Conduct and Responsibilities</h2>
+        <p className="text-muted-foreground mb-4">Users agree to:</p>
+        <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+          <li>Use the platform for lawful educational purposes only</li>
+          <li>Respect intellectual property rights of content creators</li>
+          <li>Maintain academic integrity and avoid plagiarism</li>
+          <li>Communicate respectfully with other users</li>
+          <li>Not attempt to circumvent platform security measures</li>
+          <li>Report inappropriate content or behavior to administrators</li>
+        </ul>
+
+        <h2 className="text-2xl font-bold mt-8 mb-4">Platform Availability and Maintenance</h2>
         <p className="text-muted-foreground">
-          All resources and materials provided on Proteclink are for educational purposes only. We strive to provide
-          accurate and up-to-date information, but we make no warranties about the completeness or accuracy of the
-          content.
+          While we strive for high availability, Proteclink may experience occasional downtime for maintenance,
+          updates, or unforeseen technical issues. We will provide reasonable notice for scheduled maintenance
+          and work to minimize disruptions to the learning experience.
         </p>
 
-        <h2 className="text-2xl font-bold mt-8 mb-4">External Links</h2>
+        <h2 className="text-2xl font-bold mt-8 mb-4">Data Privacy and Security</h2>
         <p className="text-muted-foreground">
-          Proteclink contains links to external websites. We have no control over the content and nature of these sites
-          and are not responsible for their availability or content. The inclusion of any links does not necessarily
-          imply a recommendation or endorsement.
+          Your privacy is important to us. Personal information is collected, used, and protected in accordance with
+          our Privacy Policy. We implement security measures to protect user data, but users are also responsible
+          for maintaining their account security.
+        </p>
+
+        <h2 className="text-2xl font-bold mt-8 mb-4">Termination and Account Suspension</h2>
+        <p className="text-muted-foreground">
+          We reserve the right to suspend or terminate accounts that violate these terms, engage in fraudulent
+          activity, or disrupt the learning environment. Users may also request account deletion at any time.
         </p>
 
         <h2 className="text-2xl font-bold mt-8 mb-4">Modifications</h2>

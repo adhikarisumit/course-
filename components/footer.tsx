@@ -50,7 +50,7 @@ export function Footer() {
               <span className="font-semibold text-lg">Proteclink</span>
             </Link>
             <p className="text-sm text-muted-foreground">
-              Your centralized platform for discovering quality online courses and educational resources.
+              A comprehensive learning management platform designed to empower educators and students with modern tools for exceptional online education experiences.
             </p>
             <div className="mt-4 space-y-2">
               <Link href="/about" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -69,70 +69,71 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4">Categories</h4>
+            <h4 className="font-semibold mb-4">Course Categories</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <a href="/#categories" onClick={handleCategoryClick} className="hover:text-foreground transition-colors cursor-pointer">
-                  Programming
+                  Programming & Development
                 </a>
               </li>
               <li>
                 <a href="/#categories" onClick={handleCategoryClick} className="hover:text-foreground transition-colors cursor-pointer">
-                  Design
+                  Design & Creative
                 </a>
               </li>
               <li>
                 <a href="/#categories" onClick={handleCategoryClick} className="hover:text-foreground transition-colors cursor-pointer">
-                  Business
+                  Business & Marketing
                 </a>
               </li>
               <li>
                 <a href="/#categories" onClick={handleCategoryClick} className="hover:text-foreground transition-colors cursor-pointer">
-                  Data Science
+                  Data Science & AI
                 </a>
               </li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4">Resources</h4>
+            <h4 className="font-semibold mb-4">Learning Resources</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <a href="/#resources" onClick={handleResourceClick} className="hover:text-foreground transition-colors cursor-pointer">
-                  Study Notes
+                  Course Library
                 </a>
               </li>
               <li>
                 <a href="/#resources" onClick={handleResourceClick} className="hover:text-foreground transition-colors cursor-pointer">
-                  Video Tutorials
+                  Study Materials
                 </a>
               </li>
               <li>
                 <a href="/#resources" onClick={handleResourceClick} className="hover:text-foreground transition-colors cursor-pointer">
-                  Documentation
+                  Interactive Lessons
                 </a>
               </li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4">Connect</h4>
-            <div className="flex gap-4">
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
-                <Github className="h-5 w-5" />
-              </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
-                <Twitter className="h-5 w-5" />
-              </a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
-                <Linkedin className="h-5 w-5" />
-              </a>
-            </div>
+            <h4 className="font-semibold mb-4">Platform</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li>
+                <Link href="/courses" className="hover:text-foreground transition-colors">
+                  Browse Courses
+                </Link>
+              </li>
+              <li>
+                <Link href="/portal/dashboard" className="hover:text-foreground transition-colors">
+                  Student Portal
+                </Link>
+              </li>
+            </ul>
           </div>
         </div>
 
         <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
-          <p>© {currentYear} Proteclink. All rights reserved. Built for educational purposes.</p>
+          <p>© {currentYear} Proteclink. All rights reserved. Empowering education through innovative learning management solutions.</p>
         </div>
       </div>
     </footer>
