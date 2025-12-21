@@ -98,14 +98,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Link href="/admin/mentors" className={linkClass} onClick={handleClick}>
           Mentors
         </Link>
-        <Link href="/admin/resource-purchases" className={linkClass} onClick={handleClick}>
-          Resource Purchases
+        <Link href="/admin/resources" className={linkClass} onClick={handleClick}>
+          Resources
         </Link>
         <Link href="/admin/analytics" className={linkClass} onClick={handleClick}>
           Analytics
-        </Link>
-        <Link href="/admin/resources" className={linkClass} onClick={handleClick}>
-          Resources
         </Link>
         <Link href="/admin/export" className={linkClass} onClick={handleClick}>
           Export Data
