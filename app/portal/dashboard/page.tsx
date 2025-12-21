@@ -221,7 +221,7 @@ export default async function DashboardPage() {
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Button asChild variant="outline" className="h-auto py-4">
-                <Link href="/cheat-sheets" className="flex flex-col items-center gap-2">
+                <Link href="/portal/cheat-sheets" className="flex flex-col items-center gap-2">
                   <BookOpen className="h-6 w-6" />
                   <div className="text-center">
                     <div className="font-semibold">Cheat Sheets</div>
@@ -230,7 +230,7 @@ export default async function DashboardPage() {
                 </Link>
               </Button>
               <Button asChild variant="outline" className="h-auto py-4">
-                <Link href="/softwares" className="flex flex-col items-center gap-2">
+                <Link href="/portal/softwares" className="flex flex-col items-center gap-2">
                   <Settings className="h-6 w-6" />
                   <div className="text-center">
                     <div className="font-semibold">Softwares & Links</div>

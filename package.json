@@ -8,7 +8,12 @@
     "dev": "next dev -p 3000",
     "lint": "eslint .",
     "start": "next start",
-    "create-admin": "node scripts/create-admin.js"
+    "create-admin": "tsx scripts/create-admin.ts",
+    "seed": "tsx scripts/seed.ts",
+    "setup-db": "node scripts/setup-db.js",
+    "db:reset": "prisma db push --force-reset && npm run setup-db",
+    "db:migrate": "prisma migrate dev && npm run setup-db",
+    "postinstall": "prisma generate && npm run setup-db"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",

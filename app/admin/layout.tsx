@@ -89,6 +89,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Link href="/admin/analytics" className={linkClass} onClick={handleClick}>
           Analytics
         </Link>
+        <Link href="/admin/resources" className={linkClass} onClick={handleClick}>
+          Resources
+        </Link>
         <Link href="/admin/export" className={linkClass} onClick={handleClick}>
           Export Data
         </Link>
@@ -111,21 +114,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <LayoutDashboard className="h-5 w-5 md:h-6 md:w-6" />
               <span className="font-bold text-base md:text-lg">Admin Panel</span>
             </Link>
-            <nav className="hidden lg:flex items-center gap-4">
+            <nav className="hidden sm:flex items-center gap-2 md:gap-4">
               <NavLinks />
             </nav>
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Mobile Menu */}
+            {/* Mobile Menu - only show on very small screens */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden">
+                <Button variant="ghost" size="icon" className="sm:hidden">
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Toggle menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left">
+              <SheetContent side="right" className="w-[40vw] sm:w-[250px]">
                 <SheetHeader>
                   <SheetTitle>Admin Menu</SheetTitle>
                   <SheetDescription>Navigate admin panel</SheetDescription>
