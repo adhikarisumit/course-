@@ -85,6 +85,7 @@ export default function AboutPage() {
                 <li>• Performance analytics</li>
                 <li>• Live course sessions</li>
                 <li>• Resource sharing and uploads</li>
+                <li>• Notice board access</li>
               </ul>
             </div>
             <div>
@@ -92,9 +93,7 @@ export default function AboutPage() {
               <ul className="text-muted-foreground space-y-1">
                 <li>• Personalized learning paths</li>
                 <li>• Progress tracking</li>
-                <li>• Resource library access</li>
                 <li>• Direct instructor communication</li>
-                <li>• Certificate generation</li>
                 <li>• Notice board for updates</li>
                 <li>• Cheat sheets and study materials</li>
               </ul>
@@ -108,20 +107,20 @@ export default function AboutPage() {
                 <li>• Multi-role user management</li>
                 <li>• Admin dashboard and analytics</li>
                 <li>• Secure payment processing</li>
-                <li>• Real-time notifications</li>
                 <li>• Mobile-responsive design</li>
                 <li>• Dark/light theme support</li>
+                <li>• Notice board for updates</li>
               </ul>
             </div>
             <div>
-              <h3 className="text-lg font-semibold mb-2">Advanced Tools</h3>
+              <h3 className="text-lg font-semibold mb-2">Learning Tools</h3>
               <ul className="text-muted-foreground space-y-1">
                 <li>• Video content integration</li>
-                <li>• Interactive quizzes and assessments</li>
-                <li>• Discussion forums</li>
-                <li>• File upload and management</li>
-                <li>• Progress reports and certificates</li>
+                <li>• Progress tracking and reports</li>
                 <li>• Mentor-student matching</li>
+                <li>• Cheat sheets and study materials</li>
+                <li>• Direct messaging system</li>
+                <li>• Resource library access</li>
               </ul>
             </div>
           </div>
