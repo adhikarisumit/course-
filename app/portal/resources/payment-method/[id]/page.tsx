@@ -19,6 +19,7 @@ interface Purchase {
     id: string
     title: string
     description?: string
+    type: string
   }
 }
 
@@ -42,15 +43,32 @@ export default function PaymentMethodPage() {
         const data = await response.json()
         setPurchase(data.purchase)
       } else {
-        toast.error("Purchase not found")
-        router.push("/portal/softwares")
+        console.error('Failed to fetch purchase')
       }
     } catch (error) {
-      console.error("Error fetching purchase:", error)
-      toast.error("Failed to load purchase details")
-      router.push("/portal/softwares")
+      console.error('Error fetching purchase:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const getBackPath = (resourceType?: string) => {
+    switch (resourceType) {
+      case 'cheatsheet':
+        return '/portal/cheat-sheets'
+      case 'software':
+      case 'link':
+        return '/portal/softwares'
+      default:
+        return '/portal/softwares'
+    }
+  }
+
+  const handleBack = () => {
+    if (purchase?.resource.type) {
+      router.push(getBackPath(purchase.resource.type))
+    } else {
+      router.back()
     }
   }
 
@@ -104,9 +122,9 @@ Please activate my access. I have attached the payment receipt.`
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Purchase not found</h1>
-          <Button onClick={() => router.push("/portal/softwares")}>
+          <Button onClick={() => router.back()}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Resources
+            Back
           </Button>
         </div>
       </div>
@@ -118,11 +136,11 @@ Please activate my access. I have attached the payment receipt.`
       <div className="max-w-2xl mx-auto">
         <Button
           variant="ghost"
-          onClick={() => router.push("/portal/softwares")}
+          onClick={handleBack}
           className="mb-6"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Resources
+          Back
         </Button>
 
         <Card>

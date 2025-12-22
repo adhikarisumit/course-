@@ -27,29 +27,29 @@ export default function ResourcePaymentPage() {
   const resourceId = searchParams.get("id")
 
   useEffect(() => {
+    const fetchResource = async () => {
+      try {
+        const response = await fetch(`/api/resources/${resourceId}`)
+        if (response.ok) {
+          const data = await response.json()
+          setResource(data)
+        } else {
+          toast.error("Resource not found")
+          router.back()
+        }
+      } catch (error) {
+        console.error("Error fetching resource:", error)
+        toast.error("Failed to load resource")
+        router.back()
+      } finally {
+        setLoading(false)
+      }
+    }
+
     if (resourceId) {
       fetchResource()
     }
-  }, [resourceId])
-
-  const fetchResource = async () => {
-    try {
-      const response = await fetch(`/api/resources/${resourceId}`)
-      if (response.ok) {
-        const data = await response.json()
-        setResource(data)
-      } else {
-        toast.error("Resource not found")
-        router.back()
-      }
-    } catch (error) {
-      console.error("Error fetching resource:", error)
-      toast.error("Failed to load resource")
-      router.back()
-    } finally {
-      setLoading(false)
-    }
-  }
+  }, [resourceId, router])
 
   const handlePurchase = async () => {
     if (!resource) return
