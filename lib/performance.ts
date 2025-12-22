@@ -1,7 +1,7 @@
 import { cache } from 'react'
 
 // Cache frequently accessed data
-export const getCachedResources = cache(async (types: string[], category?: string, isFree?: boolean) => {
+export const getCachedResources = async (types: string[], category?: string, isFree?: boolean) => {
   const prisma = (await import('@/lib/prisma')).default
 
   const where: any = {
@@ -29,6 +29,7 @@ export const getCachedResources = cache(async (types: string[], category?: strin
       description: true,
       type: true,
       url: true,
+      fileUrl: true,
       category: true,
       tags: true,
       isFree: true,
@@ -38,7 +39,7 @@ export const getCachedResources = cache(async (types: string[], category?: strin
       createdAt: true,
     }
   })
-})
+}
 
 // Performance monitoring utility
 export class PerformanceMonitor {

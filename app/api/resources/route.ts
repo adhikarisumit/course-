@@ -14,9 +14,8 @@ export async function GET(request: NextRequest) {
     // Use cached version for better performance
     const resources = await getCachedResources(types, category, isFree)
 
-    // Cache for 5 minutes with stale-while-revalidate
+    // No caching for resources since they can be deleted/modified frequently
     const response = NextResponse.json(resources)
-    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
 
     endTimer()
     return response

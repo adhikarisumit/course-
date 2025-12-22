@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { FileText, Download, Eye, EyeOff, RefreshCw } from "lucide-react"
+import { FileText, ExternalLink, Eye, EyeOff, RefreshCw } from "lucide-react"
 import { toast } from "sonner"
 
 interface Resource {
@@ -13,6 +14,7 @@ interface Resource {
   title: string
   description?: string
   type: "cheatsheet" | "software" | "link"
+  url?: string
   fileUrl?: string
   category?: string
   tags?: string
@@ -20,12 +22,21 @@ interface Resource {
   price?: number
   isActive: boolean
   downloadCount: number
+  clickCount: number
+}
+
+interface ResourcePurchase {
+  id: string
+  resourceId: string
+  status: string
 }
 
 export default function CheatSheetsPage() {
   const [resources, setResources] = useState<Resource[]>([])
+  const [resourcePurchases, setResourcePurchases] = useState<ResourcePurchase[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const { data: session } = useSession()
   const router = useRouter()
 
   useEffect(() => {
@@ -37,13 +48,22 @@ export default function CheatSheetsPage() {
     return () => clearInterval(interval) // Cleanup on unmount
   }, [])
 
-  const fetchResources = async () => {
+  const fetchResources = useCallback(async () => {
     try {
       setRefreshing(true)
-      const response = await fetch("/api/resources?type=cheatsheet")
-      if (response.ok) {
-        const data = await response.json()
+      const [resourcesRes, purchasesRes] = await Promise.all([
+        fetch("/api/resources?type=cheatsheet"),
+        fetch("/api/user/resource-purchases")
+      ])
+
+      if (resourcesRes.ok) {
+        const data = await resourcesRes.json()
         setResources(data)
+      }
+
+      if (purchasesRes.ok) {
+        const purchasesData = await purchasesRes.json()
+        setResourcePurchases(purchasesData)
       }
     } catch (error) {
       console.error("Error fetching resources:", error)
@@ -52,56 +72,79 @@ export default function CheatSheetsPage() {
       setLoading(false)
       setRefreshing(false)
     }
-  }
+  }, [])
 
-  const handleDownload = async (resource: Resource) => {
-    if (!resource.fileUrl) return
+  const hasAccess = useCallback((resourceId: string) => {
+    return resourcePurchases.some(purchase =>
+      purchase.resourceId === resourceId && purchase.status === "completed"
+    )
+  }, [resourcePurchases])
 
-    // Check if resource is paid
-    if (!resource.isFree) {
-      toast.error("This is a paid resource. Please purchase it first.")
+  const handleVisit = async (resource: Resource) => {
+    // Determine which URL to use (url takes precedence for direct links)
+    const targetUrl = resource.url || resource.fileUrl
+
+    if (!targetUrl) {
+      toast.error("No link available")
+      return
+    }
+
+    // Check if resource is paid and user doesn't have access
+    if (!resource.isFree && !hasAccess(resource.id)) {
+      // Show PayPay payment instructions instead of redirecting
+      toast.info(`Send ¥${resource.price} to PayPay ID: aatit`, {
+        description: "Contact admin after payment for access approval",
+        duration: 5000,
+      })
       return
     }
 
     try {
-      // Track download
+      // Track click/visit
       await fetch(`/api/resources/${resource.id}/track`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ action: "download" }),
+        body: JSON.stringify({ action: "click" }),
       })
 
-      // Handle Google Drive links
-      let downloadUrl = resource.fileUrl
-      if (resource.fileUrl.includes('drive.google.com') || resource.fileUrl.includes('docs.google.com')) {
-        // Extract file ID from Google Drive share link
-        const match = resource.fileUrl.match(/\/d\/([a-zA-Z0-9-_]+)/)
-        if (match) {
-          const fileId = match[1]
-          downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`
-        }
-      }
-
-      // Create download link
-      const link = document.createElement("a")
-      link.href = downloadUrl
-      link.download = resource.title
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-
-      toast.success("Download started!")
+      // Open the link in a new tab
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+      toast.success("Opening link...")
     } catch (error) {
-      console.error("Error downloading:", error)
-      toast.error("Failed to download")
+      console.error("Error:", error)
+      // Still open the link even if tracking fails
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+      toast.error("Failed to track visit, but opening link...")
     }
   }
 
-  const handlePurchase = async (resource: Resource) => {
-    router.push(`/portal/resources/${resource.id}`)
-  }
+  const handlePurchase = useCallback(async (resource: Resource) => {
+    try {
+      const response = await fetch("/api/resources/purchase", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          resourceId: resource.id,
+          amount: resource.price,
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        router.push(`/portal/resources/payment-method/${data.purchase.id}`)
+      } else {
+        const error = await response.json()
+        toast.error(error.message || "Failed to create purchase")
+      }
+    } catch (error) {
+      console.error("Error creating purchase:", error)
+      toast.error("Failed to create purchase")
+    }
+  }, [router])
 
   if (loading) {
     return (
@@ -162,8 +205,8 @@ export default function CheatSheetsPage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <Download className="h-4 w-4" />
-                      {resource.downloadCount} downloads
+                      <ExternalLink className="h-4 w-4" />
+                      {resource.clickCount} visits
                     </span>
                     {resource.isFree ? (
                       <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
@@ -177,20 +220,20 @@ export default function CheatSheetsPage() {
                   </div>
 
                   <Button
-                    onClick={() => resource.isFree ? handleDownload(resource) : handlePurchase(resource)}
+                    onClick={() => (resource.isFree || hasAccess(resource.id)) ? handleVisit(resource) : handlePurchase(resource)}
                     className="w-full"
                     disabled={!resource.isActive}
-                    variant={resource.isFree ? "default" : "secondary"}
+                    variant={(resource.isFree || hasAccess(resource.id)) ? "default" : "secondary"}
                   >
                     {resource.isActive ? (
-                      resource.isFree ? (
+                      (resource.isFree || hasAccess(resource.id)) ? (
                         <>
-                          <Download className="mr-2 h-4 w-4" />
-                          Download
+                          <ExternalLink className="mr-2 h-4 w-4" />
+                          Visit
                         </>
                       ) : (
                         <>
-                          <Download className="mr-2 h-4 w-4" />
+                          <ExternalLink className="mr-2 h-4 w-4" />
                           Purchase - ¥{resource.price}
                         </>
                       )

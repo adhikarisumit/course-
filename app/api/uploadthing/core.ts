@@ -15,6 +15,21 @@ export const ourFileRouter = {
       console.log("File URL:", file.url)
       return { videoUrl: file.url }
     }),
+
+  resourceUploader: f({
+    pdf: { maxFileSize: "100MB", maxFileCount: 1 },
+    image: { maxFileSize: "10MB", maxFileCount: 1 }
+  })
+    .middleware(async () => {
+      const session = await auth()
+      if (!session?.user) throw new Error("Unauthorized")
+      return { userId: session.user.id }
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log("Resource upload complete for userId:", metadata.userId)
+      console.log("File URL:", file.url)
+      return { fileUrl: file.url, fileName: file.name }
+    }),
 } satisfies FileRouter
 
 export type OurFileRouter = typeof ourFileRouter

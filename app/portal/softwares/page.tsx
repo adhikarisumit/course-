@@ -17,6 +17,7 @@ interface Resource {
   description?: string
   type: "cheatsheet" | "software" | "link"
   url?: string
+  fileUrl?: string
   category?: string
   tags?: string
   isFree: boolean
@@ -53,9 +54,7 @@ export default function SoftwaresPage() {
     try {
       setRefreshing(true)
       const [resourcesRes, purchasesRes] = await Promise.all([
-        fetch("/api/resources?type=software&type=link", {
-          next: { revalidate: 300 } // Cache for 5 minutes
-        }),
+        fetch("/api/resources?type=software&type=link"),
         fetch("/api/user/resource-purchases", {
           next: { revalidate: 60 } // Cache for 1 minute
         })
@@ -113,7 +112,13 @@ const handlePurchase = useCallback(async (resource: Resource) => {
   }, [])
 
   const handleClick = useCallback(async (resource: Resource) => {
-    if (!resource.url) return
+    // Determine which URL to use (url takes precedence for direct links)
+    const targetUrl = resource.url || resource.fileUrl
+
+    if (!targetUrl) {
+      toast.error("No link available")
+      return
+    }
 
     // Check if resource is paid and user doesn't have access
     if (!resource.isFree && !hasAccess(resource.id)) {
@@ -126,7 +131,7 @@ const handlePurchase = useCallback(async (resource: Resource) => {
     }
 
     try {
-      // Track click (fire and forget for performance)
+      // Track click/visit (fire and forget for performance)
       fetch(`/api/resources/${resource.id}/track`, {
         method: "POST",
         headers: {
@@ -135,34 +140,14 @@ const handlePurchase = useCallback(async (resource: Resource) => {
         body: JSON.stringify({ action: "click" }),
       }).catch(error => console.warn("Tracking failed:", error))
 
-      // Handle Google Drive links for download
-      if (resource.url.includes('drive.google.com') || resource.url.includes('docs.google.com')) {
-        // Extract file ID from Google Drive share link
-        const match = resource.url.match(/\/d\/([a-zA-Z0-9-_]+)/)
-        if (match) {
-          const fileId = match[1]
-          const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`
-
-          // Create download link
-          const link = document.createElement("a")
-          link.href = downloadUrl
-          link.download = resource.title
-          document.body.appendChild(link)
-          link.click()
-          document.body.removeChild(link)
-
-          toast.success("Download started!")
-          return
-        }
-      }
-
-      // Open regular links in new tab
-      window.open(resource.url, "_blank")
+      // Open the link in a new tab
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
       toast.success("Opening link...")
     } catch (error) {
       console.error("Error:", error)
       // Still open the link even if tracking fails
-      window.open(resource.url, "_blank")
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+      toast.error("Failed to track visit, but opening link...")
     }
   }, [hasAccess])
 

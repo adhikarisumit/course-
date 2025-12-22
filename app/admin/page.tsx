@@ -125,15 +125,15 @@ export default async function AdminDashboard() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Analytics</CardTitle>
-              <BarChart className="h-5 w-5 text-muted-foreground" />
+              <CardTitle>Resources</CardTitle>
+              <HardDrive className="h-5 w-5 text-muted-foreground" />
             </div>
-            <CardDescription>Track platform performance</CardDescription>
+            <CardDescription>Manage cheat sheets, software, and links</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button className="w-full" variant="outline" disabled>
-              Coming Soon
-            </Button>
+            <Link href="/admin/resources">
+              <Button className="w-full">Manage Resources</Button>
+            </Link>
           </CardContent>
         </Card>
 

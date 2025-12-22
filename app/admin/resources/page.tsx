@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Plus, Edit, Trash2, FileText, Download, ExternalLink, Eye, EyeOff, UserPlus, UserMinus, Search, Filter, Settings, Users, X, CheckCircle, XCircle, Clock } from "lucide-react"
+import { Plus, Edit, Trash2, FileText, Download, ExternalLink, Eye, EyeOff, UserPlus, UserMinus, Search, Filter, Settings, Users, X, CheckCircle, XCircle, Clock, File } from "lucide-react"
 import { toast } from "sonner"
 
 interface Resource {
@@ -251,12 +251,18 @@ export default function AdminResourcesPage() {
 
       const method = editingResource ? "PUT" : "POST"
 
+      // Use the fileUrl field for direct links
+      const submitData = {
+        ...formData,
+        url: formData.fileUrl, // Set URL field to the same value for consistency
+      }
+
       const response = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submitData),
       })
 
       if (response.ok) {
@@ -318,7 +324,7 @@ export default function AdminResourcesPage() {
     setFormData({
       title: "",
       description: "",
-      type: "cheatsheet",
+      type: "cheatsheet" as "cheatsheet" | "software" | "link",
       url: "",
       fileUrl: "",
       category: "",
@@ -599,6 +605,25 @@ export default function AdminResourcesPage() {
                   </div>
                 )}
               </div>
+
+              {/* File URL Section */}
+              {formData.type !== "link" && (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fileUrl">File URL</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Enter Google Drive shareable link or direct file URL for this resource.
+                    </p>
+                    <Input
+                      id="fileUrl"
+                      type="url"
+                      placeholder="https://drive.google.com/file/d/.../view?usp=sharing"
+                      value={formData.fileUrl}
+                      onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value })}
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="flex items-center space-x-2">

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { SignOutButton } from "@/components/sign-out-button"
 import { useSession } from "next-auth/react"
+import { useEffect, useState } from "react"
 
 const navigation = [
   { name: "Dashboard", href: "/portal/dashboard", icon: Home },
@@ -24,6 +25,11 @@ const navigation = [
 export default function PortalHeader() {
   const pathname = usePathname()
   const { data: session } = useSession()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const initials = session?.user?.name
     ?.split(" ")
@@ -64,7 +70,7 @@ export default function PortalHeader() {
 
         {/* User Menu */}
         <div className="flex items-center gap-4">
-          <DropdownMenu>
+          {mounted && <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                 <Avatar className="h-10 w-10">
@@ -111,7 +117,7 @@ export default function PortalHeader() {
               <DropdownMenuSeparator />
               <SignOutButton />
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu>}
         </div>
       </div>
 
