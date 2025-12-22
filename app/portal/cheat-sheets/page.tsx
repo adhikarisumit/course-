@@ -73,9 +73,20 @@ export default function CheatSheetsPage() {
         body: JSON.stringify({ action: "download" }),
       })
 
+      // Handle Google Drive links
+      let downloadUrl = resource.fileUrl
+      if (resource.fileUrl.includes('drive.google.com') || resource.fileUrl.includes('docs.google.com')) {
+        // Extract file ID from Google Drive share link
+        const match = resource.fileUrl.match(/\/d\/([a-zA-Z0-9-_]+)/)
+        if (match) {
+          const fileId = match[1]
+          downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`
+        }
+      }
+
       // Create download link
       const link = document.createElement("a")
-      link.href = resource.fileUrl
+      link.href = downloadUrl
       link.download = resource.title
       document.body.appendChild(link)
       link.click()

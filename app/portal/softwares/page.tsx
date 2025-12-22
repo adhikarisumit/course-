@@ -135,7 +135,28 @@ const handlePurchase = useCallback(async (resource: Resource) => {
         body: JSON.stringify({ action: "click" }),
       }).catch(error => console.warn("Tracking failed:", error))
 
-      // Open link in new tab immediately
+      // Handle Google Drive links for download
+      if (resource.url.includes('drive.google.com') || resource.url.includes('docs.google.com')) {
+        // Extract file ID from Google Drive share link
+        const match = resource.url.match(/\/d\/([a-zA-Z0-9-_]+)/)
+        if (match) {
+          const fileId = match[1]
+          const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`
+
+          // Create download link
+          const link = document.createElement("a")
+          link.href = downloadUrl
+          link.download = resource.title
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+
+          toast.success("Download started!")
+          return
+        }
+      }
+
+      // Open regular links in new tab
       window.open(resource.url, "_blank")
       toast.success("Opening link...")
     } catch (error) {
