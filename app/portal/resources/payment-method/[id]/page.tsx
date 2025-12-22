@@ -235,17 +235,10 @@ Please activate my access. I have attached the payment receipt.`
               </div>
             </div>
 
-            <div className="border-t pt-6 flex gap-4">
-              <Button
-                onClick={() => router.push("/portal/softwares")}
-                variant="outline"
-                className="flex-1"
-              >
-                Back to Resources
-              </Button>
+            <div className="border-t pt-6">
               <Button
                 onClick={sendEmail}
-                className="flex-1"
+                className="w-full"
               >
                 <Mail className="w-4 h-4 mr-2" />
                 Send Email Receipt
