@@ -83,6 +83,8 @@ export default function AboutPage() {
                 <li>• Interactive lessons and resources</li>
                 <li>• Communication tools</li>
                 <li>• Performance analytics</li>
+                <li>• Live course sessions</li>
+                <li>• Resource sharing and uploads</li>
               </ul>
             </div>
             <div>
@@ -93,6 +95,33 @@ export default function AboutPage() {
                 <li>• Resource library access</li>
                 <li>• Direct instructor communication</li>
                 <li>• Certificate generation</li>
+                <li>• Notice board for updates</li>
+                <li>• Cheat sheets and study materials</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Platform Features</h3>
+              <ul className="text-muted-foreground space-y-1">
+                <li>• Multi-role user management</li>
+                <li>• Admin dashboard and analytics</li>
+                <li>• Secure payment processing</li>
+                <li>• Real-time notifications</li>
+                <li>• Mobile-responsive design</li>
+                <li>• Dark/light theme support</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Advanced Tools</h3>
+              <ul className="text-muted-foreground space-y-1">
+                <li>• Video content integration</li>
+                <li>• Interactive quizzes and assessments</li>
+                <li>• Discussion forums</li>
+                <li>• File upload and management</li>
+                <li>• Progress reports and certificates</li>
+                <li>• Mentor-student matching</li>
               </ul>
             </div>
           </div>
