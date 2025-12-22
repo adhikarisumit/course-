@@ -67,7 +67,7 @@ export default function TermsPage() {
         <h2 className="text-2xl font-bold mt-8 mb-4">Platform Availability and Maintenance</h2>
         <p className="text-muted-foreground">
           While we strive for high availability, Proteclink may experience occasional downtime for maintenance,
-          updates, or unforeseen technical issues. We will provide reasonable notice for scheduled maintenance
+          updates, or unforeseen technical issues. We will provide reasonable notice for scheduled maintenance through our notice board
           and work to minimize disruptions to the learning experience.
         </p>
 
@@ -86,8 +86,7 @@ export default function TermsPage() {
 
         <h2 className="text-2xl font-bold mt-8 mb-4">Modifications</h2>
         <p className="text-muted-foreground">
-          We reserve the right to revise these Terms of Service at any time without notice. By using this website, you
-          agree to be bound by the current version of these terms.
+          We reserve the right to revise these Terms of Service at any time. We will notify users of any changes through our notice board. By continuing to use this website after changes are posted, you agree to be bound by the updated terms.
         </p>
 
         <h2 className="text-2xl font-bold mt-8 mb-4">Contact Information</h2>
