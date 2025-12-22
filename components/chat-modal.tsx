@@ -29,6 +29,8 @@ export function ChatModal({ open, onOpenChange, userId, currentUserId, userName,
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const [isUserAtBottom, setIsUserAtBottom] = useState(true);
 
 
   // Fetch messages (initial and polling)
@@ -65,10 +67,27 @@ export function ChatModal({ open, onOpenChange, userId, currentUserId, userName,
     }
   }, [open, messages, currentUserId, userId]);
 
-  // Scroll to bottom on new messages
+  // Track scroll position
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    const scrollElement = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+    if (!scrollElement) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollElement;
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10; // 10px tolerance
+      setIsUserAtBottom(isAtBottom);
+    };
+
+    scrollElement.addEventListener('scroll', handleScroll);
+    return () => scrollElement.removeEventListener('scroll', handleScroll);
+  }, [open]);
+
+  // Scroll to bottom on new messages only if user is at bottom
+  useEffect(() => {
+    if (isUserAtBottom) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, isUserAtBottom]);
 
   // Send message
   const sendMessage = async () => {
@@ -105,7 +124,7 @@ export function ChatModal({ open, onOpenChange, userId, currentUserId, userName,
         <DialogHeader>
           <DialogTitle>{title || `Chat with ${userName || "User"}`}</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="h-80 py-2 pr-3">
+        <ScrollArea ref={scrollAreaRef} className="h-80 py-2 pr-3">
           <div className="flex flex-col gap-2 pr-2">
             {messages.length === 0 && <div className="text-center text-muted-foreground text-xs">No messages yet.</div>}
             {messages.map(msg => (
