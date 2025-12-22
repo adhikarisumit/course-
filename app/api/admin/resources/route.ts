@@ -60,13 +60,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (type === "cheatsheet" && !fileUrl) {
-      return NextResponse.json(
-        { message: "File URL is required for cheat sheet type" },
-        { status: 400 }
-      )
-    }
-
     const resource = await prisma.resource.create({
       data: {
         title,
