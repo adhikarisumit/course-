@@ -70,7 +70,7 @@ export default function ResourceAccessPage() {
 
   const approvePurchase = async (purchaseId: string) => {
     try {
-      const response = await fetch(`/api/admin/resource-access/${purchaseId}/approve`, {
+      const response = await fetch(`/api/admin/resource-purchases/${purchaseId}/approve`, {
         method: "POST",
       })
 
@@ -89,7 +89,7 @@ export default function ResourceAccessPage() {
 
   const rejectPurchase = async (purchaseId: string) => {
     try {
-      const response = await fetch(`/api/admin/resource-access/${purchaseId}/reject`, {
+      const response = await fetch(`/api/admin/resource-purchases/${purchaseId}/reject`, {
         method: "POST",
       })
 
@@ -103,6 +103,25 @@ export default function ResourceAccessPage() {
     } catch (error) {
       console.error("Error rejecting purchase:", error)
       toast.error("Failed to reject purchase")
+    }
+  }
+
+  const revokeAccess = async (purchaseId: string) => {
+    try {
+      const response = await fetch(`/api/admin/resource-access/${purchaseId}`, {
+        method: "DELETE",
+      })
+
+      if (response.ok) {
+        toast.success("Access revoked successfully")
+        fetchPurchases() // Refresh the list
+      } else {
+        const error = await response.json()
+        toast.error(error.message || "Failed to revoke access")
+      }
+    } catch (error) {
+      console.error("Error revoking access:", error)
+      toast.error("Failed to revoke access")
     }
   }
 
@@ -138,7 +157,7 @@ export default function ResourceAccessPage() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading purchase requests...</p>
+              <p className="text-muted-foreground">Loading access records...</p>
           </div>
         </div>
       </div>
@@ -151,7 +170,7 @@ export default function ResourceAccessPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold mb-2">Resource Access Management</h1>
-            <p className="text-muted-foreground">Review and approve student purchase requests</p>
+            <p className="text-muted-foreground">Manage user access to resources - approve requests and revoke access</p>
           </div>
           <Button
             onClick={fetchPurchases}
@@ -166,16 +185,16 @@ export default function ResourceAccessPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Purchase Requests</CardTitle>
+          <CardTitle>Access Records</CardTitle>
           <CardDescription>
-            {purchases.length} total requests • {purchases.filter(p => p.status === 'pending').length} pending approval
+            {purchases.length} total records • {purchases.filter(p => p.status === 'pending').length} pending approval • {purchases.filter(p => p.status === 'completed').length} with access granted
           </CardDescription>
         </CardHeader>
         <CardContent>
           {purchases.length === 0 ? (
             <div className="text-center py-8">
               <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No purchase requests found</p>
+              <p className="text-muted-foreground">No access records found</p>
             </div>
           ) : (
             <Table>
@@ -226,7 +245,7 @@ export default function ResourceAccessPage() {
                       {new Date(purchase.createdAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 flex-wrap">
                         {purchase.status === 'pending' && (
                           <>
                             <AlertDialog>
@@ -275,6 +294,30 @@ export default function ResourceAccessPage() {
                               </AlertDialogContent>
                             </AlertDialog>
                           </>
+                        )}
+                        {purchase.status === 'completed' && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="destructive">
+                                <XCircle className="w-4 h-4 mr-1" />
+                                Revoke Access
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Revoke Access</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to revoke access to "{purchase.resource.title}" for {purchase.user.name || purchase.user.email}? This will permanently remove their access to this resource.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => revokeAccess(purchase.id)}>
+                                  Revoke Access
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         )}
                       </div>
                     </TableCell>

@@ -17,8 +17,8 @@ export const ourFileRouter = {
     }),
 
   resourceUploader: f({
-    pdf: { maxFileSize: "100MB", maxFileCount: 1 },
-    image: { maxFileSize: "10MB", maxFileCount: 1 }
+    pdf: { maxFileSize: "64MB", maxFileCount: 1 },
+    image: { maxFileSize: "4MB", maxFileCount: 1 }
   })
     .middleware(async () => {
       const session = await auth()
