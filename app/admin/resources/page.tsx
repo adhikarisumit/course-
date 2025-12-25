@@ -22,7 +22,6 @@ interface Resource {
   description?: string
   type: "cheatsheet" | "software" | "link"
   url?: string
-  fileUrl?: string
   category?: string
   tags?: string
   isFree: boolean
@@ -81,7 +80,6 @@ export default function AdminResourcesPage() {
     description: "",
     type: "cheatsheet" as "cheatsheet" | "software" | "link",
     url: "",
-    fileUrl: "",
     category: "",
     tags: "",
     isFree: true,
@@ -251,10 +249,9 @@ export default function AdminResourcesPage() {
 
       const method = editingResource ? "PUT" : "POST"
 
-      // Use the fileUrl field for direct links
+      // Use the url field for all resource types
       const submitData = {
         ...formData,
-        url: formData.fileUrl, // Set URL field to the same value for consistency
       }
 
       const response = await fetch(url, {
@@ -326,7 +323,6 @@ export default function AdminResourcesPage() {
       description: "",
       type: "cheatsheet" as "cheatsheet" | "software" | "link",
       url: "",
-      fileUrl: "",
       category: "",
       tags: "",
       isFree: true,
@@ -343,7 +339,6 @@ export default function AdminResourcesPage() {
       description: resource.description || "",
       type: resource.type,
       url: resource.url || "",
-      fileUrl: resource.fileUrl || "",
       category: resource.category || "",
       tags: resource.tags || "",
       isFree: resource.isFree,
@@ -422,7 +417,6 @@ export default function AdminResourcesPage() {
       description: resource.description || "",
       type: resource.type,
       url: resource.url || "",
-      fileUrl: resource.fileUrl || "",
       category: resource.category || "",
       tags: resource.tags || "",
       isFree: resource.isFree,
@@ -592,38 +586,7 @@ export default function AdminResourcesPage() {
                     required={formData.type === "link"}
                   />
                 </div>
-                {formData.type !== "cheatsheet" && (
-                  <div className="space-y-2">
-                    <Label htmlFor="fileUrl">File URL</Label>
-                    <Input
-                      id="fileUrl"
-                      type="url"
-                      value={formData.fileUrl}
-                      onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value })}
-                      placeholder="https://example.com/file.pdf"
-                    />
-                  </div>
-                )}
               </div>
-
-              {/* File URL Section */}
-              {formData.type !== "link" && (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="fileUrl">File URL</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Enter Google Drive shareable link or direct file URL for this resource.
-                    </p>
-                    <Input
-                      id="fileUrl"
-                      type="url"
-                      placeholder="https://drive.google.com/file/d/.../view?usp=sharing"
-                      value={formData.fileUrl}
-                      onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value })}
-                    />
-                  </div>
-                </div>
-              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="flex items-center space-x-2">

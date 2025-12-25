@@ -241,7 +241,6 @@ model Resource {
   description   String?
   type          String
   url           String?
-  fileUrl       String?
   category      String?
   tags          String?
   isFree        Boolean  @default(true)

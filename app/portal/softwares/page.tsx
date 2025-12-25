@@ -17,7 +17,6 @@ interface Resource {
   description?: string
   type: "cheatsheet" | "software" | "link"
   url?: string
-  fileUrl?: string
   category?: string
   tags?: string
   isFree: boolean
@@ -112,12 +111,8 @@ const handlePurchase = useCallback(async (resource: Resource) => {
   }, [])
 
   const handleClick = useCallback(async (resource: Resource) => {
-    // Determine which URL to use based on resource type
-    // For cheat sheets, use fileUrl (uploaded file) first, then url
-    // For software and links, use only url (external link)
-    const targetUrl = resource.type === "cheatsheet" 
-      ? (resource.fileUrl || resource.url) 
-      : resource.url
+    // Use the url field for both direct links and Google Drive links
+    const targetUrl = resource.url
 
     if (!targetUrl) {
       toast.error("No link available")

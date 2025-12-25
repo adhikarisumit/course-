@@ -29,7 +29,6 @@ export const getCachedResources = async (types: string[], category?: string, isF
       description: true,
       type: true,
       url: true,
-      fileUrl: true,
       category: true,
       tags: true,
       isFree: true,

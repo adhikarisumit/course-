@@ -53,7 +53,6 @@ export async function PUT(
       description,
       type,
       url,
-      fileUrl,
       category,
       tags,
       isFree,
@@ -68,9 +67,9 @@ export async function PUT(
       )
     }
 
-    if ((type === "software" || type === "link") && !url) {
+    if ((type === "software" || type === "link" || type === "cheatsheet") && !url) {
       return NextResponse.json(
-        { message: "URL is required for software and link types" },
+        { message: "URL is required for all resource types" },
         { status: 400 }
       )
     }
@@ -92,8 +91,7 @@ export async function PUT(
         title,
         description,
         type,
-        url: type === "software" || type === "link" ? url : null,
-        fileUrl: type === "cheatsheet" ? fileUrl : null,
+        url,
         category,
         tags,
         isFree,

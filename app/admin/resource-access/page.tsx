@@ -28,7 +28,6 @@ interface ResourcePurchase {
     description?: string
     type: string
     url?: string
-    fileUrl?: string
     category?: string
     tags?: string
     isFree: boolean
