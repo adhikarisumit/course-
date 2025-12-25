@@ -229,7 +229,7 @@ export default function CheatSheetsPage() {
                       (resource.isFree || hasAccess(resource.id)) ? (
                         <>
                           <ExternalLink className="mr-2 h-4 w-4" />
-                          Visit
+                          Open
                         </>
                       ) : (
                         <>
