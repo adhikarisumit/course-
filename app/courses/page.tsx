@@ -29,9 +29,9 @@ export default async function CoursesPage() {
       <div className="container mx-auto px-4 py-8 md:py-12">
         {/* Back Button */}
         <Button asChild variant="ghost" className="mb-6">
-          <Link href="/">
+          <Link href="/portal/dashboard">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
+            Back to Dashboard
           </Link>
         </Button>
 
