@@ -81,8 +81,12 @@ export default function CheatSheetsPage() {
   }, [resourcePurchases])
 
   const handleVisit = async (resource: Resource) => {
-    // Determine which URL to use (url takes precedence for direct links)
-    const targetUrl = resource.url || resource.fileUrl
+    // Determine which URL to use based on resource type
+    // For cheat sheets, use fileUrl (uploaded file) first, then url
+    // For software and links, use only url (external link)
+    const targetUrl = resource.type === "cheatsheet" 
+      ? (resource.fileUrl || resource.url) 
+      : resource.url
 
     if (!targetUrl) {
       toast.error("No link available")
