@@ -35,8 +35,35 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
     notFound()
   }
 
-  const isEnrolled = course.enrollments && course.enrollments.length > 0
-  const enrollment = isEnrolled ? course.enrollments[0] : null
+  let isEnrolled = course.enrollments && course.enrollments.length > 0
+  let enrollment = isEnrolled ? course.enrollments[0] : null
+
+  // Auto-enroll free courses
+  if (!course.isPaid && !isEnrolled && session?.user) {
+    try {
+      await prisma.enrollment.create({
+        data: {
+          userId: session.user.id,
+          courseId: course.id,
+          enrolledAt: new Date(),
+          expiresAt: new Date(Date.now() + (course.accessDurationMonths || 6) * 30 * 24 * 60 * 60 * 1000), // Approximate months to milliseconds
+        },
+      })
+      // Re-fetch to get the new enrollment
+      const updatedCourse = await prisma.course.findFirst({
+        where: { id },
+        include: {
+          lessons: { orderBy: { order: "asc" } },
+          enrollments: session?.user ? { where: { userId: session.user.id } } : undefined,
+        },
+      }) as any
+      course.enrollments = updatedCourse.enrollments
+      isEnrolled = updatedCourse.enrollments && updatedCourse.enrollments.length > 0
+      enrollment = isEnrolled ? updatedCourse.enrollments[0] : null
+    } catch (error) {
+      // Enrollment might fail if already enrolled, ignore
+    }
+  }
 
   // If course is paid and user is not enrolled, redirect to enrollment page
   if (course.isPaid && !isEnrolled && session?.user) {
