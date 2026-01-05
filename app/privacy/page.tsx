@@ -1,8 +1,12 @@
+import { Header } from "@/components/header"
+
 export default function PrivacyPage() {
   const currentDate = new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="min-h-screen">
+      <Header />
+      <div className="container mx-auto px-4 py-12">
       <div className="max-w-4xl mx-auto prose prose-neutral dark:prose-invert">
         <h1 className="text-4xl font-bold mb-6">Privacy Policy</h1>
         <p className="text-muted-foreground mb-8">Last updated: {currentDate}</p>
@@ -99,6 +103,7 @@ export default function PrivacyPage() {
           If you have questions about this Privacy Policy, please contact us at sumitadhikari2341@gmail.com
         </p>
       </div>
+    </div>
     </div>
   )
 }

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useSession, signOut } from "next-auth/react"
+import { useRouter, usePathname } from "next/navigation"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,16 +19,30 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 interface HeaderProps {
-  searchQuery: string
-  setSearchQuery: (query: string) => void
+  searchQuery?: string
+  setSearchQuery?: (query: string) => void
 }
 
-export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
+export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const router = useRouter()
+  const pathname = usePathname()
   const handleSearch = () => {
     const coursesSection = document.getElementById("courses")
     if (coursesSection) {
       coursesSection.scrollIntoView({ behavior: "smooth" })
+    }
+  }
+
+  const handleMentorClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (pathname === "/") {
+      const mentorSection = document.getElementById("mentor")
+      if (mentorSection) {
+        mentorSection.scrollIntoView({ behavior: "smooth" })
+      }
+    } else {
+      router.push("/#mentor")
     }
   }
 
@@ -145,27 +160,29 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
             <span className="text-xl font-semibold">Proteclink</span>
           </div>
 
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
-            <div className="relative w-full flex gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search courses, notes, resources..."
-                  className="pl-10"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleSearch()
-                    }
-                  }}
-                />
+          {setSearchQuery && (
+            <div className="hidden md:flex flex-1 max-w-md mx-8">
+              <div className="relative w-full flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search courses, notes, resources..."
+                    className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleSearch()
+                      }
+                    }}
+                  />
+                </div>
+                <Button onClick={handleSearch} size="default">
+                  Search
+                </Button>
               </div>
-              <Button onClick={handleSearch} size="default">
-                Search
-              </Button>
             </div>
-          </div>
+          )}
           <nav className="flex items-center gap-6">
             <Link href="/" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
               Home
@@ -173,7 +190,7 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
             <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
               About
             </Link>
-            <Link href="/#mentor" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
+            <Link href="/#mentor" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block" onClick={handleMentorClick}>
               Mentor
             </Link>
             <Link href="/contact" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
@@ -200,26 +217,28 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
         <div className="md:hidden bg-card border-t border-border">
           <div className="container mx-auto px-4 py-3 flex flex-col gap-3">
             {/* Mobile search */}
-            <div className="relative w-full flex gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search courses, notes, resources..."
-                  className="pl-10"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleSearch()
-                      setMobileOpen(false)
-                    }
-                  }}
-                />
+            {setSearchQuery && (
+              <div className="relative w-full flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search courses, notes, resources..."
+                    className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleSearch()
+                        setMobileOpen(false)
+                      }
+                    }}
+                  />
+                </div>
+                <Button onClick={() => { handleSearch(); setMobileOpen(false); }} size="default">
+                  Search
+                </Button>
               </div>
-              <Button onClick={() => { handleSearch(); setMobileOpen(false); }} size="default">
-                Search
-              </Button>
-            </div>
+            )}
             {/* Mobile nav links */}
             <div className="flex flex-col gap-3 border-t border-border pt-3 items-end">
               <Link href="/" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
@@ -228,7 +247,7 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
               <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
                 About
               </Link>
-              <Link href="/#mentor" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
+              <Link href="/#mentor" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={(e) => { handleMentorClick(e); setMobileOpen(false); }}>
                 Mentor
               </Link>
               <Link href="/contact" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
