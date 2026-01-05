@@ -6,7 +6,7 @@ import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { useSession, signOut } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react" // import useSession
 import { useRouter, usePathname } from "next/navigation"
 import {
   DropdownMenu,

@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Loader2, Users, Search, Mail, Calendar, BookOpen, Key, Copy, Check, Download, CheckCircle, Shield } from "lucide-react"
 import { toast } from "sonner"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
@@ -220,6 +221,7 @@ interface User {
   role: string
   profileVerified: boolean
   createdAt: string
+  image: string | null
   _count: {
     enrollments: number
   }
@@ -451,6 +453,14 @@ export default function AdminUsersPage() {
                     >
                       <div className="flex-1 space-y-1 w-full min-w-0">
                         <div className="flex flex-wrap items-center gap-2 min-w-0">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={user.image || undefined} alt={user.name || "User"} />
+                            <AvatarFallback>
+                              {user.name
+                                ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+                                : "U"}
+                            </AvatarFallback>
+                          </Avatar>
                           <p className="font-medium">{user.name || "No name"}</p>
                           <Badge variant="secondary">student</Badge>
                           {user.profileVerified && (
@@ -660,6 +670,14 @@ export default function AdminUsersPage() {
                     >
                       <div className="flex-1 space-y-1 w-full min-w-0">
                         <div className="flex flex-wrap items-center gap-2 min-w-0">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={user.image || undefined} alt={user.name || "User"} />
+                            <AvatarFallback>
+                              {user.name
+                                ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+                                : "U"}
+                            </AvatarFallback>
+                          </Avatar>
                           <p className="font-medium">{user.name || "No name"}</p>
                           <Badge variant="default">admin</Badge>
                         </div>
