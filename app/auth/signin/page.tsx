@@ -9,17 +9,22 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { signIn } from "next-auth/react"
 import { toast } from "sonner"
+import { AlertCircle } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function SignInPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [showVerificationAlert, setShowVerificationAlert] = useState(false)
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   })
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setShowVerificationAlert(false)
 
     try {
       const result = await signIn("credentials", {
@@ -29,7 +34,12 @@ export default function SignInPage() {
       })
 
       if (result?.error) {
-        toast.error("Invalid email or password")
+        // Check if it's an email verification error
+        if (result.error.includes("verify your email")) {
+          setShowVerificationAlert(true)
+        } else {
+          toast.error("Invalid email or password")
+        }
       } else {
         toast.success("Welcome back!")
         // Fetch session to check user role
@@ -61,6 +71,23 @@ export default function SignInPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {showVerificationAlert && (
+            <Alert variant="destructive" className="bg-amber-50 border-amber-200 text-amber-800">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="ml-2">
+                <p className="font-medium">Email not verified</p>
+                <p className="text-sm mt-1">Please verify your email before signing in.</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2 bg-white hover:bg-amber-100 border-amber-300"
+                  onClick={() => router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`)}
+                >
+                  Verify Email
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>

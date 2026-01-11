@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { signIn } from "next-auth/react"
 import { toast } from "sonner"
 
 export default function SignUpPage() {
@@ -76,19 +75,9 @@ export default function SignUpPage() {
         return
       }
 
-      toast.success("Account created successfully!")
-      
-      // Auto sign in after registration
-      const result = await signIn("credentials", {
-        email: formData.email,
-        password: formData.password,
-        redirect: false,
-      })
-
-      if (result?.ok) {
-        router.push("/portal/dashboard")
-        router.refresh()
-      }
+      // Redirect to verify page with email
+      toast.success("Account created! Please enter the verification code sent to your email.")
+      router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`)
     } catch (error) {
       toast.error("Something went wrong")
     } finally {

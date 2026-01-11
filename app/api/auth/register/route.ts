@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import prisma from "@/lib/prisma"
+import { generateVerificationToken } from "@/lib/tokens"
+import { sendVerificationEmail } from "@/lib/email"
 
 export async function POST(req: NextRequest) {
   try {
@@ -107,6 +109,21 @@ export async function POST(req: NextRequest) {
       },
     })
 
+    // Generate verification token
+    const verificationToken = await generateVerificationToken(normalizedEmail)
+
+    // Send verification email
+    const emailResult = await sendVerificationEmail(
+      normalizedEmail,
+      verificationToken.token,
+      name
+    )
+
+    if (!emailResult.success) {
+      console.error("Failed to send verification email:", emailResult.error)
+      // User is created but email failed - they can request a new verification email
+    }
+
     return NextResponse.json(
       {
         user: {
@@ -114,6 +131,8 @@ export async function POST(req: NextRequest) {
           name: user.name,
           email: user.email,
         },
+        message: "Account created successfully. Please check your email to verify your account.",
+        requiresVerification: true,
       },
       { status: 201 }
     )
