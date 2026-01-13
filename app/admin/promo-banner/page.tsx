@@ -86,10 +86,10 @@ export default function PromoBannerPage() {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch('/api/courses');
+      const response = await fetch('/api/admin/courses/list');
       if (response.ok) {
         const data = await response.json();
-        setCourses(data.courses || data || []);
+        setCourses(data || []);
       }
     } catch (error) {
       console.error('Error fetching courses:', error);
@@ -98,7 +98,7 @@ export default function PromoBannerPage() {
 
   const fetchResources = async () => {
     try {
-      const response = await fetch('/api/resources');
+      const response = await fetch('/api/admin/resources');
       if (response.ok) {
         const data = await response.json();
         setResources(data || []);
@@ -295,7 +295,9 @@ export default function PromoBannerPage() {
                   <div className="grid grid-cols-2 gap-2 mb-2">
                     <Select
                       onValueChange={(value) => {
-                        if (value !== 'none') {
+                        if (value === 'all-courses') {
+                          setFormData({ ...formData, linkUrl: '/courses' });
+                        } else if (value && value !== 'none') {
                           setFormData({ ...formData, linkUrl: `/courses/${value}` });
                         }
                       }}
@@ -305,7 +307,7 @@ export default function PromoBannerPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">-- Select Course --</SelectItem>
-                        <SelectItem value="">All Courses (/courses)</SelectItem>
+                        <SelectItem value="all-courses">All Courses (/courses)</SelectItem>
                         {courses.map((course) => (
                           <SelectItem key={course.id} value={course.id}>
                             {course.title}
@@ -315,9 +317,9 @@ export default function PromoBannerPage() {
                     </Select>
                     <Select
                       onValueChange={(value) => {
-                        if (value === 'all') {
+                        if (value === 'all-resources') {
                           setFormData({ ...formData, linkUrl: '/portal/resources' });
-                        } else if (value !== 'none') {
+                        } else if (value && value !== 'none') {
                           setFormData({ ...formData, linkUrl: `/portal/resources#${value}` });
                         }
                       }}
@@ -327,7 +329,7 @@ export default function PromoBannerPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">-- Select Resource --</SelectItem>
-                        <SelectItem value="all">All Resources (/portal/resources)</SelectItem>
+                        <SelectItem value="all-resources">All Resources (/portal/resources)</SelectItem>
                         {resources.map((resource) => (
                           <SelectItem key={resource.id} value={resource.id}>
                             {resource.title}
