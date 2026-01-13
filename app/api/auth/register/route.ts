@@ -121,7 +121,18 @@ export async function POST(req: NextRequest) {
 
     if (!emailResult.success) {
       console.error("Failed to send verification email:", emailResult.error)
-      // User is created but email failed - they can request a new verification email
+      // Delete the user since they won't be able to verify without the email
+      await prisma.user.delete({
+        where: { id: user.id }
+      })
+      // Also delete the verification token
+      await prisma.verificationToken.deleteMany({
+        where: { identifier: normalizedEmail }
+      })
+      return NextResponse.json(
+        { error: "Failed to send verification email. Please check your email address and try again." },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json(
