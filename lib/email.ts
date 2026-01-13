@@ -1,49 +1,62 @@
 import nodemailer from 'nodemailer'
+import { Resend } from 'resend'
 
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'Course Platform'
 
-// Create SMTP transporter
+// Initialize Resend if API key is available
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
+
+// Create SMTP transporter (fallback for local)
 function createTransporter() {
-  const smtpHost = process.env.SMTP_HOST
-  const smtpPort = process.env.SMTP_PORT
   const smtpUser = process.env.SMTP_USER
   const smtpPassword = process.env.SMTP_PASSWORD
 
-  console.log('SMTP Config:', {
-    host: smtpHost || 'NOT SET',
-    port: smtpPort || 'NOT SET', 
-    user: smtpUser || 'NOT SET',
-    passLength: smtpPassword?.length || 0
-  })
-
   if (!smtpUser || !smtpPassword) {
-    throw new Error('SMTP credentials not configured. Set SMTP_USER and SMTP_PASSWORD.')
+    throw new Error('SMTP credentials not configured.')
   }
   
   return nodemailer.createTransport({
-    host: smtpHost || 'smtp.gmail.com',
-    port: parseInt(smtpPort || '587'),
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.SMTP_PORT || '587'),
     secure: process.env.SMTP_SECURE === 'true',
-    auth: {
-      user: smtpUser,
-      pass: smtpPassword,
-    },
+    auth: { user: smtpUser, pass: smtpPassword },
   })
 }
 
-// Helper to send email
+// Helper to send email - uses Resend in production, SMTP locally
 async function sendEmail(to: string, subject: string, html: string) {
-  const fromEmail = process.env.SMTP_USER || 'noreply@example.com'
+  // Use Resend if available (production)
+  if (resend) {
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+    console.log('Sending via Resend to:', to)
+    
+    const { data, error } = await resend.emails.send({
+      from: `${APP_NAME} <${fromEmail}>`,
+      to: [to],
+      subject,
+      html,
+    })
+    
+    if (error) {
+      console.error('Resend error:', error)
+      throw new Error(error.message)
+    }
+    
+    console.log('Email sent via Resend:', data?.id)
+    return { success: true, data }
+  }
   
+  // Fallback to SMTP (local development)
+  console.log('Sending via SMTP to:', to)
   const transporter = createTransporter()
   const info = await transporter.sendMail({
-    from: `"${APP_NAME}" <${fromEmail}>`,
+    from: `"${APP_NAME}" <${process.env.SMTP_USER}>`,
     to,
     subject,
     html,
   })
   
-  console.log('Email sent:', info.messageId)
+  console.log('Email sent via SMTP:', info.messageId)
   return { success: true, data: info }
 }
 
