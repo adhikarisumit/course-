@@ -2,24 +2,49 @@ import nodemailer from 'nodemailer'
 
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'Course Platform'
 
-// Create SMTP transporter dynamically to ensure env vars are loaded
+// Create SMTP transporter
 function createTransporter() {
-  console.log('Creating email transporter with:', {
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    user: process.env.SMTP_USER,
-    passLength: process.env.SMTP_PASSWORD?.length || 0,
+  const smtpHost = process.env.SMTP_HOST
+  const smtpPort = process.env.SMTP_PORT
+  const smtpUser = process.env.SMTP_USER
+  const smtpPassword = process.env.SMTP_PASSWORD
+
+  console.log('SMTP Config:', {
+    host: smtpHost || 'NOT SET',
+    port: smtpPort || 'NOT SET', 
+    user: smtpUser || 'NOT SET',
+    passLength: smtpPassword?.length || 0
   })
+
+  if (!smtpUser || !smtpPassword) {
+    throw new Error('SMTP credentials not configured. Set SMTP_USER and SMTP_PASSWORD.')
+  }
   
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+    host: smtpHost || 'smtp.gmail.com',
+    port: parseInt(smtpPort || '587'),
+    secure: process.env.SMTP_SECURE === 'true',
     auth: {
-      user: process.env.SMTP_USER, // Your email address
-      pass: process.env.SMTP_PASSWORD, // Your app password
+      user: smtpUser,
+      pass: smtpPassword,
     },
   })
+}
+
+// Helper to send email
+async function sendEmail(to: string, subject: string, html: string) {
+  const fromEmail = process.env.SMTP_USER || 'noreply@example.com'
+  
+  const transporter = createTransporter()
+  const info = await transporter.sendMail({
+    from: `"${APP_NAME}" <${fromEmail}>`,
+    to,
+    subject,
+    html,
+  })
+  
+  console.log('Email sent:', info.messageId)
+  return { success: true, data: info }
 }
 
 export async function sendVerificationEmail(
@@ -28,12 +53,8 @@ export async function sendVerificationEmail(
   name?: string
 ) {
   try {
-    const transporter = createTransporter()
-    const info = await transporter.sendMail({
-      from: `"${APP_NAME}" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject: `Your verification code: ${code} - ${APP_NAME}`,
-      html: `
+    const subject = `Your verification code: ${code} - ${APP_NAME}`
+    const html = `
         <!DOCTYPE html>
         <html>
           <head>
@@ -64,14 +85,11 @@ export async function sendVerificationEmail(
             </div>
           </body>
         </html>
-      `,
-    })
+      `
 
-    console.log('Verification email sent:', info.messageId)
-    return { success: true, data: info }
+    return await sendEmail(email, subject, html)
   } catch (error: any) {
     console.error('Error sending verification email:', error?.message || error)
-    console.error('Full error:', JSON.stringify(error, null, 2))
     return { success: false, error: error?.message || 'Failed to send email' }
   }
 }
@@ -82,12 +100,8 @@ export async function sendPasswordResetEmail(
   name?: string
 ) {
   try {
-    const transporter = createTransporter()
-    const info = await transporter.sendMail({
-      from: `"${APP_NAME}" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject: `Your password reset code: ${code} - ${APP_NAME}`,
-      html: `
+    const subject = `Your password reset code: ${code} - ${APP_NAME}`
+    const html = `
         <!DOCTYPE html>
         <html>
           <head>
@@ -118,11 +132,9 @@ export async function sendPasswordResetEmail(
             </div>
           </body>
         </html>
-      `,
-    })
+      `
 
-    console.log('Password reset email sent:', info.messageId)
-    return { success: true, data: info }
+    return await sendEmail(email, subject, html)
   } catch (error: any) {
     console.error('Error sending password reset email:', error?.message || error)
     return { success: false, error: error?.message || 'Failed to send email' }
