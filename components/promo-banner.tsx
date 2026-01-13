@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { X } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
-interface PromoBanner {
+interface PromoBannerData {
   id: string;
   title: string;
   description: string | null;
@@ -16,29 +17,43 @@ interface PromoBanner {
 }
 
 export function PromoBanner() {
-  const [banner, setBanner] = useState<PromoBanner | null>(null);
-  const [isVisible, setIsVisible] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
+  const [banner, setBanner] = useState<PromoBannerData | null>(null);
+  const { data: session } = useSession();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchBanner = async () => {
       try {
-        const response = await fetch('/api/promo-banner');
+        const response = await fetch('/api/promo-banner', {
+          cache: 'no-store',
+        });
         if (response.ok) {
           const data = await response.json();
-          setBanner(data);
+          if (data && data.id) {
+            setBanner(data);
+          }
         }
       } catch (error) {
         console.error('Error fetching promo banner:', error);
-      } finally {
-        setIsLoading(false);
       }
     };
 
     fetchBanner();
   }, []);
 
-  if (isLoading || !banner || !isVisible) {
+  const handleBannerClick = (e: React.MouseEvent) => {
+    if (!banner?.linkUrl) return;
+    
+    // If user is not signed in, redirect to sign in with callback
+    if (!session?.user) {
+      e.preventDefault();
+      const callbackUrl = encodeURIComponent(banner.linkUrl);
+      router.push(`/auth/signin?callbackUrl=${callbackUrl}`);
+    }
+    // If signed in, the Link will handle navigation normally
+  };
+
+  if (!banner) {
     return null;
   }
 
@@ -82,24 +97,20 @@ export function PromoBanner() {
 
   return (
     <div 
-      className="relative w-full"
+      className="relative w-full z-40"
       style={{ backgroundColor: bgColor }}
     >
       {banner.linkUrl ? (
-        <Link href={banner.linkUrl} className="block hover:opacity-95 transition-opacity">
+        <Link 
+          href={banner.linkUrl} 
+          className="block hover:opacity-95 transition-opacity"
+          onClick={handleBannerClick}
+        >
           <BannerContent />
         </Link>
       ) : (
         <BannerContent />
       )}
-      <button
-        onClick={() => setIsVisible(false)}
-        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-white/20 transition-colors"
-        style={{ color: txtColor }}
-        aria-label="Close banner"
-      >
-        <X className="h-4 w-4" />
-      </button>
     </div>
   );
 }

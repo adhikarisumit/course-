@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Plus, Edit, Trash2, Eye, EyeOff, Megaphone, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
@@ -28,6 +29,16 @@ interface PromoBanner {
   createdAt: string;
 }
 
+interface Course {
+  id: string;
+  title: string;
+}
+
+interface Resource {
+  id: string;
+  title: string;
+}
+
 const defaultFormData = {
   title: '',
   description: '',
@@ -43,6 +54,8 @@ const defaultFormData = {
 
 export default function PromoBannerPage() {
   const [banners, setBanners] = useState<PromoBanner[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingBanner, setEditingBanner] = useState<PromoBanner | null>(null);
@@ -50,6 +63,8 @@ export default function PromoBannerPage() {
 
   useEffect(() => {
     fetchBanners();
+    fetchCourses();
+    fetchResources();
   }, []);
 
   const fetchBanners = async () => {
@@ -66,6 +81,30 @@ export default function PromoBannerPage() {
       toast.error('Failed to fetch promo banners');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCourses = async () => {
+    try {
+      const response = await fetch('/api/courses');
+      if (response.ok) {
+        const data = await response.json();
+        setCourses(data.courses || data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+    }
+  };
+
+  const fetchResources = async () => {
+    try {
+      const response = await fetch('/api/resources');
+      if (response.ok) {
+        const data = await response.json();
+        setResources(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching resources:', error);
     }
   };
 
@@ -253,12 +292,59 @@ export default function PromoBannerPage() {
 
                 <div className="grid gap-2">
                   <Label htmlFor="linkUrl">Link URL</Label>
+                  <div className="grid grid-cols-2 gap-2 mb-2">
+                    <Select
+                      onValueChange={(value) => {
+                        if (value !== 'none') {
+                          setFormData({ ...formData, linkUrl: `/courses/${value}` });
+                        }
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a course" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">-- Select Course --</SelectItem>
+                        <SelectItem value="">All Courses (/courses)</SelectItem>
+                        {courses.map((course) => (
+                          <SelectItem key={course.id} value={course.id}>
+                            {course.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select
+                      onValueChange={(value) => {
+                        if (value === 'all') {
+                          setFormData({ ...formData, linkUrl: '/portal/resources' });
+                        } else if (value !== 'none') {
+                          setFormData({ ...formData, linkUrl: `/portal/resources#${value}` });
+                        }
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a resource" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">-- Select Resource --</SelectItem>
+                        <SelectItem value="all">All Resources (/portal/resources)</SelectItem>
+                        {resources.map((resource) => (
+                          <SelectItem key={resource.id} value={resource.id}>
+                            {resource.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <Input
                     id="linkUrl"
-                    placeholder="e.g., /courses, /courses/abc123"
+                    placeholder="e.g., /courses, /courses/abc123, or type custom URL"
                     value={formData.linkUrl}
                     onChange={(e) => setFormData({ ...formData, linkUrl: e.target.value })}
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Select from dropdowns above or type a custom URL
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">

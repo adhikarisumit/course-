@@ -9,8 +9,8 @@ export function HomeClient({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen">
-      <PromoBanner />
       <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      <PromoBanner />
       {children}
     </div>
   )

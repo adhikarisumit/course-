@@ -9,26 +9,18 @@ export async function GET() {
     const banner = await prisma.promoBanner.findFirst({
       where: {
         isActive: true,
-        OR: [
-          // No date restrictions
+        AND: [
           {
-            startDate: null,
-            endDate: null,
+            OR: [
+              { startDate: null },
+              { startDate: { lte: now } },
+            ],
           },
-          // Only start date, must be past
           {
-            startDate: { lte: now },
-            endDate: null,
-          },
-          // Only end date, must be future
-          {
-            startDate: null,
-            endDate: { gte: now },
-          },
-          // Both dates, must be within range
-          {
-            startDate: { lte: now },
-            endDate: { gte: now },
+            OR: [
+              { endDate: null },
+              { endDate: { gte: now } },
+            ],
           },
         ],
       },

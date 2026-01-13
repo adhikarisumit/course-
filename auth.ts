@@ -53,10 +53,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           throw new Error("Invalid credentials")
         }
 
-        // Check if email is verified (skip for admin users)
-        if (!user.emailVerified && user.role !== "admin") {
-          throw new Error("Please verify your email before signing in")
-        }
+        // Email verification is no longer required for sign in
+        // Verification is only enforced during signup process
 
         const isCorrectPassword = await bcrypt.compare(
           credentials.password as string,
