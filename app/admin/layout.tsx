@@ -22,7 +22,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
-import { MessageCircle, LayoutDashboard, Menu, User, LogOut } from "lucide-react"
+import { MessageCircle, LayoutDashboard, Menu, User, LogOut, Megaphone } from "lucide-react"
 import { useSession, signOut } from "next-auth/react"
 
 const SUPER_ADMIN_EMAIL = "sumitadhikari2341@gmail.com"
@@ -101,6 +101,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </Link>
         <Link href="/admin/resources" className={linkClass} onClick={handleClick}>
           Resources
+        </Link>
+        <Link href="/admin/promo-banner" className={linkClass} onClick={handleClick}>
+          Promo Banner
         </Link>
         <Link href="/admin/analytics" className={linkClass} onClick={handleClick}>
           Analytics

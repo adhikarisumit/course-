@@ -28,6 +28,7 @@ async function createAdminUser() {
           role: "admin",
           isFrozen: false,
           profileVerified: true,
+          emailVerified: new Date(),
           sessionVersion: 0,
         }
       })
@@ -46,6 +47,7 @@ async function createAdminUser() {
           role: "admin",
           isFrozen: false,
           profileVerified: true,
+          emailVerified: new Date(),
           sessionVersion: 0,
         }
       })

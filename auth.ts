@@ -53,8 +53,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           throw new Error("Invalid credentials")
         }
 
-        // Check if email is verified
-        if (!user.emailVerified) {
+        // Check if email is verified (skip for admin users)
+        if (!user.emailVerified && user.role !== "admin") {
           throw new Error("Please verify your email before signing in")
         }
 
