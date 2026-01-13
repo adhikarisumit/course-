@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if user is super admin by email
-    const SUPER_ADMIN_EMAIL = "sumitadhikari2341@gmail.com"
+    const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || ""
     const isSuperAdmin = session.user.email === SUPER_ADMIN_EMAIL
 
     if (!isSuperAdmin) {

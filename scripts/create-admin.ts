@@ -1,12 +1,18 @@
 import prisma from "../lib/prisma"
 import bcrypt from "bcryptjs"
+import "dotenv/config"
 
 async function createAdminUser() {
   try {
-    // Admin credentials - these should be consistent
-    const email = "sumitadhikari2341@gmail.com"
-    const password = "C242N012b.."
-    const name = "Super Admin"
+    // Admin credentials from environment variables
+    const email = process.env.SUPER_ADMIN_EMAIL
+    const password = process.env.SUPER_ADMIN_PASSWORD
+    const name = process.env.SUPER_ADMIN_NAME || "Super Admin"
+
+    if (!email || !password) {
+      console.error("❌ SUPER_ADMIN_EMAIL and SUPER_ADMIN_PASSWORD must be set in .env file")
+      process.exit(1)
+    }
 
     console.log("🔐 Setting up super admin user...")
 

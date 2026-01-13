@@ -3,7 +3,7 @@ import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
-const SUPER_ADMIN_EMAIL = "sumitadhikari2341@gmail.com"
+const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || ""
 
 export async function GET(request: NextRequest) {
   try {

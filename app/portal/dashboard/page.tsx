@@ -50,7 +50,7 @@ export default async function DashboardPage() {
     .toUpperCase() || "U"
 
   // Find the super admin user to chat with
-  const admin = await prisma.user.findFirst({ where: { email: "sumitadhikari2341@gmail.com", role: "admin" } });
+  const admin = await prisma.user.findFirst({ where: { email: process.env.SUPER_ADMIN_EMAIL, role: "admin" } });
 
   return (
     <div className="min-h-screen bg-background">

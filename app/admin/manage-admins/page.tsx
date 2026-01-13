@@ -12,8 +12,6 @@ import { Loader2, UserPlus, Shield, Mail, Calendar, AlertCircle, Trash2 } from "
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
-const SUPER_ADMIN_EMAIL = "sumitadhikari2341@gmail.com"
-
 interface Admin {
   id: string
   name: string | null
@@ -30,24 +28,40 @@ export default function ManageAdminsPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [creating, setCreating] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [superAdminEmail, setSuperAdminEmail] = useState<string>("")
   const [newAdmin, setNewAdmin] = useState({
     name: "",
     email: "",
     password: "",
   })
 
-  const isSuperAdmin = session?.user?.email === SUPER_ADMIN_EMAIL
+  const isSuperAdmin = session?.user?.email === superAdminEmail && superAdminEmail !== ""
 
   useEffect(() => {
-    if (session && !isSuperAdmin) {
+    const fetchSuperAdminEmail = async () => {
+      try {
+        const response = await fetch("/api/admin/super-admin-email")
+        if (response.ok) {
+          const data = await response.json()
+          setSuperAdminEmail(data.superAdminEmail)
+        }
+      } catch (error) {
+        console.error("Failed to fetch super admin email")
+      }
+    }
+    fetchSuperAdminEmail()
+  }, [])
+
+  useEffect(() => {
+    if (session && superAdminEmail && !isSuperAdmin) {
       toast.error("Access denied: Only super admin can manage admins")
       router.push("/admin")
       return
     }
-    if (session) {
+    if (session && superAdminEmail) {
       loadAdmins()
     }
-  }, [session, isSuperAdmin, router])
+  }, [session, isSuperAdmin, superAdminEmail, router])
 
   const loadAdmins = async () => {
     try {
@@ -101,7 +115,7 @@ export default function ManageAdminsPage() {
   }
 
   const handleDeleteAdmin = async (adminId: string, adminEmail: string) => {
-    if (adminEmail === SUPER_ADMIN_EMAIL) {
+    if (adminEmail === superAdminEmail) {
       toast.error("Cannot delete super admin")
       return
     }
@@ -251,7 +265,7 @@ export default function ManageAdminsPage() {
               <p className="font-medium">{session.user?.name || "Super Admin"}</p>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="h-3 w-3" />
-                <span>{SUPER_ADMIN_EMAIL}</span>
+                <span>{superAdminEmail}</span>
               </div>
             </div>
             <Badge className="bg-primary">Super Admin</Badge>
@@ -285,7 +299,7 @@ export default function ManageAdminsPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-medium">{admin.name || "No name"}</p>
                       <Badge variant="secondary">
-                        {admin.email === SUPER_ADMIN_EMAIL ? "Super Admin" : "Manager"}
+                        {admin.email === superAdminEmail ? "Super Admin" : "Manager"}
                       </Badge>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground">
@@ -299,7 +313,7 @@ export default function ManageAdminsPage() {
                       </div>
                     </div>
                   </div>
-                  {admin.email !== SUPER_ADMIN_EMAIL && (
+                  {admin.email !== superAdminEmail && (
                     <div className="flex sm:block justify-end">
                       <Button
                         variant="destructive"

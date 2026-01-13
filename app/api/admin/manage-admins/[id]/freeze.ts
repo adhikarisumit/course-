@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
 
-const SUPER_ADMIN_EMAIL = "sumitadhikari2341@gmail.com"
+const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || ""
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
