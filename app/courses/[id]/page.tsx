@@ -88,9 +88,6 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
     <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
       <div className="container mx-auto px-4 py-8">
         {/* Course Header */}
-        </Button>
-
-        {/* Course Header */}
         <div className="grid lg:grid-cols-3 gap-8 mb-8">
           <div className="lg:col-span-2">
             {/* Course Video or Image */}
