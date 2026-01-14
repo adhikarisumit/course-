@@ -6,8 +6,9 @@ import { useSession } from "next-auth/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ExternalLink, Settings, Eye, EyeOff, RefreshCw, Clock } from "lucide-react"
+import { ExternalLink, Settings, Eye, EyeOff, RefreshCw, Clock, Search, X } from "lucide-react"
 import { toast } from "sonner"
+import { Input } from "@/components/ui/input"
 import { optimizedDbQueries, PerformanceMonitor } from "@/lib/performance"
 import { ResourceGridSkeleton } from "@/components/skeletons"
 
@@ -36,6 +37,7 @@ export default function SoftwaresPage() {
   const [resourcePurchases, setResourcePurchases] = useState<ResourcePurchase[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
   const { data: session } = useSession()
   const router = useRouter()
 
@@ -157,6 +159,18 @@ const handlePurchase = useCallback(async (resource: Resource) => {
     )
   }, [resources])
 
+  // Filter by search query
+  const searchFilteredResources = useMemo(() => {
+    if (!searchQuery.trim()) return filteredResources
+    const query = searchQuery.toLowerCase()
+    return filteredResources.filter(r => 
+      r.title.toLowerCase().includes(query) ||
+      r.description?.toLowerCase().includes(query) ||
+      r.category?.toLowerCase().includes(query) ||
+      r.tags?.toLowerCase().includes(query)
+    )
+  }, [filteredResources, searchQuery])
+
   const getTypeIcon = (type: string) => {
     switch (type) {
       case "software":
@@ -210,15 +224,47 @@ const handlePurchase = useCallback(async (resource: Resource) => {
         </div>
       </div>
 
-      {resources.length === 0 ? (
+      {/* Search Input */}
+      <div className="mb-6">
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search software & links..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 pr-10"
+          />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+              onClick={() => setSearchQuery("")}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {searchFilteredResources.length === 0 ? (
         <div className="text-center py-12">
           <Settings className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No resources available</h3>
-          <p className="text-muted-foreground">Check back later for new tools and links</p>
+          <h3 className="text-lg font-semibold mb-2">
+            {searchQuery ? "No resources found" : "No resources available"}
+          </h3>
+          <p className="text-muted-foreground">
+            {searchQuery ? `No resources match "${searchQuery}"` : "Check back later for new tools and links"}
+          </p>
+          {searchQuery && (
+            <Button variant="outline" className="mt-4" onClick={() => setSearchQuery("")}>
+              Clear search
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredResources.map((resource) => (
+          {searchFilteredResources.map((resource) => (
             <Card key={resource.id} className="overflow-hidden">
               <CardHeader>
                 <div className="flex items-start justify-between">

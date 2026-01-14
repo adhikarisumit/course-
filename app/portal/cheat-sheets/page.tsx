@@ -1,13 +1,14 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { FileText, ExternalLink, Eye, EyeOff, RefreshCw } from "lucide-react"
+import { FileText, ExternalLink, Eye, EyeOff, RefreshCw, Search, X } from "lucide-react"
 import { toast } from "sonner"
+import { Input } from "@/components/ui/input"
 
 interface Resource {
   id: string
@@ -35,6 +36,7 @@ export default function CheatSheetsPage() {
   const [resourcePurchases, setResourcePurchases] = useState<ResourcePurchase[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
   const { data: session } = useSession()
   const router = useRouter()
 
@@ -145,6 +147,18 @@ export default function CheatSheetsPage() {
     }
   }, [router])
 
+  // Filter resources by search query
+  const filteredResources = useMemo(() => {
+    if (!searchQuery.trim()) return resources
+    const query = searchQuery.toLowerCase()
+    return resources.filter(r => 
+      r.title.toLowerCase().includes(query) ||
+      r.description?.toLowerCase().includes(query) ||
+      r.category?.toLowerCase().includes(query) ||
+      r.tags?.toLowerCase().includes(query)
+    )
+  }, [resources, searchQuery])
+
   if (loading) {
     return (
       <div className="container mx-auto p-4 md:p-6">
@@ -175,15 +189,47 @@ export default function CheatSheetsPage() {
         </div>
       </div>
 
-      {resources.length === 0 ? (
+      {/* Search Input */}
+      <div className="mb-6">
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search cheat sheets..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 pr-10"
+          />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+              onClick={() => setSearchQuery("")}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {filteredResources.length === 0 ? (
         <div className="text-center py-12">
           <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No cheat sheets available</h3>
-          <p className="text-muted-foreground">Check back later for new resources</p>
+          <h3 className="text-lg font-semibold mb-2">
+            {searchQuery ? "No cheat sheets found" : "No cheat sheets available"}
+          </h3>
+          <p className="text-muted-foreground">
+            {searchQuery ? `No cheat sheets match "${searchQuery}"` : "Check back later for new resources"}
+          </p>
+          {searchQuery && (
+            <Button variant="outline" className="mt-4" onClick={() => setSearchQuery("")}>
+              Clear search
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {resources.map((resource) => (
+          {filteredResources.map((resource) => (
             <Card key={resource.id} className="overflow-hidden">
               <CardHeader>
                 <div className="flex items-start justify-between">

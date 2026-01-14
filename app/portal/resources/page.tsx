@@ -7,9 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { FileText, ExternalLink, Settings, Eye, EyeOff, RefreshCw, Package } from "lucide-react"
+import { FileText, ExternalLink, Settings, Eye, EyeOff, RefreshCw, Package, Search, X } from "lucide-react"
 import { toast } from "sonner"
 import { ResourceGridSkeleton } from "@/components/skeletons"
+import { Input } from "@/components/ui/input"
 
 interface Resource {
   id: string
@@ -38,6 +39,7 @@ export default function ResourcesPage() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [activeTab, setActiveTab] = useState("all")
+  const [searchQuery, setSearchQuery] = useState("")
   const { data: session } = useSession()
   const router = useRouter()
 
@@ -149,13 +151,27 @@ export default function ResourcesPage() {
     }
   }, [router])
 
-  // Filter resources by type
+  // Filter resources by type and search query
   const filteredResources = useMemo(() => {
-    if (activeTab === "all") return resources
-    if (activeTab === "cheatsheets") return resources.filter(r => r.type === "cheatsheet")
-    if (activeTab === "software") return resources.filter(r => r.type === "software" || r.type === "link")
-    return resources
-  }, [resources, activeTab])
+    let filtered = resources
+    
+    // Filter by tab
+    if (activeTab === "cheatsheets") filtered = filtered.filter(r => r.type === "cheatsheet")
+    else if (activeTab === "software") filtered = filtered.filter(r => r.type === "software" || r.type === "link")
+    
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(r => 
+        r.title.toLowerCase().includes(query) ||
+        r.description?.toLowerCase().includes(query) ||
+        r.category?.toLowerCase().includes(query) ||
+        r.tags?.toLowerCase().includes(query)
+      )
+    }
+    
+    return filtered
+  }, [resources, activeTab, searchQuery])
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -228,6 +244,29 @@ export default function ResourcesPage() {
         </div>
       </div>
 
+      {/* Search Input */}
+      <div className="mb-6">
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search resources by title, description, category..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 pr-10"
+          />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+              onClick={() => setSearchQuery("")}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
@@ -239,8 +278,17 @@ export default function ResourcesPage() {
       {filteredResources.length === 0 ? (
         <div className="text-center py-12">
           <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No resources available</h3>
-          <p className="text-muted-foreground">Check back later for new resources</p>
+          <h3 className="text-lg font-semibold mb-2">
+            {searchQuery ? "No resources found" : "No resources available"}
+          </h3>
+          <p className="text-muted-foreground">
+            {searchQuery ? `No resources match "${searchQuery}"` : "Check back later for new resources"}
+          </p>
+          {searchQuery && (
+            <Button variant="outline" className="mt-4" onClick={() => setSearchQuery("")}>
+              Clear search
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
