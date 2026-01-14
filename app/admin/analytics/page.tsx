@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2, TrendingUp, Users, BookOpen, DollarSign, Award, Activity } from "lucide-react"
+import { Loader2, TrendingUp, Users, BookOpen, DollarSign, Award, Activity, FolderOpen, Download, MousePointerClick, Package } from "lucide-react"
 import { toast } from "sonner"
+import { Badge } from "@/components/ui/badge"
 
 interface AnalyticsData {
   revenue: {
@@ -12,6 +13,16 @@ interface AnalyticsData {
     thisMonth: number
     lastMonth: number
     growth: number
+    courses: {
+      total: number
+      thisMonth: number
+      lastMonth: number
+    }
+    resources: {
+      total: number
+      thisMonth: number
+      lastMonth: number
+    }
   }
   enrollments: {
     total: number
@@ -34,6 +45,9 @@ interface AnalyticsData {
   }
   resources: {
     active: number
+    totalDownloads: number
+    totalClicks: number
+    totalPurchases: number
   }
   completion: {
     rate: number
@@ -50,6 +64,14 @@ interface AnalyticsData {
     enrollments: number
     revenue: number
     completionRate: number
+  }>
+  topResources: Array<{
+    id: string
+    title: string
+    type: string
+    purchases: number
+    revenue: number
+    price: number
   }>
 }
 
@@ -105,40 +127,41 @@ export default function AdminAnalyticsPage() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList>
+        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="revenue">Revenue</TabsTrigger>
           <TabsTrigger value="courses">Courses</TabsTrigger>
-          <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="resources">Resources</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
           {/* Key Metrics */}
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            <Card>
+            <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <DollarSign className="h-4 w-4 text-green-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">¥{analytics.revenue.total.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-green-600">¥{analytics.revenue.total.toLocaleString()}</div>
                 <p className="text-xs text-muted-foreground mt-1">
                   {analytics.revenue.growth >= 0 ? "+" : ""}
                   {analytics.revenue.growth.toFixed(1)}% from last month
                 </p>
-                <div className="flex items-center mt-2 text-xs text-muted-foreground">
-                  <TrendingUp className="h-3 w-3 mr-1" />
-                  ¥{analytics.revenue.thisMonth.toLocaleString()} this month
+                <div className="flex items-center gap-2 mt-2 text-xs">
+                  <Badge variant="outline" className="text-xs">Courses: ¥{analytics.revenue.courses.total.toLocaleString()}</Badge>
+                  <Badge variant="outline" className="text-xs">Resources: ¥{analytics.revenue.resources.total.toLocaleString()}</Badge>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Enrollments</CardTitle>
-                <BookOpen className="h-4 w-4 text-muted-foreground" />
+                <BookOpen className="h-4 w-4 text-blue-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{analytics.enrollments.total}</div>
+                <div className="text-2xl font-bold text-blue-600">{analytics.enrollments.total}</div>
                 <p className="text-xs text-muted-foreground mt-1">
                   {analytics.enrollments.growth >= 0 ? "+" : ""}
                   {analytics.enrollments.growth.toFixed(1)}% from last month
@@ -150,13 +173,13 @@ export default function AdminAnalyticsPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className="h-4 w-4 text-purple-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{analytics.users.total}</div>
+                <div className="text-2xl font-bold text-purple-600">{analytics.users.total}</div>
                 <p className="text-xs text-muted-foreground mt-1">
                   {analytics.users.growth >= 0 ? "+" : ""}
                   {analytics.users.growth.toFixed(1)}% from last month
@@ -168,6 +191,26 @@ export default function AdminAnalyticsPage() {
               </CardContent>
             </Card>
 
+            <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Active Resources</CardTitle>
+                <FolderOpen className="h-4 w-4 text-amber-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-amber-600">{analytics.resources.active}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {analytics.resources.totalPurchases} purchases
+                </p>
+                <div className="flex items-center mt-2 text-xs text-muted-foreground">
+                  <Download className="h-3 w-3 mr-1" />
+                  {analytics.resources.totalDownloads} downloads
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Secondary Metrics */}
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
@@ -178,10 +221,45 @@ export default function AdminAnalyticsPage() {
                 <p className="text-xs text-muted-foreground mt-1">
                   {analytics.completion.completed} completed courses
                 </p>
-                <div className="flex items-center mt-2 text-xs text-muted-foreground">
-                  <Activity className="h-3 w-3 mr-1" />
-                  {analytics.completion.inProgress} in progress
-                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">This Month Revenue</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">¥{analytics.revenue.thisMonth.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Courses: ¥{analytics.revenue.courses.thisMonth.toLocaleString()} | Resources: ¥{analytics.revenue.resources.thisMonth.toLocaleString()}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Courses</CardTitle>
+                <BookOpen className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics.courses.total}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {analytics.courses.published} published, {analytics.courses.draft} draft
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Resource Clicks</CardTitle>
+                <MousePointerClick className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics.resources.totalClicks}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Total link clicks
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -333,92 +411,319 @@ export default function AdminAnalyticsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="users" className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card>
+        {/* Revenue Tab */}
+        <TabsContent value="revenue" className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Total Revenue Card */}
+            <Card className="md:col-span-2">
               <CardHeader>
-                <CardTitle>User Growth</CardTitle>
-                <CardDescription>New users this month</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="h-5 w-5 text-green-600" />
+                  Total Revenue Breakdown
+                </CardTitle>
+                <CardDescription>Combined revenue from courses and resources</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{analytics.users.thisMonth}</div>
-                <p className="text-sm text-muted-foreground mt-2">
-                  {analytics.users.growth >= 0 ? "+" : ""}
-                  {analytics.users.growth.toFixed(1)}% from last month ({analytics.users.lastMonth} users)
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Student Enrollment</CardTitle>
-                <CardDescription>Active learners</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{analytics.users.byRole.student}</div>
-                <p className="text-sm text-muted-foreground mt-2">
-                  {((analytics.users.byRole.student / analytics.users.total) * 100).toFixed(1)}% of all users
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Avg Enrollments</CardTitle>
-                <CardDescription>Per student</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">
-                  {analytics.users.byRole.student > 0
-                    ? (analytics.enrollments.total / analytics.users.byRole.student).toFixed(1)
-                    : "0"}
+                <div className="grid gap-6 md:grid-cols-3">
+                  <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg text-center">
+                    <p className="text-3xl font-bold text-green-700 dark:text-green-300">
+                      ¥{analytics.revenue.total.toLocaleString()}
+                    </p>
+                    <p className="text-sm text-green-600 dark:text-green-400">Total Revenue</p>
+                  </div>
+                  <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg text-center">
+                    <p className="text-3xl font-bold text-blue-700 dark:text-blue-300">
+                      ¥{analytics.revenue.courses.total.toLocaleString()}
+                    </p>
+                    <p className="text-sm text-blue-600 dark:text-blue-400">Course Revenue</p>
+                  </div>
+                  <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg text-center">
+                    <p className="text-3xl font-bold text-purple-700 dark:text-purple-300">
+                      ¥{analytics.revenue.resources.total.toLocaleString()}
+                    </p>
+                    <p className="text-sm text-purple-600 dark:text-purple-400">Resource Revenue</p>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground mt-2">
-                  courses per student
+              </CardContent>
+            </Card>
+
+            {/* Course Revenue */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5 text-blue-600" />
+                  Course Revenue
+                </CardTitle>
+                <CardDescription>Monthly course sales performance</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                  <span className="text-sm font-medium">This Month</span>
+                  <span className="text-lg font-bold text-blue-600">¥{analytics.revenue.courses.thisMonth.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                  <span className="text-sm font-medium">Last Month</span>
+                  <span className="text-lg font-bold">¥{analytics.revenue.courses.lastMonth.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                  <span className="text-sm font-medium">All Time</span>
+                  <span className="text-lg font-bold">¥{analytics.revenue.courses.total.toLocaleString()}</span>
+                </div>
+                <div className="pt-2">
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span>Share of Total Revenue</span>
+                    <span className="font-medium">
+                      {analytics.revenue.total > 0 
+                        ? ((analytics.revenue.courses.total / analytics.revenue.total) * 100).toFixed(1)
+                        : 0}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-secondary rounded-full h-2">
+                    <div
+                      className="bg-blue-600 h-2 rounded-full"
+                      style={{
+                        width: `${analytics.revenue.total > 0 
+                          ? (analytics.revenue.courses.total / analytics.revenue.total) * 100
+                          : 0}%`
+                      }}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Resource Revenue */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FolderOpen className="h-5 w-5 text-purple-600" />
+                  Resource Revenue
+                </CardTitle>
+                <CardDescription>Monthly resource sales performance</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                  <span className="text-sm font-medium">This Month</span>
+                  <span className="text-lg font-bold text-purple-600">¥{analytics.revenue.resources.thisMonth.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                  <span className="text-sm font-medium">Last Month</span>
+                  <span className="text-lg font-bold">¥{analytics.revenue.resources.lastMonth.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                  <span className="text-sm font-medium">All Time</span>
+                  <span className="text-lg font-bold">¥{analytics.revenue.resources.total.toLocaleString()}</span>
+                </div>
+                <div className="pt-2">
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span>Share of Total Revenue</span>
+                    <span className="font-medium">
+                      {analytics.revenue.total > 0 
+                        ? ((analytics.revenue.resources.total / analytics.revenue.total) * 100).toFixed(1)
+                        : 0}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-secondary rounded-full h-2">
+                    <div
+                      className="bg-purple-600 h-2 rounded-full"
+                      style={{
+                        width: `${analytics.revenue.total > 0 
+                          ? (analytics.revenue.resources.total / analytics.revenue.total) * 100
+                          : 0}%`
+                      }}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Monthly Comparison */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Monthly Comparison</CardTitle>
+              <CardDescription>Revenue growth this month vs last month</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-4">
+                  <h4 className="font-medium">This Month</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Courses</span>
+                      <span className="font-medium">¥{analytics.revenue.courses.thisMonth.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Resources</span>
+                      <span className="font-medium">¥{analytics.revenue.resources.thisMonth.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm border-t pt-2">
+                      <span className="font-medium">Total</span>
+                      <span className="font-bold text-green-600">¥{analytics.revenue.thisMonth.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <h4 className="font-medium">Last Month</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Courses</span>
+                      <span className="font-medium">¥{analytics.revenue.courses.lastMonth.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Resources</span>
+                      <span className="font-medium">¥{analytics.revenue.resources.lastMonth.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm border-t pt-2">
+                      <span className="font-medium">Total</span>
+                      <span className="font-bold">¥{analytics.revenue.lastMonth.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Month-over-Month Growth</span>
+                  <span className={`text-lg font-bold ${analytics.revenue.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {analytics.revenue.growth >= 0 ? '+' : ''}{analytics.revenue.growth.toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Resources Tab */}
+        <TabsContent value="resources" className="space-y-6">
+          {/* Resource Metrics */}
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Resource Revenue</CardTitle>
+                <DollarSign className="h-4 w-4 text-purple-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-purple-600">¥{analytics.revenue.resources.total.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  ¥{analytics.revenue.resources.thisMonth.toLocaleString()} this month
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Purchases</CardTitle>
+                <Package className="h-4 w-4 text-blue-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">{analytics.resources.totalPurchases}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Paid resource purchases
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Downloads</CardTitle>
+                <Download className="h-4 w-4 text-green-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">{analytics.resources.totalDownloads}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  File downloads
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Clicks</CardTitle>
+                <MousePointerClick className="h-4 w-4 text-amber-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-amber-600">{analytics.resources.totalClicks}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Link clicks
                 </p>
               </CardContent>
             </Card>
           </div>
 
+          {/* Top Resources */}
           <Card>
             <CardHeader>
-              <CardTitle>Engagement Metrics</CardTitle>
-              <CardDescription>User activity and course completion</CardDescription>
+              <CardTitle>Top Selling Resources</CardTitle>
+              <CardDescription>Resources ranked by purchases and revenue</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Completion Rate</span>
-                    <span className="text-sm font-bold">{analytics.completion.rate.toFixed(1)}%</span>
-                  </div>
-                  <div className="w-full bg-secondary rounded-full h-3">
-                    <div
-                      className="bg-green-600 h-3 rounded-full transition-all"
-                      style={{ width: `${analytics.completion.rate}%` }}
-                    />
-                  </div>
+              {analytics.topResources.length === 0 ? (
+                <div className="text-center py-8">
+                  <FolderOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No paid resource sales yet</p>
+                  <p className="text-sm text-muted-foreground mt-1">Resource revenue will appear here when users purchase paid resources</p>
                 </div>
+              ) : (
+                <div className="space-y-4">
+                  {analytics.topResources.map((resource, index) => (
+                    <div
+                      key={resource.id}
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500/10 text-purple-600 font-bold">
+                          {index + 1}
+                        </div>
+                        <div>
+                          <p className="font-medium">{resource.title}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="outline" className="text-xs">{resource.type}</Badge>
+                            <span className="text-sm text-muted-foreground">
+                              {resource.purchases} purchase{resource.purchases !== 1 ? "s" : ""}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-purple-600">¥{resource.revenue.toLocaleString()}</p>
+                        <p className="text-sm text-muted-foreground">
+                          ¥{resource.price.toLocaleString()} each
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-                <div className="grid gap-4 md:grid-cols-3 pt-4">
-                  <div className="text-center p-4 bg-green-50 dark:bg-green-950 rounded-lg">
-                    <p className="text-2xl font-bold text-green-700 dark:text-green-300">
-                      {analytics.completion.completed}
-                    </p>
-                    <p className="text-sm text-green-600 dark:text-green-400">Completed</p>
-                  </div>
-                  <div className="text-center p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
-                    <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-                      {analytics.completion.inProgress}
-                    </p>
-                    <p className="text-sm text-blue-600 dark:text-blue-400">In Progress</p>
-                  </div>
-                  <div className="text-center p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                    <p className="text-2xl font-bold text-gray-700 dark:text-gray-300">
-                      {analytics.completion.notStarted}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Not Started</p>
-                  </div>
+          {/* Resource Stats */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Resource Statistics</CardTitle>
+              <CardDescription>Overview of all active resources</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-4">
+                <div className="p-4 bg-muted/50 rounded-lg text-center">
+                  <p className="text-2xl font-bold">{analytics.resources.active}</p>
+                  <p className="text-sm text-muted-foreground">Active Resources</p>
+                </div>
+                <div className="p-4 bg-muted/50 rounded-lg text-center">
+                  <p className="text-2xl font-bold">{analytics.resources.totalPurchases}</p>
+                  <p className="text-sm text-muted-foreground">Total Purchases</p>
+                </div>
+                <div className="p-4 bg-muted/50 rounded-lg text-center">
+                  <p className="text-2xl font-bold">{analytics.resources.totalDownloads}</p>
+                  <p className="text-sm text-muted-foreground">Total Downloads</p>
+                </div>
+                <div className="p-4 bg-muted/50 rounded-lg text-center">
+                  <p className="text-2xl font-bold">
+                    {analytics.resources.totalPurchases > 0 
+                      ? `¥${(analytics.revenue.resources.total / analytics.resources.totalPurchases).toFixed(0)}`
+                      : '¥0'}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Avg. Purchase Value</p>
                 </div>
               </div>
             </CardContent>

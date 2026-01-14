@@ -13,10 +13,10 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Return all purchases (including pending) so user can see request status
     const resourcePurchases = await prisma.resourcePurchase.findMany({
       where: {
         userId: session.user.id,
-        status: "completed"
       },
       select: {
         id: true,

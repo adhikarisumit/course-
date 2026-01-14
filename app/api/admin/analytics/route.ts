@@ -33,7 +33,12 @@ export async function GET(_request: NextRequest) {
       totalUsers,
       usersByRole,
       courseStats,
+      allCourses,
       resourceStats,
+      resourcePurchasesThisMonth,
+      resourcePurchasesLastMonth,
+      allResourcePurchases,
+      topResources,
       paymentStats,
       topCoursesData
     ] = await Promise.all([
@@ -87,10 +92,58 @@ export async function GET(_request: NextRequest) {
         _avg: { price: true }
       }),
 
+      // All courses for draft count
+      prisma.course.findMany({
+        select: { isPublished: true }
+      }),
+
       // Resource statistics
       prisma.resource.aggregate({
         _count: { id: true },
+        _sum: { downloadCount: true, clickCount: true },
         where: { isActive: true }
+      }),
+
+      // Resource purchases this month (only completed/approved)
+      prisma.resourcePurchase.findMany({
+        where: { 
+          createdAt: { gte: firstDayThisMonth },
+          status: "completed"
+        },
+        select: { amount: true }
+      }),
+
+      // Resource purchases last month (only completed/approved)
+      prisma.resourcePurchase.findMany({
+        where: {
+          createdAt: { gte: firstDayLastMonth, lte: lastDayLastMonth },
+          status: "completed"
+        },
+        select: { amount: true }
+      }),
+
+      // All resource purchases (only completed/approved)
+      prisma.resourcePurchase.findMany({
+        where: { status: "completed" },
+        select: { amount: true, resourceId: true }
+      }),
+
+      // Top resources by purchases (only completed/approved)
+      prisma.resource.findMany({
+        where: { isFree: false, isActive: true },
+        include: {
+          _count: { 
+            select: { 
+              purchases: { where: { status: "completed" } } 
+            } 
+          },
+          purchases: { 
+            where: { status: "completed" },
+            select: { amount: true } 
+          }
+        },
+        orderBy: { purchases: { _count: 'desc' } },
+        take: 5
       }),
 
       // Payment statistics
@@ -153,6 +206,30 @@ export async function GET(_request: NextRequest) {
       completionRate: 0 // TODO: Calculate completion rate
     }))
 
+    // Calculate resource revenue
+    const resourceRevenueThisMonth = resourcePurchasesThisMonth.reduce((sum, p) => sum + (p.amount || 0), 0)
+    const resourceRevenueLastMonth = resourcePurchasesLastMonth.reduce((sum, p) => sum + (p.amount || 0), 0)
+    const totalResourceRevenue = allResourcePurchases.reduce((sum, p) => sum + (p.amount || 0), 0)
+
+    // Format top resources
+    const formattedTopResources = topResources.map(resource => ({
+      id: resource.id,
+      title: resource.title,
+      type: resource.type,
+      purchases: resource._count.purchases,
+      revenue: resource.purchases.reduce((sum, p) => sum + (p.amount || 0), 0),
+      price: resource.price || 0
+    }))
+
+    // Count draft courses
+    const draftCourses = allCourses.filter(c => !c.isPublished).length
+    const publishedCourses = allCourses.filter(c => c.isPublished).length
+
+    // Calculate combined revenue (courses + resources)
+    const combinedRevenueThisMonth = revenueThisMonth + resourceRevenueThisMonth
+    const combinedRevenueLastMonth = revenueLastMonth + resourceRevenueLastMonth
+    const totalCombinedRevenue = totalRevenueAmount + totalResourceRevenue
+
     const analytics = {
       enrollments: {
         thisMonth: enrollmentsThisMonth,
@@ -162,11 +239,22 @@ export async function GET(_request: NextRequest) {
           ((enrollmentsThisMonth - enrollmentsLastMonth) / enrollmentsLastMonth * 100) : 0
       },
       revenue: {
-        thisMonth: revenueThisMonth,
-        lastMonth: revenueLastMonth,
-        total: totalRevenueAmount,
-        growth: revenueLastMonth > 0 ?
-          ((revenueThisMonth - revenueLastMonth) / revenueLastMonth * 100) : 0
+        thisMonth: combinedRevenueThisMonth,
+        lastMonth: combinedRevenueLastMonth,
+        total: totalCombinedRevenue,
+        growth: combinedRevenueLastMonth > 0 ?
+          ((combinedRevenueThisMonth - combinedRevenueLastMonth) / combinedRevenueLastMonth * 100) : 0,
+        // Breakdown
+        courses: {
+          thisMonth: revenueThisMonth,
+          lastMonth: revenueLastMonth,
+          total: totalRevenueAmount
+        },
+        resources: {
+          thisMonth: resourceRevenueThisMonth,
+          lastMonth: resourceRevenueLastMonth,
+          total: totalResourceRevenue
+        }
       },
       users: {
         thisMonth: usersThisMonth,
@@ -177,13 +265,16 @@ export async function GET(_request: NextRequest) {
         byRole: formattedUsersByRole
       },
       courses: {
-        total: courseStats._count.id, // Assuming all courses are counted, not just published
-        published: courseStats._count.id,
-        draft: 0, // TODO: Add draft course count
+        total: allCourses.length,
+        published: publishedCourses,
+        draft: draftCourses,
         averagePrice: courseStats._avg.price || 0
       },
       resources: {
-        active: resourceStats._count.id
+        active: resourceStats._count.id,
+        totalDownloads: resourceStats._sum.downloadCount || 0,
+        totalClicks: resourceStats._sum.clickCount || 0,
+        totalPurchases: allResourcePurchases.length
       },
       completion: {
         rate: totalEnrollments > 0 ?
@@ -195,7 +286,8 @@ export async function GET(_request: NextRequest) {
       payments: {
         total: paymentStats
       },
-      topCourses
+      topCourses,
+      topResources: formattedTopResources
     }
 
     // Cache analytics for 2 minutes (analytics don't need to be real-time)

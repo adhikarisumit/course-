@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { FileText, ExternalLink, Settings, Eye, EyeOff, RefreshCw, Package, Search, X } from "lucide-react"
+import { FileText, ExternalLink, Settings, Eye, EyeOff, RefreshCw, Package, Search, X, Clock } from "lucide-react"
 import { toast } from "sonner"
 import { ResourceGridSkeleton } from "@/components/skeletons"
 import { Input } from "@/components/ui/input"
@@ -85,6 +85,12 @@ export default function ResourcesPage() {
   const hasAccess = useCallback((resourceId: string) => {
     return resourcePurchases.some(purchase =>
       purchase.resourceId === resourceId && purchase.status === "completed"
+    )
+  }, [resourcePurchases])
+
+  const isPending = useCallback((resourceId: string) => {
+    return resourcePurchases.some(purchase =>
+      purchase.resourceId === resourceId && purchase.status === "pending"
     )
   }, [resourcePurchases])
 
@@ -321,7 +327,7 @@ export default function ResourcesPage() {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     {resource.isFree ? (
                       <Badge variant="secondary">Free</Badge>
                     ) : (
@@ -333,6 +339,12 @@ export default function ResourcesPage() {
                             Access Granted
                           </Badge>
                         )}
+                        {isPending(resource.id) && !hasAccess(resource.id) && (
+                          <Badge variant="outline" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
+                            <Clock className="h-3 w-3 mr-1" />
+                            Pending Approval
+                          </Badge>
+                        )}
                       </>
                     )}
                   </div>
@@ -340,6 +352,11 @@ export default function ResourcesPage() {
                     <Button size="sm" onClick={() => handleVisit(resource)}>
                       <ExternalLink className="h-4 w-4 mr-2" />
                       Visit
+                    </Button>
+                  ) : isPending(resource.id) ? (
+                    <Button size="sm" variant="outline" disabled>
+                      <Clock className="h-4 w-4 mr-2" />
+                      Waiting
                     </Button>
                   ) : (
                     <Button size="sm" onClick={() => handlePurchase(resource)}>
