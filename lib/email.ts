@@ -1,7 +1,10 @@
 import nodemailer from 'nodemailer'
 import { Resend } from 'resend'
 
-const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'Course Platform'
+// Get app name dynamically to ensure env var is loaded
+function getAppName() {
+  return process.env.NEXT_PUBLIC_APP_NAME || 'Course Platform'
+}
 
 // Initialize Resend if API key is available
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
@@ -25,6 +28,7 @@ function createTransporter() {
 
 // Helper to send email - uses Resend in production, SMTP locally
 async function sendEmail(to: string, subject: string, html: string) {
+  const APP_NAME = getAppName()
   // Use Resend if available (production)
   if (resend) {
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
@@ -60,12 +64,82 @@ async function sendEmail(to: string, subject: string, html: string) {
   return { success: true, data: info }
 }
 
+// Generic email sending function (exported for custom emails)
+export async function sendCustomEmail(options: { to: string; subject: string; html: string }) {
+  try {
+    return await sendEmail(options.to, options.subject, options.html)
+  } catch (error: any) {
+    console.error('Error sending custom email:', error?.message || error)
+    return { success: false, error: error?.message || 'Failed to send email' }
+  }
+}
+
+// Send account credentials email (for admin-created accounts)
+export async function sendAccountCredentialsEmail(
+  email: string,
+  password: string,
+  name?: string
+) {
+  try {
+    const APP_NAME = getAppName()
+    const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/signin`
+    const subject = `Your Account Has Been Created - ${APP_NAME}`
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Your Account Credentials</title>
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 28px;">${APP_NAME}</h1>
+          </div>
+          <div style="background: #ffffff; padding: 40px 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #333; margin-top: 0;">Welcome to ${APP_NAME}!</h2>
+            <p>Hi${name ? ` ${name}` : ''},</p>
+            <p>An account has been created for you. Here are your login credentials:</p>
+            <div style="background: #f5f5f5; border-radius: 10px; padding: 20px; margin: 25px 0;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #e0e0e0;"><strong>Email:</strong></td>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #e0e0e0; font-family: monospace;">${email}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0;"><strong>Password:</strong></td>
+                  <td style="padding: 10px 0; font-family: monospace;">${password}</td>
+                </tr>
+              </table>
+            </div>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${loginUrl}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">Login to Your Account</a>
+            </div>
+            <p style="color: #666; font-size: 14px;">We recommend changing your password after your first login for security purposes.</p>
+            <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+            <p style="color: #999; font-size: 12px; text-align: center;">Keep your credentials secure. Do not share them with anyone.</p>
+          </div>
+          <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
+            <p>&copy; ${new Date().getFullYear()} ${APP_NAME}. All rights reserved.</p>
+          </div>
+        </body>
+      </html>
+    `
+
+    return await sendEmail(email, subject, html)
+  } catch (error: any) {
+    console.error('Error sending account credentials email:', error?.message || error)
+    return { success: false, error: error?.message || 'Failed to send email' }
+  }
+}
+
 export async function sendVerificationEmail(
   email: string,
   code: string,
   name?: string
 ) {
   try {
+    const APP_NAME = getAppName()
     const subject = `Your verification code: ${code} - ${APP_NAME}`
     const html = `
         <!DOCTYPE html>
@@ -113,6 +187,7 @@ export async function sendPasswordResetEmail(
   name?: string
 ) {
   try {
+    const APP_NAME = getAppName()
     const subject = `Your password reset code: ${code} - ${APP_NAME}`
     const html = `
         <!DOCTYPE html>

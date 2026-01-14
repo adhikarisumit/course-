@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Loader2, Users, Search, Mail, Calendar, BookOpen, Key, Copy, Check, Download, CheckCircle, Shield } from "lucide-react"
+import { Loader2, Users, Search, Mail, Calendar, BookOpen, Key, Copy, Check, Download, CheckCircle, Shield, UserPlus, Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import { ChatModalWrapper } from "./chat-modal-wrapper"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import dynamic from "next/dynamic"
@@ -214,6 +215,293 @@ function VerifyProfileButton({ userId, userRole, currentUserRole, isVerified, on
   );
 }
 
+function CreateUserButton({ onCreated }: { onCreated: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    sendCredentials: true,
+  });
+  const [createdUser, setCreatedUser] = useState<{
+    email: string;
+    password: string;
+  } | null>(null);
+  const [copied, setCopied] = useState<"email" | "password" | "both" | null>(null);
+
+  const generateRandomPassword = () => {
+    const length = 12;
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    let password = "";
+    for (let i = 0; i < length; i++) {
+      password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    return password;
+  };
+
+  const handleGeneratePassword = () => {
+    const password = generateRandomPassword();
+    setFormData({ ...formData, password });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/admin/users/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create user");
+      }
+
+      toast.success("User account created successfully!");
+      
+      // Store created credentials for display
+      setCreatedUser({
+        email: formData.email,
+        password: formData.password,
+      });
+      
+      onCreated();
+    } catch (error) {
+      console.error("Error creating user:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to create user");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyToClipboard = async (type: "email" | "password" | "both") => {
+    if (!createdUser) return;
+    
+    let text = "";
+    if (type === "email") {
+      text = createdUser.email;
+    } else if (type === "password") {
+      text = createdUser.password;
+    } else {
+      text = `Email: ${createdUser.email}\nPassword: ${createdUser.password}`;
+    }
+    
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(type);
+      toast.success("Copied to clipboard!");
+      setTimeout(() => setCopied(null), 2000);
+    } catch (error) {
+      toast.error("Failed to copy");
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      email: "",
+      password: "",
+      sendCredentials: true,
+    });
+    setCreatedUser(null);
+    setCopied(null);
+  };
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      resetForm();
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        <Button>
+          <UserPlus className="mr-2 h-4 w-4" />
+          Create User
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>{createdUser ? "User Created Successfully" : "Create New User"}</DialogTitle>
+          <DialogDescription>
+            {createdUser 
+              ? "The user account has been created. Share these credentials with the user."
+              : "Create a new student account. The user will be able to login immediately."
+            }
+          </DialogDescription>
+        </DialogHeader>
+        
+        {createdUser ? (
+          <div className="space-y-4 py-4">
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <span className="font-semibold text-green-800 dark:text-green-200">Account Created</span>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded p-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Email</p>
+                    <p className="font-mono text-sm">{createdUser.email}</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard("email")}
+                  >
+                    {copied === "email" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
+                
+                <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded p-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Password</p>
+                    <p className="font-mono text-sm">{createdUser.password}</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard("password")}
+                  >
+                    {copied === "password" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => copyToClipboard("both")}
+            >
+              {copied === "both" ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
+              Copy All Credentials
+            </Button>
+            
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button variant="outline" onClick={() => handleOpenChange(false)}>
+                Close
+              </Button>
+              <Button onClick={resetForm}>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Create Another
+              </Button>
+            </DialogFooter>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="create-name" className="text-right">
+                  Name
+                </Label>
+                <Input
+                  id="create-name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="col-span-3"
+                  placeholder="Enter full name"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="create-email" className="text-right">
+                  Email
+                </Label>
+                <Input
+                  id="create-email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="col-span-3"
+                  placeholder="Enter email address"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="create-password" className="text-right">
+                  Password
+                </Label>
+                <div className="col-span-3 flex gap-2">
+                  <div className="relative flex-1">
+                    <Input
+                      id="create-password"
+                      type={showPassword ? "text" : "password"}
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      placeholder="Enter password"
+                      required
+                      minLength={6}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleGeneratePassword}
+                  >
+                    <Key className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <div className="col-span-1" />
+                <div className="col-span-3 flex items-center space-x-2">
+                  <Checkbox
+                    id="send-credentials"
+                    checked={formData.sendCredentials}
+                    onCheckedChange={(checked) => 
+                      setFormData({ ...formData, sendCredentials: checked as boolean })
+                    }
+                  />
+                  <Label htmlFor="send-credentials" className="text-sm font-normal cursor-pointer">
+                    Send login credentials via email
+                  </Label>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Create User
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 interface User {
   id: string
   name: string | null
@@ -351,31 +639,34 @@ export default function AdminUsersPage() {
           <h1 className="text-2xl md:text-3xl font-bold mb-2">User Management</h1>
           <p className="text-sm md:text-base text-muted-foreground">View and manage all registered users</p>
         </div>
-        {session?.user?.role === "super" && (
-        <Button
-          variant="outline"
-          onClick={async () => {
-            try {
-              const response = await fetch("/api/admin/export?type=all-users")
-              const blob = await response.blob()
-              const url = window.URL.createObjectURL(blob)
-              const a = document.createElement("a")
-              a.href = url
-              a.download = `users-export-${new Date().toISOString().split("T")[0]}.csv`
-              document.body.appendChild(a)
-              a.click()
-              window.URL.revokeObjectURL(url)
-              document.body.removeChild(a)
-              toast.success("Users exported successfully!")
-            } catch (error) {
-              toast.error("Failed to export users")
-            }
-          }}
-        >
-          <Download className="mr-2 h-4 w-4" />
-          Export CSV
-        </Button>
-        )}
+        <div className="flex gap-2 flex-wrap">
+          <CreateUserButton onCreated={loadUsers} />
+          {session?.user?.role === "super" && (
+          <Button
+            variant="outline"
+            onClick={async () => {
+              try {
+                const response = await fetch("/api/admin/export?type=all-users")
+                const blob = await response.blob()
+                const url = window.URL.createObjectURL(blob)
+                const a = document.createElement("a")
+                a.href = url
+                a.download = `users-export-${new Date().toISOString().split("T")[0]}.csv`
+                document.body.appendChild(a)
+                a.click()
+                window.URL.revokeObjectURL(url)
+                document.body.removeChild(a)
+                toast.success("Users exported successfully!")
+              } catch (error) {
+                toast.error("Failed to export users")
+              }
+            }}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Export CSV
+          </Button>
+          )}
+        </div>
       </div>
 
       {/* Stats */}
