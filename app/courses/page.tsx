@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import Image from "next/image"
-import { Clock, BookOpen, Lock, CheckCircle, ArrowLeft } from "lucide-react"
+import { Clock, BookOpen, Lock, CheckCircle } from "lucide-react"
 
 export default async function CoursesPage() {
   const session = await auth()
@@ -25,16 +25,8 @@ export default async function CoursesPage() {
   }) as any[];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
       <div className="container mx-auto px-4 py-8 md:py-12">
-        {/* Back Button */}
-        <Button asChild variant="ghost" className="mb-6">
-          <Link href="/portal/dashboard">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
-          </Link>
-        </Button>
-
         {/* Header */}
         <div className="text-center mb-8 md:mb-12">
           <h1 className="text-3xl md:text-4xl font-bold mb-4">All Courses</h1>

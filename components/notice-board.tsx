@@ -66,59 +66,52 @@ export default function NoticeBoard({ compact = false }: NoticeBoardProps) {
 
   if (loading) {
     return (
-      <div className={compact ? "w-full" : "w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"}>
-        <Card className={compact ? "shadow-sm border" : "shadow-lg"}>
-          <CardHeader className={compact ? "pb-1 px-2 pt-2" : "text-center sm:text-left"}>
-            <CardTitle className={`flex items-center gap-2 ${compact ? "text-sm justify-center sm:justify-start" : "text-xl sm:text-2xl justify-center sm:justify-start"}`}>
-              <Bell className={compact ? "h-3 w-3" : "h-5 w-5 sm:h-6 sm:w-6"} />
-              <span className={compact ? "text-xs" : ""}>Notice Board</span>
+      <div className="w-full">
+        <Card className="shadow-sm border bg-muted/30">
+          <CardHeader className="py-3 px-4">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Bell className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground">Notice Board</span>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent ml-2"></div>
             </CardTitle>
           </CardHeader>
-          <CardContent className={compact ? "p-2" : "p-4 sm:p-6"}>
-            <div className={`flex justify-center items-center ${compact ? "py-1" : "py-8 sm:py-12"}`}>
-              <div className={`animate-spin rounded-full border-b-2 border-primary ${compact ? "h-4 w-4" : "h-8 w-8 sm:h-10 sm:w-10"}`}></div>
-            </div>
-          </CardContent>
         </Card>
       </div>
     );
   }
 
   return (
-    <div className={compact ? "w-full" : "w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"}>
-      <Card className={compact ? "shadow-sm border" : "shadow-lg"}>
-        <CardHeader className={compact ? "pb-1 px-2 pt-2" : "text-center sm:text-left"}>
-          <CardTitle className={`flex items-center gap-2 ${compact ? "text-sm justify-center sm:justify-start" : "text-xl sm:text-2xl justify-center sm:justify-start"}`}>
-            <Bell className={compact ? "h-3 w-3" : "h-5 w-5 sm:h-6 sm:w-6"} />
-            <span className={compact ? "text-xs" : ""}>Notice Board</span>
+    <div className={compact ? "w-full" : "w-full"}>
+      <Card className={`shadow-sm border transition-all duration-300 ${notices.length === 0 ? "bg-muted/30" : ""}`}>
+        <CardHeader className={`${notices.length === 0 ? "py-3 px-4" : compact ? "pb-1 px-2 pt-2" : "py-4 px-4 sm:px-6"}`}>
+          <CardTitle className={`flex items-center gap-2 ${notices.length === 0 ? "text-base" : compact ? "text-sm justify-center sm:justify-start" : "text-lg sm:text-xl"}`}>
+            <Bell className={notices.length === 0 ? "h-4 w-4 text-muted-foreground" : compact ? "h-3 w-3" : "h-5 w-5"} />
+            <span className={notices.length === 0 ? "text-muted-foreground" : ""}>Notice Board</span>
+            {notices.length === 0 && (
+              <span className="text-sm text-muted-foreground font-normal ml-2">— No active notices</span>
+            )}
           </CardTitle>
         </CardHeader>
-        <CardContent className={compact ? "p-2" : "p-4 sm:p-6"}>
-          {notices.length === 0 ? (
-            <div className={`text-center ${compact ? "py-1" : "py-8 sm:py-12"}`}>
-              <Bell className={`mx-auto text-muted-foreground mb-2 ${compact ? "h-6 w-6" : "h-12 w-12 sm:h-16 sm:w-16"}`} />
-              <h3 className={`font-semibold mb-1 ${compact ? "text-base" : "text-lg sm:text-xl"}`} style={compact ? {} : {}}>No notices</h3>
-              <p className={`text-muted-foreground ${compact ? "text-sm" : "text-sm sm:text-base"}`} style={compact ? {} : {}}>There are no active notices at the moment.</p>
-            </div>
-          ) : (
-            <div className={`space-y-2 ${compact ? "space-y-1" : "sm:space-y-6"}`}>
+        {notices.length > 0 && (
+          <CardContent className={compact ? "p-2" : "px-4 sm:px-6 pb-4 sm:pb-6 pt-0"}>
+            <div className={`space-y-2 ${compact ? "space-y-1" : "sm:space-y-4"}`}>
               {notices.slice(0, compact ? 3 : notices.length).map((notice) => (
-                <div key={notice.id} className={`border rounded-md bg-card hover:shadow-sm transition-shadow ${compact ? "p-2 space-y-1" : "p-3 sm:p-4 space-y-3"}`}>
+                <div key={notice.id} className={`border rounded-lg bg-card hover:shadow-sm transition-shadow ${compact ? "p-2 space-y-1" : "p-3 sm:p-4 space-y-2"}`}>
                   <div className={`flex ${compact ? "flex-col gap-1" : "flex-col sm:flex-row sm:items-start sm:justify-between gap-2"}`}>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-2">
                       {getPriorityIcon(notice.priority)}
-                      <h4 className={`font-semibold leading-tight ${compact ? "text-base" : "text-base sm:text-lg"}`} style={compact ? {} : {}}>{notice.title}</h4>
+                      <h4 className={`font-semibold leading-tight ${compact ? "text-base" : "text-base sm:text-lg"}`}>{notice.title}</h4>
                     </div>
                     <Badge variant={getPriorityColor(notice.priority)} className="self-start text-xs">
                       {notice.priority}
                     </Badge>
                   </div>
                   <div className="prose prose-sm max-w-none">
-                    <p className={`whitespace-pre-wrap text-muted-foreground leading-relaxed ${compact ? "text-sm" : "text-sm sm:text-base"}`} style={compact ? { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' } : {}}>{notice.content}</p>
+                    <p className={`whitespace-pre-wrap text-muted-foreground leading-relaxed ${compact ? "text-sm line-clamp-2" : "text-sm sm:text-base"}`}>{notice.content}</p>
                   </div>
-                  <div className={`flex ${compact ? "flex-col gap-1" : "flex-col sm:flex-row sm:items-center sm:justify-between gap-2"} text-xs text-muted-foreground ${compact ? "pt-1" : "border-t pt-3"}`}>
-                    <span className="font-medium text-xs">By {notice.author.name}</span>
-                    <span className="text-xs">{new Date(notice.publishedAt).toLocaleDateString()}</span>
+                  <div className={`flex ${compact ? "flex-col gap-1" : "flex-col sm:flex-row sm:items-center sm:justify-between gap-2"} text-xs text-muted-foreground ${compact ? "pt-1" : "border-t pt-2"}`}>
+                    <span className="font-medium">By {notice.author.name}</span>
+                    <span>{new Date(notice.publishedAt).toLocaleDateString()}</span>
                   </div>
                 </div>
               ))}
@@ -130,8 +123,8 @@ export default function NoticeBoard({ compact = false }: NoticeBoardProps) {
                 </div>
               )}
             </div>
-          )}
-        </CardContent>
+          </CardContent>
+        )}
       </Card>
     </div>
   );

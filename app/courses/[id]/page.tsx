@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import Link from "next/link"
 import Image from "next/image"
-import { BookOpen, Clock, Award, Lock, CheckCircle, Play, ArrowLeft, Video, Calendar, ExternalLink } from "lucide-react"
+import { BookOpen, Clock, Award, Lock, CheckCircle, Play, Video, Calendar, ExternalLink } from "lucide-react"
 import { YouTubePlayer } from "@/components/youtube-player"
 
 export default async function CoursePage({ params }: { params: Promise<{ id: string }> }) {
@@ -85,14 +85,9 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
   const completedLessons = lessonProgress.filter((p: any) => p.completed).length
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
       <div className="container mx-auto px-4 py-8">
-        {/* Back Button */}
-        <Button asChild variant="ghost" className="mb-6">
-          <Link href="/portal/dashboard">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
-          </Link>
+        {/* Course Header */}
         </Button>
 
         {/* Course Header */}

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { CheckCircle, ChevronLeft, ChevronRight, BookOpen, Lock, Loader2, Video, Calendar, ExternalLink, ArrowLeft } from "lucide-react"
+import { CheckCircle, ChevronLeft, ChevronRight, BookOpen, Lock, Loader2, Video, Calendar, ExternalLink } from "lucide-react"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
 import { YouTubePlayer } from "@/components/youtube-player"
@@ -187,18 +187,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Back to Dashboard */}
-      <div className="bg-card border-b">
-        <div className="container mx-auto px-4 py-2">
-          <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-            <Link href="/portal/dashboard">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Link>
-          </Button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
       {/* Top Navigation */}
       <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
