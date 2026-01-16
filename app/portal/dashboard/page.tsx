@@ -55,10 +55,6 @@ export default async function DashboardPage() {
   // Get first name for greeting
   const firstName = session.user.name?.split(" ")[0] || "Student"
 
-  // Get time-based greeting
-  const hour = new Date().getHours()
-  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening"
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
       <div className="container mx-auto px-4 py-6 md:py-8 max-w-7xl">
@@ -67,7 +63,7 @@ export default async function DashboardPage() {
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="space-y-1">
-              <p className="text-muted-foreground text-sm font-medium">{greeting}</p>
+              <p className="text-muted-foreground text-sm font-medium">Hello</p>
               <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
                 Welcome back, {firstName}! 👋
               </h1>
