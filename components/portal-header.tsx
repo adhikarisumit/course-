@@ -87,7 +87,7 @@ export default function PortalHeader() {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-72 p-0">
+            <SheetContent side="right" className="w-72 p-0">
               <div className="flex flex-col h-full">
                 <div className="p-4 border-b">
                   <Link href="/portal/dashboard" className="flex items-center gap-2.5" onClick={() => setMobileMenuOpen(false)}>
