@@ -17,3 +17,5 @@ README.md
 
 # Platform settings (contains sensitive info)
 settings.json
+# User code snippets storage
+storage/

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, BookOpen, User, Menu, X, GraduationCap, FolderOpen } from "lucide-react"
+import { Home, BookOpen, User, Menu, X, GraduationCap, FolderOpen, Code2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -23,6 +23,7 @@ const navigation = [
   { name: "Dashboard", href: "/portal/dashboard", icon: Home },
   { name: "Courses", href: "/courses", icon: GraduationCap },
   { name: "Resources", href: "/portal/resources", icon: FolderOpen },
+  { name: "Playground", href: "/portal/playground", icon: Code2 },
 ]
 
 export default function PortalHeader() {

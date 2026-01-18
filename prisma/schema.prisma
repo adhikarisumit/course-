@@ -309,3 +309,19 @@ model PromoBanner {
   @@index([isActive])
   @@index([startDate, endDate])
 }
+
+model CodeSnippet {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  code        String
+  language    String
+  userId      String
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([language])
+  @@index([createdAt])
+}
