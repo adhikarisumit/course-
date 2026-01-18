@@ -446,6 +446,23 @@ export default function CodeEditor() {
     // Register custom completion providers for each language
     registerCompletionProviders(monaco)
 
+    // Add Format Document to context menu
+    editor.addAction({
+      id: 'format-document',
+      label: 'Format Document',
+      keybindings: [
+        // Optionally add a keybinding, e.g. Shift+Alt+F
+        // monaco.KeyMod.Shift | monaco.KeyMod.Alt | monaco.KeyCode.KeyF
+      ],
+      precondition: undefined,
+      keybindingContext: undefined,
+      contextMenuGroupId: 'navigation',
+      contextMenuOrder: 1.5,
+      run: function(ed) {
+        return ed.getAction('editor.action.formatDocument').run();
+      }
+    });
+
     // Add Ctrl+S to save snippet (if editing)
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, (e) => {
       e.preventDefault()
