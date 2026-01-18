@@ -459,7 +459,10 @@ export default function CodeEditor() {
       contextMenuGroupId: 'navigation',
       contextMenuOrder: 1.5,
       run: function(ed) {
-        return ed.getAction('editor.action.formatDocument').run();
+        const action = ed.getAction('editor.action.formatDocument');
+        if (action) {
+          return action.run();
+        }
       }
     });
 
