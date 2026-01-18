@@ -373,7 +373,7 @@ export default function CodeEditor() {
   const { resolvedTheme } = useTheme()
   const editorRef = useRef<any>(null)
   const [language, setLanguage] = useState<Language>(LANGUAGES[0])
-  const [code, setCode] = useState("welcome to proteclink")
+  const [code, setCode] = useState(LANGUAGES[0].defaultCode)
   const [output, setOutput] = useState("")
   const [isRunning, setIsRunning] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -435,7 +435,7 @@ export default function CodeEditor() {
     if (newLang) {
       setLanguage(newLang)
       if (!currentSnippet) {
-        setCode("welcome to proteclink")
+        setCode(newLang.defaultCode)
       }
       setOutput("")
     }
@@ -489,7 +489,7 @@ export default function CodeEditor() {
   }
 
   const handleReset = () => {
-    setCode("welcome to proteclink")
+    setCode(language.defaultCode)
     setOutput("")
     setStdin("")
     setCurrentSnippet(null)
@@ -527,7 +527,7 @@ export default function CodeEditor() {
 
   const handleNewSnippet = () => {
     setCurrentSnippet(null)
-    setCode("welcome to proteclink")
+    setCode(language.defaultCode)
     setOutput("")
     setStdin("")
     toast.info("Started new snippet")
