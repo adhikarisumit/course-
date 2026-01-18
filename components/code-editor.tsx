@@ -446,19 +446,6 @@ export default function CodeEditor() {
     // Register custom completion providers for each language
     registerCompletionProviders(monaco)
 
-    // Add keyboard shortcuts for running code (similar to VS Code)
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
-      handleRunCode()
-    })
-
-    editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
-      handleRunCode()
-    })
-
-    editor.addCommand(monaco.KeyCode.F5, () => {
-      handleRunCode()
-    })
-
     // Add Ctrl+S to save snippet (if editing)
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, (e) => {
       e.preventDefault()
