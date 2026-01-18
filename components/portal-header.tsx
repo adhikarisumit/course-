@@ -17,7 +17,7 @@ import { SignOutButton } from "@/components/sign-out-button"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 
 const navigation = [
   { name: "Dashboard", href: "/portal/dashboard", icon: Home },
@@ -81,57 +81,64 @@ export default function PortalHeader() {
 
         {/* Right Side - User Menu */}
         <div className="flex items-center gap-3">
-          {/* Mobile Menu */}
-          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild className="lg:hidden">
-              <Button variant="ghost" size="icon" className="h-9 w-9">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-72 p-0">
-              <div className="flex flex-col h-full">
-                <div className="p-4 border-b">
-                  <Link href="/portal/dashboard" className="flex items-center gap-2.5" onClick={() => setMobileMenuOpen(false)}>
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-primary-foreground">
-                      <GraduationCap className="h-5 w-5" />
-                    </div>
-                    <span className="font-bold text-lg">{appName}</span>
-                  </Link>
+          {/* Mobile Menu - Only render after mount to avoid hydration mismatch */}
+          {mounted ? (
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild className="lg:hidden">
+                <Button variant="ghost" size="icon" className="h-9 w-9">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-72 p-0">
+                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                <div className="flex flex-col h-full">
+                  <div className="p-4 border-b">
+                    <Link href="/portal/dashboard" className="flex items-center gap-2.5" onClick={() => setMobileMenuOpen(false)}>
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-primary-foreground">
+                        <GraduationCap className="h-5 w-5" />
+                      </div>
+                      <span className="font-bold text-lg">{appName}</span>
+                    </Link>
+                  </div>
+                  <nav className="flex-1 p-4 space-y-1">
+                    {navigation.map((item) => {
+                      const isActive = pathname === item.href || (item.href !== "/portal/dashboard" && pathname.startsWith(item.href))
+                      return (
+                        <Link
+                          key={item.name}
+                          href={item.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={cn(
+                            "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
+                            isActive
+                              ? "bg-primary text-primary-foreground"
+                              : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                          )}
+                        >
+                          <item.icon className="h-5 w-5" />
+                          {item.name}
+                        </Link>
+                      )
+                    })}
+                  </nav>
+                  <div className="p-4 border-t">
+                    <Link
+                      href="/"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors"
+                    >
+                      <Home className="h-5 w-5" />
+                      Back to Home
+                    </Link>
+                  </div>
                 </div>
-                <nav className="flex-1 p-4 space-y-1">
-                  {navigation.map((item) => {
-                    const isActive = pathname === item.href || (item.href !== "/portal/dashboard" && pathname.startsWith(item.href))
-                    return (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={cn(
-                          "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
-                          isActive
-                            ? "bg-primary text-primary-foreground"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                        )}
-                      >
-                        <item.icon className="h-5 w-5" />
-                        {item.name}
-                      </Link>
-                    )
-                  })}
-                </nav>
-                <div className="p-4 border-t">
-                  <Link
-                    href="/"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors"
-                  >
-                    <Home className="h-5 w-5" />
-                    Back to Home
-                  </Link>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+              </SheetContent>
+            </Sheet>
+          ) : (
+            <Button variant="ghost" size="icon" className="lg:hidden h-9 w-9">
+              <Menu className="h-5 w-5" />
+            </Button>
+          )}
 
           {/* User Dropdown */}
           {mounted && (
