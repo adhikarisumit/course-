@@ -1425,29 +1425,35 @@ export default function CodeEditor() {
 
         <div className="flex items-center gap-2 flex-wrap">
           {/* New Snippet */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleNewSnippet}
-            className="gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">New</span>
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleNewSnippet}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent><p>New</p></TooltipContent>
+          </Tooltip>
 
           {/* Save Dialog */}
           <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
-            <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={openSaveDialog}
-                className="gap-2"
-              >
-                <Save className="h-4 w-4" />
-                <span className="hidden sm:inline">Save</span>
-              </Button>
-            </DialogTrigger>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={openSaveDialog}
+                  >
+                    <Save className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+              </TooltipTrigger>
+              <TooltipContent><p>Save</p></TooltipContent>
+            </Tooltip>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>
@@ -1501,20 +1507,23 @@ export default function CodeEditor() {
 
           {/* Load Dialog */}
           <Dialog open={isLoadDialogOpen} onOpenChange={setIsLoadDialogOpen}>
-            <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  fetchSnippets()
-                  setIsLoadDialogOpen(true)
-                }}
-                className="gap-2"
-              >
-                <FolderOpen className="h-4 w-4" />
-                <span className="hidden sm:inline">Load</span>
-              </Button>
-            </DialogTrigger>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      fetchSnippets()
+                      setIsLoadDialogOpen(true)
+                    }}
+                  >
+                    <FolderOpen className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+              </TooltipTrigger>
+              <TooltipContent><p>Load</p></TooltipContent>
+            </Tooltip>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>Your Saved Snippets</DialogTitle>
@@ -1596,64 +1605,75 @@ export default function CodeEditor() {
             </DialogContent>
           </Dialog>
 
-          <div className="w-px h-6 bg-border hidden sm:block" />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleCopy}
+              >
+                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent><p>Copy</p></TooltipContent>
+          </Tooltip>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCopy}
-            className="gap-2"
-          >
-            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            <span className="hidden sm:inline">Copy</span>
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleExport}
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent><p>Export</p></TooltipContent>
+          </Tooltip>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExport}
-            className="gap-2"
-          >
-            <Download className="h-4 w-4" />
-            <span className="hidden sm:inline">Export</span>
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleReset}
+              >
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent><p>Reset</p></TooltipContent>
+          </Tooltip>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleReset}
-            className="gap-2"
-          >
-            <RotateCcw className="h-4 w-4" />
-            <span className="hidden sm:inline">Reset</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            className="gap-2"
-          >
-            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setIsFullscreen(!isFullscreen)}
+              >
+                {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent><p>{isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</p></TooltipContent>
+          </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 onClick={handleRunCode}
                 disabled={isRunning}
-                className="gap-2 bg-green-600 hover:bg-green-700"
+                size="icon"
+                className="bg-green-600 hover:bg-green-700"
               >
                 {isRunning ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Play className="h-4 w-4" />
                 )}
-                Run Code
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Run code (Ctrl+Enter, Shift+Enter, or F5)</p>
+              <p>Run Code</p>
             </TooltipContent>
           </Tooltip>
         </div>
