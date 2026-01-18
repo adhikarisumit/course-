@@ -404,6 +404,9 @@ export default function CodeEditor() {
     }
   }, [code, language, currentSnippet])
 
+  // Proteclink detection
+  const containsProteclink = /proteclink/i.test(code)
+
   const fetchSnippets = useCallback(async () => {
     setIsLoadingSnippets(true)
     try {
@@ -934,7 +937,7 @@ export default function CodeEditor() {
         isFullscreen ? "grid-cols-1 lg:grid-cols-2 flex-1" : "grid-cols-1 lg:grid-cols-2"
       )}>
         {/* Code Editor */}
-        <Card className={cn("overflow-hidden", isFullscreen && "h-full")}>
+        <Card className={cn("overflow-hidden", isFullscreen && "h-full")}> 
           <CardHeader className="py-3 px-4 border-b bg-muted/30">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Code2 className="h-4 w-4" />
@@ -944,6 +947,12 @@ export default function CodeEditor() {
               </span>
             </CardTitle>
           </CardHeader>
+          {containsProteclink && (
+            <div className="bg-yellow-100 dark:bg-yellow-900 text-yellow-900 dark:text-yellow-100 px-4 py-2 border-b border-yellow-300 dark:border-yellow-700 flex items-center gap-2">
+              <span className="font-bold">Proteclink Detected:</span>
+              <span>This code contains <span className="underline font-mono">proteclink</span> related content. Please review or handle accordingly.</span>
+            </div>
+          )}
           <CardContent className="p-0">
             <Editor
               height={isFullscreen ? "calc(100vh - 200px)" : "500px"}
