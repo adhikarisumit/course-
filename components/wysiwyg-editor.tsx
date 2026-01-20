@@ -360,9 +360,9 @@ export function WysiwygEditor({
   }
 
   return (
-    <div className="border rounded-lg bg-background overflow-hidden">
-      {/* Toolbar - sticky under navbar or at top if in modal */}
-      <div className={`flex flex-wrap items-center gap-0.5 sm:gap-1 p-1.5 sm:p-2 border-b bg-background sticky ${isModal ? 'top-0' : 'top-16'} z-40 rounded-t-lg shadow-sm overflow-x-auto`}>
+    <div className="border rounded-lg bg-background">
+      {/* Toolbar - sticky within the page scroll context */}
+      <div className={`flex flex-wrap items-center gap-0.5 sm:gap-1 p-1.5 sm:p-2 border-b bg-background sticky ${isModal ? 'top-0' : 'top-16'} z-10 rounded-t-lg shadow-sm overflow-x-auto`}>
         {/* Undo/Redo */}
         <ToolbarButton
           onClick={() => editor.chain().focus().undo().run()}
