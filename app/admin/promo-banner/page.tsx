@@ -221,13 +221,13 @@ export default function PromoBannerPage() {
 
   return (
     <div className="container mx-auto py-6 px-4">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Megaphone className="h-6 w-6" />
+          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+            <Megaphone className="h-6 w-6 sm:h-8 sm:w-8" />
             Promo Banners
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm sm:text-base mt-1">
             Manage promotional banners displayed on the homepage
           </p>
         </div>
@@ -269,7 +269,7 @@ export default function PromoBannerPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="badgeText">Badge Text</Label>
                     <Input
@@ -292,7 +292,7 @@ export default function PromoBannerPage() {
 
                 <div className="grid gap-2">
                   <Label htmlFor="linkUrl">Link URL</Label>
-                  <div className="grid grid-cols-2 gap-2 mb-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
                     <Select
                       onValueChange={(value) => {
                         if (value === 'all-courses') {
@@ -349,7 +349,7 @@ export default function PromoBannerPage() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="backgroundColor">Background Color</Label>
                     <div className="flex gap-2">
@@ -388,7 +388,7 @@ export default function PromoBannerPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="startDate">Start Date (Optional)</Label>
                     <Input
@@ -477,10 +477,10 @@ export default function PromoBannerPage() {
           {banners.map((banner) => (
             <Card key={banner.id} className={banner.isActive ? 'ring-2 ring-primary' : ''}>
               <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <CardTitle className="text-lg">{banner.title}</CardTitle>
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <CardTitle className="text-base sm:text-lg break-words">{banner.title}</CardTitle>
                       {banner.isActive && (
                         <Badge variant="default" className="bg-green-500">Active</Badge>
                       )}
@@ -492,7 +492,7 @@ export default function PromoBannerPage() {
                       <CardDescription>{banner.description}</CardDescription>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -548,27 +548,27 @@ export default function PromoBannerPage() {
                     color: banner.textColor || '#ffffff' 
                   }}
                 >
-                  <div className="flex items-center justify-center gap-3 flex-wrap">
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 flex-wrap">
                     {banner.badgeText && (
                       <span className="px-2 py-1 bg-white/20 rounded-full text-xs font-bold uppercase">
                         {banner.badgeText}
                       </span>
                     )}
-                    <span className="font-semibold">{banner.title}</span>
+                    <span className="font-semibold text-sm sm:text-base">{banner.title}</span>
                     {banner.description && (
-                      <span className="text-sm opacity-90">{banner.description}</span>
+                      <span className="text-xs sm:text-sm opacity-90">{banner.description}</span>
                     )}
                     {banner.linkText && (
-                      <span className="underline text-sm font-medium">{banner.linkText} →</span>
+                      <span className="underline text-xs sm:text-sm font-medium">{banner.linkText} →</span>
                     )}
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                   {banner.linkUrl && (
-                    <div className="flex items-center gap-1">
-                      <ExternalLink className="h-3 w-3" />
-                      <span>Links to: {banner.linkUrl}</span>
+                    <div className="flex items-center gap-1 break-all">
+                      <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                      <span className="truncate">Links to: {banner.linkUrl}</span>
                     </div>
                   )}
                   {banner.startDate && (

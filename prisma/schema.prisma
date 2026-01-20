@@ -26,6 +26,7 @@ model User {
   sentMessages     Message[]    @relation("SentMessages")
   payments         Payment[]
   resourcePurchases ResourcePurchase[]
+  purchaseRequests  PurchaseRequest[]
   sessions         Session[]
   notices          Notice[]
 }
@@ -323,5 +324,28 @@ model CodeSnippet {
 
   @@index([userId])
   @@index([language])
+  @@index([createdAt])
+}
+
+model PurchaseRequest {
+  id           String    @id @default(cuid())
+  userId       String
+  itemType     String    // "course" or "resource"
+  itemId       String    // courseId or resourceId
+  itemTitle    String    // Store title for easy reference
+  amount       Float
+  currency     String    @default("jpy")
+  status       String    @default("pending") // pending, approved, rejected
+  message      String?   // Optional message from student
+  adminNote    String?   // Note from admin when approving/rejecting
+  reviewedAt   DateTime?
+  reviewedBy   String?   // Admin who reviewed
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([itemType])
   @@index([createdAt])
 }

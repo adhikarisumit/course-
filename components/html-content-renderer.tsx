@@ -162,14 +162,48 @@ export function HtmlContentRenderer({ content, className = "" }: HtmlContentRend
         }
       }
 
-      // For all other elements, render as HTML
-      const htmlContent = element.outerHTML;
-      elements.push(
-        <div
-          key={elementKey++}
-          dangerouslySetInnerHTML={{ __html: htmlContent }}
-        />
-      );
+      // For all other elements, render as HTML without wrapping in div
+      // This preserves proper prose styling for lists, paragraphs, etc.
+      const tagName = element.tagName.toLowerCase();
+      
+      // Void elements cannot have children or dangerouslySetInnerHTML
+      const voidElements = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
+      const isVoidElement = voidElements.includes(tagName);
+      
+      // Build props from attributes
+      const props: Record<string, unknown> = {
+        key: elementKey++,
+      };
+      
+      // Add attributes
+      Array.from(element.attributes).forEach(attr => {
+        if (attr.name === 'class') {
+          props.className = attr.value;
+        } else if (attr.name === 'style') {
+          // Convert style string to React style object
+          const styleObj: Record<string, string> = {};
+          attr.value.split(';').forEach(rule => {
+            const [prop, val] = rule.split(':').map(s => s.trim());
+            if (prop && val) {
+              // Convert CSS property to camelCase
+              const camelProp = prop.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+              styleObj[camelProp] = val;
+            }
+          });
+          props.style = styleObj;
+        } else if (attr.name === 'for') {
+          props.htmlFor = attr.value;
+        } else {
+          props[attr.name] = attr.value;
+        }
+      });
+      
+      // Only add innerHTML for non-void elements
+      if (!isVoidElement && element.innerHTML) {
+        props.dangerouslySetInnerHTML = { __html: element.innerHTML };
+      }
+      
+      elements.push(React.createElement(tagName, props));
     };
 
     // Process all children of the body
@@ -179,10 +213,23 @@ export function HtmlContentRenderer({ content, className = "" }: HtmlContentRend
     setProcessedElements(elements);
   }, [content, mounted]);
 
+  // Define prose classes with inline style support and proper list styling
+  const proseClasses = `prose prose-sm sm:prose dark:prose-invert max-w-none 
+    [&_p[style]]:leading-[unset] [&_li[style]]:leading-[unset] 
+    [&_h1[style]]:leading-[unset] [&_h2[style]]:leading-[unset] [&_h3[style]]:leading-[unset]
+    [&_h4[style]]:leading-[unset] [&_h5[style]]:leading-[unset] [&_h6[style]]:leading-[unset]
+    [&_div[style]]:leading-[unset] [&_span[style]]:leading-[unset]
+    [&_hr]:my-6 [&_hr]:border-border
+    [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-4
+    [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-4
+    [&_li]:my-1 [&_li]:pl-1
+    [&_p]:my-3
+    ${className}`;
+
   if (!mounted) {
     // Return a simple placeholder during SSR
     return (
-      <div className={`prose prose-sm sm:prose dark:prose-invert max-w-none ${className}`}>
+      <div className={proseClasses}>
         <div dangerouslySetInnerHTML={{ __html: content }} />
       </div>
     );
@@ -191,14 +238,17 @@ export function HtmlContentRenderer({ content, className = "" }: HtmlContentRend
   if (processedElements.length === 0 && content) {
     // Fallback: render raw HTML if parsing produced no elements
     return (
-      <div className={`prose prose-sm sm:prose dark:prose-invert max-w-none ${className}`}>
+      <div className={proseClasses}>
         <div dangerouslySetInnerHTML={{ __html: content }} />
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className={`prose prose-sm sm:prose dark:prose-invert max-w-none ${className}`}>
+    <div 
+      ref={containerRef} 
+      className={proseClasses}
+    >
       {processedElements}
     </div>
   );

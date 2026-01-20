@@ -81,7 +81,7 @@ export async function PUT(
         duration: duration || null,
         price: isPaid ? parseFloat(price) : 0,
         isPaid: isPaid || false,
-        isPublished: !isPaid ? true : (isPublished !== undefined ? isPublished : true),
+        isPublished: isPublished !== undefined ? isPublished : true,
         accessDurationMonths: accessDurationMonths || 6,
         courseType: courseType || "recorded",
         meetingLink: meetingLink || null,

@@ -7,8 +7,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { toast } from "sonner"
-import { Loader2, Plus, ArrowLeft, Trash2, Pencil, X, Save } from "lucide-react"
+import { Loader2, Plus, ArrowLeft, Trash2, Pencil, Save } from "lucide-react"
 import Link from "next/link"
 import { UploadButton } from "@/lib/uploadthing"
 import { WysiwygEditor } from "@/components/wysiwyg-editor"
@@ -30,6 +37,7 @@ export default function ManageLessonsPage({ params }: { params: Promise<{ id: st
   const [saving, setSaving] = useState(false)
   const [course, setCourse] = useState<any>(null)
   const [lessons, setLessons] = useState<Lesson[]>([])
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [editingLesson, setEditingLesson] = useState<string | null>(null)
   const [editLessonData, setEditLessonData] = useState<{
     title: string
@@ -126,9 +134,11 @@ export default function ManageLessonsPage({ params }: { params: Promise<{ id: st
       duration: lesson.duration || "",
       isFree: lesson.isFree,
     })
+    setEditDialogOpen(true)
   }
 
   const cancelEditLesson = () => {
+    setEditDialogOpen(false)
     setEditingLesson(null)
     setEditLessonData({
       title: "",
@@ -158,6 +168,7 @@ export default function ManageLessonsPage({ params }: { params: Promise<{ id: st
 
       const updatedLesson = await response.json()
       setLessons(lessons.map((l) => (l.id === editingLesson ? { ...l, ...updatedLesson } : l)))
+      setEditDialogOpen(false)
       setEditingLesson(null)
       setEditLessonData({
         title: "",
@@ -310,150 +321,50 @@ export default function ManageLessonsPage({ params }: { params: Promise<{ id: st
                 {lessons.map((lesson) => (
                   <Card key={lesson.id}>
                     <CardContent className="pt-6">
-                      {editingLesson === lesson.id ? (
-                        /* Edit Mode */
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between mb-4">
+                      {/* View Mode */}
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
                             <span className="text-sm font-medium text-muted-foreground">
-                              Editing Lesson {lesson.order}
+                              Lesson {lesson.order}
                             </span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={cancelEditLesson}
-                            >
-                              <X className="h-4 w-4 mr-1" />
-                              Cancel
-                            </Button>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label>Lesson Title *</Label>
-                            <Input
-                              placeholder="e.g., Introduction to Components"
-                              value={editLessonData.title}
-                              onChange={(e) => setEditLessonData({ ...editLessonData, title: e.target.value })}
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label>Lesson Content</Label>
-                            <WysiwygEditor
-                              value={editLessonData.content}
-                              onChange={(value) => setEditLessonData({ ...editLessonData, content: value })}
-                              placeholder="Start typing your lesson content here..."
-                              minHeight="300px"
-                            />
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {course?.courseType !== "reading" && (
-                              <div className="space-y-2">
-                                <Label>Video URL (YouTube)</Label>
-                                <Input
-                                  placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
-                                  value={editLessonData.videoUrl}
-                                  onChange={(e) => setEditLessonData({ ...editLessonData, videoUrl: e.target.value })}
-                                />
-                                <div className="pt-2">
-                                  <p className="text-xs text-muted-foreground mb-2">Or upload video file:</p>
-                                  <UploadButton
-                                    endpoint="videoUploader"
-                                    onClientUploadComplete={(res: Array<{ url: string }>) => {
-                                      if (res?.[0]) {
-                                        setEditLessonData({ ...editLessonData, videoUrl: res[0].url })
-                                        toast.success("Video uploaded successfully!")
-                                      }
-                                    }}
-                                    onUploadError={(error: Error) => {
-                                      toast.error(`Upload failed: ${error.message}`)
-                                    }}
-                                  />
-                                </div>
-                              </div>
+                            {lesson.isFree && (
+                              <span className="text-xs bg-green-500/10 text-green-700 dark:text-green-400 px-2 py-0.5 rounded">
+                                Free Preview
+                              </span>
                             )}
-
-                            <div className="space-y-2">
-                              <Label>{course?.courseType === "reading" ? "Reading Time" : "Duration"}</Label>
-                              <Input
-                                placeholder={course?.courseType === "reading" ? "e.g., 5 min read" : "e.g., 15 minutes"}
-                                value={editLessonData.duration}
-                                onChange={(e) => setEditLessonData({ ...editLessonData, duration: e.target.value })}
-                              />
-                            </div>
                           </div>
-
-                          <div className="flex items-center justify-between">
-                            <div className="space-y-0.5">
-                              <Label>Free Preview</Label>
-                              <p className="text-sm text-muted-foreground">Allow non-enrolled students to view</p>
-                            </div>
-                            <Switch
-                              checked={editLessonData.isFree}
-                              onCheckedChange={(checked) => setEditLessonData({ ...editLessonData, isFree: checked })}
-                            />
-                          </div>
-
-                          <Button onClick={saveEditLesson} disabled={saving} className="w-full">
-                            {saving ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Saving...
-                              </>
-                            ) : (
-                              <>
-                                <Save className="mr-2 h-4 w-4" />
-                                Save Changes
-                              </>
-                            )}
+                          <h3 className="font-semibold mb-1">{lesson.title}</h3>
+                          {lesson.duration && (
+                            <p className="text-sm text-muted-foreground">{lesson.duration}</p>
+                          )}
+                          {lesson.videoUrl && (
+                            <p className="text-xs text-muted-foreground mt-1">✓ Video attached</p>
+                          )}
+                          {lesson.content && (
+                            <p className="text-xs text-muted-foreground mt-1">✓ Content added</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => startEditLesson(lesson)}
+                            title="Edit lesson"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => deleteLesson(lesson.id)}
+                            className="text-destructive hover:text-destructive"
+                            title="Delete lesson"
+                          >
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
-                      ) : (
-                        /* View Mode */
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-sm font-medium text-muted-foreground">
-                                Lesson {lesson.order}
-                              </span>
-                              {lesson.isFree && (
-                                <span className="text-xs bg-green-500/10 text-green-700 dark:text-green-400 px-2 py-0.5 rounded">
-                                  Free Preview
-                                </span>
-                              )}
-                            </div>
-                            <h3 className="font-semibold mb-1">{lesson.title}</h3>
-                            {lesson.duration && (
-                              <p className="text-sm text-muted-foreground">{lesson.duration}</p>
-                            )}
-                            {lesson.videoUrl && (
-                              <p className="text-xs text-muted-foreground mt-1">✓ Video attached</p>
-                            )}
-                            {lesson.content && (
-                              <p className="text-xs text-muted-foreground mt-1">✓ Content added</p>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => startEditLesson(lesson)}
-                              title="Edit lesson"
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => deleteLesson(lesson.id)}
-                              className="text-destructive hover:text-destructive"
-                              title="Delete lesson"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      )}
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -461,6 +372,108 @@ export default function ManageLessonsPage({ params }: { params: Promise<{ id: st
             )}
           </div>
         </div>
+
+        {/* Edit Lesson Dialog */}
+        <Dialog open={editDialogOpen} onOpenChange={(open) => !open && cancelEditLesson()}>
+          <DialogContent className="w-[95vw] sm:max-w-[90vw] lg:max-w-6xl max-h-[90vh] flex flex-col p-0 gap-0">
+            <DialogHeader className="px-6 py-4 border-b shrink-0">
+              <DialogTitle>Edit Lesson</DialogTitle>
+              <DialogDescription>
+                Update the lesson details below
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex-1 overflow-y-auto px-6 py-4">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Lesson Title *</Label>
+                  <Input
+                    placeholder="e.g., Introduction to Components"
+                    value={editLessonData.title}
+                    onChange={(e) => setEditLessonData({ ...editLessonData, title: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Lesson Content</Label>
+                  <WysiwygEditor
+                    value={editLessonData.content}
+                    onChange={(value) => setEditLessonData({ ...editLessonData, content: value })}
+                    placeholder="Start typing your lesson content here..."
+                    minHeight="300px"
+                    isModal={true}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {course?.courseType !== "reading" && (
+                    <div className="space-y-2">
+                      <Label>Video URL (YouTube)</Label>
+                      <Input
+                        placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+                        value={editLessonData.videoUrl}
+                        onChange={(e) => setEditLessonData({ ...editLessonData, videoUrl: e.target.value })}
+                      />
+                      <div className="pt-2">
+                        <p className="text-xs text-muted-foreground mb-2">Or upload video file:</p>
+                        <UploadButton
+                          endpoint="videoUploader"
+                          onClientUploadComplete={(res: Array<{ url: string }>) => {
+                            if (res?.[0]) {
+                              setEditLessonData({ ...editLessonData, videoUrl: res[0].url })
+                              toast.success("Video uploaded successfully!")
+                            }
+                          }}
+                          onUploadError={(error: Error) => {
+                            toast.error(`Upload failed: ${error.message}`)
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label>{course?.courseType === "reading" ? "Reading Time" : "Duration"}</Label>
+                    <Input
+                      placeholder={course?.courseType === "reading" ? "e.g., 5 min read" : "e.g., 15 minutes"}
+                      value={editLessonData.duration}
+                      onChange={(e) => setEditLessonData({ ...editLessonData, duration: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Free Preview</Label>
+                    <p className="text-sm text-muted-foreground">Allow non-enrolled students to view</p>
+                  </div>
+                  <Switch
+                    checked={editLessonData.isFree}
+                    onCheckedChange={(checked) => setEditLessonData({ ...editLessonData, isFree: checked })}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="px-6 py-4 border-t shrink-0 flex gap-2">
+              <Button variant="outline" onClick={cancelEditLesson} className="flex-1">
+                Cancel
+              </Button>
+              <Button onClick={saveEditLesson} disabled={saving} className="flex-1">
+                {saving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

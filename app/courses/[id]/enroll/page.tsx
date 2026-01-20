@@ -4,7 +4,10 @@ import { use, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { CheckCircle, Copy, Mail } from "lucide-react"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
+import { CheckCircle, Loader2, Clock, Send, ArrowLeft, BookOpen, Copy } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -13,8 +16,12 @@ export default function EnrollPage({ params }: { params: Promise<{ id: string }>
   const { id } = use(params)
   const router = useRouter()
   const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
   const [course, setCourse] = useState<any>(null)
   const [session, setSession] = useState<any>(null)
+  const [message, setMessage] = useState("")
+  const [existingRequests, setExistingRequests] = useState<any[]>([])
+  const [submitted, setSubmitted] = useState(false)
 
   useEffect(() => {
     const loadData = async () => {
@@ -60,6 +67,16 @@ export default function EnrollPage({ params }: { params: Promise<{ id: string }>
         }
 
         setCourse(courseData)
+
+        // Load existing purchase requests for this course
+        const requestsRes = await fetch("/api/purchase-requests")
+        if (requestsRes.ok) {
+          const requests = await requestsRes.json()
+          const courseRequests = requests.filter(
+            (r: any) => r.itemType === "course" && r.itemId === id
+          )
+          setExistingRequests(courseRequests)
+        }
       } catch (error) {
         toast.error("Failed to load course")
       } finally {
@@ -70,37 +87,70 @@ export default function EnrollPage({ params }: { params: Promise<{ id: string }>
     loadData()
   }, [id, router])
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText("aatit")
-    toast.success("PayPay ID copied to clipboard!")
+  const handleSubmitRequest = async () => {
+    setSubmitting(true)
+    try {
+      const response = await fetch("/api/purchase-requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          itemType: "course",
+          itemId: id,
+          message: message || null,
+        }),
+      })
+
+      if (response.ok) {
+        const newRequest = await response.json()
+        setExistingRequests([newRequest, ...existingRequests])
+        setSubmitted(true)
+        setMessage("")
+        toast.success("Purchase request submitted successfully!")
+      } else {
+        const error = await response.json()
+        toast.error(error.error || "Failed to submit request")
+      }
+    } catch (error) {
+      toast.error("Failed to submit request")
+    } finally {
+      setSubmitting(false)
+    }
   }
 
-  const sendEmail = (e: React.MouseEvent) => {
-    e.preventDefault()
-    
-    const email = "sumitadhikari2341@gmail.com"
-    const subject = `Course Enrollment - ${course.title}`
-    const body = `Hi, I have sent payment via PayPay (ID: aatit) for the course "${course.title}".
-
-My email: ${session.user.email}
-
-Please activate my access. I have attached the payment receipt.`
-
-    const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-    
+  const handleCancelRequest = async (requestId: string) => {
     try {
-      window.open(mailtoLink)
-      toast.success("Opening email client...")
+      const response = await fetch(`/api/purchase-requests/${requestId}`, {
+        method: "DELETE",
+      })
+
+      if (response.ok) {
+        setExistingRequests(existingRequests.filter((r) => r.id !== requestId))
+        toast.success("Request canceled")
+      } else {
+        toast.error("Failed to cancel request")
+      }
     } catch (error) {
-      // Fallback
-      window.location.href = mailtoLink
+      toast.error("Failed to cancel request")
+    }
+  }
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "pending":
+        return <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20"><Clock className="h-3 w-3 mr-1" />Pending Review</Badge>
+      case "approved":
+        return <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20"><CheckCircle className="h-3 w-3 mr-1" />Approved</Badge>
+      case "rejected":
+        return <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20">Rejected</Badge>
+      default:
+        return <Badge variant="outline">{status}</Badge>
     }
   }
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     )
   }
@@ -168,33 +218,38 @@ Please activate my access. I have attached the payment receipt.`
               })()}
             </div>
 
-            {/* Payment Card */}
+            {/* Purchase Request Card */}
             <div>
               <Card>
                 <CardHeader>
-                  <CardTitle>Complete Your Enrollment</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <BookOpen className="h-5 w-5" />
+                    Complete Your Enrollment
+                  </CardTitle>
                   <CardDescription>
-                    Pay securely via PayPay
+                    Pay via PayPay and submit a request for access
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="border rounded-lg p-6 space-y-4">
+                  {/* Price Display */}
+                  <div className="border rounded-lg p-4 md:p-6 space-y-4">
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Course Price</span>
-                      <span className="text-2xl font-bold">¥{course.price}</span>
+                      <span className="text-2xl font-bold">¥{course.price?.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between items-center pt-4 border-t">
                       <span className="font-semibold">Total</span>
-                      <span className="text-3xl font-bold text-primary">¥{course.price}</span>
+                      <span className="text-3xl font-bold text-primary">¥{course.price?.toLocaleString()}</span>
                     </div>
                   </div>
 
-                  <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-6 space-y-4">
+                  {/* Payment Instructions */}
+                  <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4 space-y-4">
                     <h3 className="font-semibold text-lg">Payment Instructions:</h3>
                     <ol className="space-y-3 text-sm">
                       <li className="flex gap-2">
                         <span className="font-semibold">1.</span>
-                        <span>Send <strong>¥{course.price}</strong> via PayPay to:</span>
+                        <span>Send <strong>¥{course.price?.toLocaleString()}</strong> via PayPay to:</span>
                       </li>
                       <li className="ml-5">
                         <div className="flex items-center gap-2 bg-white dark:bg-gray-900 p-3 rounded border">
@@ -202,7 +257,10 @@ Please activate my access. I have attached the payment receipt.`
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={copyToClipboard}
+                            onClick={() => {
+                              navigator.clipboard.writeText("aatit")
+                              toast.success("PayPay ID copied!")
+                            }}
                           >
                             <Copy className="h-4 w-4" />
                           </Button>
@@ -210,34 +268,104 @@ Please activate my access. I have attached the payment receipt.`
                       </li>
                       <li className="flex gap-2">
                         <span className="font-semibold">2.</span>
-                        <span>Include your email <strong>({session.user.email})</strong> and course name in the payment note</span>
+                        <span>Include your email <strong>({session?.user?.email})</strong> in the payment note</span>
                       </li>
                       <li className="flex gap-2">
                         <span className="font-semibold">3.</span>
-                        <span>Send payment receipt to <strong>sumitadhikari2341@gmail.com</strong> with subject:</span>
-                      </li>
-                      <li className="ml-5">
-                        <div className="bg-white dark:bg-gray-900 p-3 rounded border text-xs font-mono">
-                          Course Enrollment - {course.title}
-                        </div>
-                      </li>
-                      <li className="flex gap-2">
-                        <span className="font-semibold">4.</span>
-                        <span>Include your payment receipt in the email</span>
+                        <span>Submit the request below with payment details</span>
                       </li>
                     </ol>
                   </div>
 
-                  <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
-                    <p className="text-sm text-center">
-                      <strong>Email Address:</strong> sumitadhikari2341@gmail.com
-                    </p>
-                  </div>
+                  {/* Existing Requests */}
+                  {existingRequests.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-sm">Your Previous Requests:</h4>
+                      <div className="space-y-2">
+                        {existingRequests.map((request) => (
+                          <div key={request.id} className="border rounded-lg p-3 space-y-2">
+                            <div className="flex items-center justify-between">
+                              {getStatusBadge(request.status)}
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(request.createdAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                            {request.message && (
+                              <p className="text-xs text-muted-foreground">
+                                Your message: {request.message}
+                              </p>
+                            )}
+                            {request.adminNote && (
+                              <p className="text-xs bg-muted p-2 rounded">
+                                Admin note: {request.adminNote}
+                              </p>
+                            )}
+                            {request.status === "pending" && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive hover:text-destructive w-full"
+                                onClick={() => handleCancelRequest(request.id)}
+                              >
+                                Cancel Request
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-                  <div className="text-xs text-center text-muted-foreground space-y-1">
-                    <p>Access will be granted within 24 hours after payment verification</p>
-                    <p>30-day money-back guarantee</p>
-                  </div>
+                  {/* Success Message */}
+                  {submitted && (
+                    <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-4 text-center">
+                      <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                      <p className="font-semibold text-green-700 dark:text-green-300">Request Submitted!</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Your request has been sent to the admin for review.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Submit New Request Form */}
+                  {!submitted && (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="message">Payment Details / Message</Label>
+                        <Textarea
+                          id="message"
+                          placeholder="Enter your PayPay transaction ID or any payment details..."
+                          value={message}
+                          onChange={(e) => setMessage(e.target.value)}
+                          rows={3}
+                        />
+                      </div>
+
+                      <Button
+                        className="w-full"
+                        size="lg"
+                        onClick={handleSubmitRequest}
+                        disabled={submitting}
+                      >
+                        {submitting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Submitting...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="mr-2 h-4 w-4" />
+                            Submit Purchase Request
+                          </>
+                        )}
+                      </Button>
+
+                      <div className="text-xs text-center text-muted-foreground space-y-1">
+                        <p>Access will be granted within 24 hours after payment verification</p>
+                        <p>30-day money-back guarantee</p>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

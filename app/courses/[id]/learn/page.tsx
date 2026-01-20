@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { CheckCircle, ChevronLeft, ChevronRight, BookOpen, Lock, Loader2, Video, Calendar, ExternalLink, FileText } from "lucide-react"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { CheckCircle, ChevronLeft, ChevronRight, ChevronDown, BookOpen, Lock, Loader2, Video, Calendar, ExternalLink, FileText } from "lucide-react"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
 import { YouTubePlayer } from "@/components/youtube-player"
@@ -50,12 +51,14 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null)
   const [loading, setLoading] = useState(true)
   const [marking, setMarking] = useState(false)
+  const [mobileContentOpen, setMobileContentOpen] = useState(false)
   const [unwrappedParams, setUnwrappedParams] = useState<{ id: string } | null>(null)
 
   useEffect(() => {
     params.then(setUnwrappedParams)
   }, [params])
 
+  // Fetch course data only once when params are ready
   useEffect(() => {
     if (!unwrappedParams?.id) return
 
@@ -66,6 +69,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
         const data = await response.json()
         setCourse(data)
 
+        // Set initial lesson based on URL or first lesson
         const lessonId = searchParams.get("lesson")
         const lesson = lessonId
           ? data.lessons.find((l: Lesson) => l.id === lessonId)
@@ -80,7 +84,9 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
     }
 
     fetchCourse()
-  }, [unwrappedParams, searchParams])
+    // Only depend on unwrappedParams, not searchParams to avoid refetching on every navigation
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unwrappedParams])
 
   const handleMarkComplete = async () => {
     if (!currentLesson || !unwrappedParams?.id) return
@@ -117,13 +123,19 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
     }
   }
 
+  const navigateToLesson = (lesson: Lesson) => {
+    setCurrentLesson(lesson)
+    // Use replace to update URL without adding history entry
+    window.history.replaceState(null, '', `/courses/${unwrappedParams?.id}/learn?lesson=${lesson.id}`)
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   const handleNext = () => {
     if (!course || !currentLesson) return
     const currentIndex = course.lessons.findIndex((l) => l.id === currentLesson.id)
     if (currentIndex < course.lessons.length - 1) {
-      const nextLesson = course.lessons[currentIndex + 1]
-      setCurrentLesson(nextLesson)
-      router.push(`/courses/${unwrappedParams?.id}/learn?lesson=${nextLesson.id}`)
+      navigateToLesson(course.lessons[currentIndex + 1])
     }
   }
 
@@ -131,9 +143,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
     if (!course || !currentLesson) return
     const currentIndex = course.lessons.findIndex((l) => l.id === currentLesson.id)
     if (currentIndex > 0) {
-      const prevLesson = course.lessons[currentIndex - 1]
-      setCurrentLesson(prevLesson)
-      router.push(`/courses/${unwrappedParams?.id}/learn?lesson=${prevLesson.id}`)
+      navigateToLesson(course.lessons[currentIndex - 1])
     }
   }
 
@@ -188,27 +198,27 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
+    <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background overflow-x-hidden">
       {/* Top Navigation */}
       <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button asChild variant="ghost" size="sm">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+              <Button asChild variant="ghost" size="sm" className="shrink-0">
                 <Link href={`/courses/${unwrappedParams?.id}`}>
-                  <ChevronLeft className="h-4 w-4 mr-2" />
-                  Back to Course
+                  <ChevronLeft className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Back to Course</span>
                 </Link>
               </Button>
-              <Separator orientation="vertical" className="h-6" />
-              <div>
-                <h1 className="font-semibold">{course.title}</h1>
-                <p className="text-sm text-muted-foreground">
+              <Separator orientation="vertical" className="h-6 hidden sm:block" />
+              <div className="min-w-0">
+                <h1 className="font-semibold text-sm sm:text-base truncate">{course.title}</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Lesson {currentIndex + 1} of {course.lessons.length}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 shrink-0">
               <div className="hidden sm:flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">Progress:</span>
                 <span className="text-sm font-medium">{course.progress}%</span>
@@ -220,91 +230,82 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-4 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Video Player */}
-            {currentLesson.videoUrl && (
-              <Card>
-                <CardContent className="p-0">
-                  <YouTubePlayer 
-                    url={currentLesson.videoUrl} 
-                    title={currentLesson.title}
-                  />
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Lesson Content */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-2xl mb-2">{currentLesson.title}</CardTitle>
-                    {currentLesson.duration && (
-                      <CardDescription>{currentLesson.duration}</CardDescription>
-                    )}
+        {/* Mobile Course Content - Collapsible */}
+        <div className="lg:hidden mb-3">
+          <Collapsible open={mobileContentOpen} onOpenChange={setMobileContentOpen}>
+            <Card className="shadow-sm">
+              <CollapsibleTrigger asChild>
+                <button className="w-full text-left">
+                  <div className="flex items-center justify-between gap-2 px-3 py-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <BookOpen className="h-3 w-3 shrink-0 text-muted-foreground" />
+                        <span className="text-[10px] text-muted-foreground">
+                          {currentIndex + 1}/{course.lessons.length}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">•</span>
+                        <p className="font-medium text-xs truncate">{currentLesson.title}</p>
+                      </div>
+                    </div>
+                    <ChevronDown className={`h-3 w-3 shrink-0 transition-transform ${mobileContentOpen ? 'rotate-180' : ''}`} />
                   </div>
-                  {currentLesson.isCompleted && (
-                    <Badge className="bg-green-500">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      Completed
-                    </Badge>
-                  )}
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="border-t">
+                  <div className="max-h-[200px] overflow-y-auto">
+                    {course.lessons.map((lesson, index) => {
+                      const isActive = lesson.id === currentLesson.id
+                      const canAccessLesson = !course.isPaid || course.isEnrolled || lesson.isFree
+
+                      return (
+                        <button
+                          key={lesson.id}
+                          onClick={() => {
+                            if (canAccessLesson) {
+                              navigateToLesson(lesson)
+                              setMobileContentOpen(false)
+                            }
+                          }}
+                          disabled={!canAccessLesson}
+                          className={`w-full text-left p-3 border-b hover:bg-accent/50 transition-colors ${
+                            isActive ? "bg-accent" : ""
+                          } ${!canAccessLesson ? "opacity-50 cursor-not-allowed" : ""}`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`flex items-center justify-center h-5 w-5 rounded-full text-xs font-medium flex-shrink-0 ${
+                                lesson.isCompleted
+                                  ? "bg-green-500 text-white"
+                                  : isActive
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-muted text-muted-foreground"
+                              }`}
+                            >
+                              {lesson.isCompleted ? (
+                                <CheckCircle className="h-3 w-3" />
+                              ) : (
+                                index + 1
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{lesson.title}</p>
+                            </div>
+                            {!canAccessLesson && <Lock className="h-3 w-3 flex-shrink-0" />}
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {currentLesson.description && (
-                  <p className="text-muted-foreground">{currentLesson.description}</p>
-                )}
-                <Separator />
-                {currentLesson.content && (
-                  <HtmlContentRenderer content={currentLesson.content} />
-                )}
-              </CardContent>
+              </CollapsibleContent>
             </Card>
+          </Collapsible>
+        </div>
 
-            {/* Navigation and Actions */}
-            <div className="flex items-center justify-between gap-4">
-              <Button
-                variant="outline"
-                onClick={handlePrevious}
-                disabled={currentIndex === 0}
-              >
-                <ChevronLeft className="h-4 w-4 mr-2" />
-                Previous Lesson
-              </Button>
-
-              <div className="flex items-center gap-2">
-                {!currentLesson.isCompleted && (
-                  <Button onClick={handleMarkComplete} disabled={marking}>
-                    {marking ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Marking...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Mark as Complete
-                      </>
-                    )}
-                  </Button>
-                )}
-              </div>
-
-              <Button
-                onClick={handleNext}
-                disabled={currentIndex === course.lessons.length - 1}
-              >
-                Next Lesson
-                <ChevronRight className="h-4 w-4 ml-2" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Sidebar - Lesson List */}
-          <div className="lg:col-span-1 space-y-4">
+        <div className="grid lg:grid-cols-4 gap-6">
+          {/* Sidebar - Lesson List (Desktop Only) */}
+          <div className="hidden lg:block lg:col-span-1 space-y-4">
             {/* Live Session Card */}
             {course.courseType === "live" && course.meetingLink && (
               <Card className="bg-primary/5 border-primary/20">
@@ -362,8 +363,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                         key={lesson.id}
                         onClick={() => {
                           if (canAccessLesson) {
-                            setCurrentLesson(lesson)
-                            router.push(`/courses/${unwrappedParams?.id}/learn?lesson=${lesson.id}`)
+                            navigateToLesson(lesson)
                           }
                         }}
                         disabled={!canAccessLesson}
@@ -405,6 +405,94 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                 </div>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Main Content */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Video Player */}
+            {currentLesson.videoUrl && (
+              <Card>
+                <CardContent className="p-0">
+                  <YouTubePlayer 
+                    url={currentLesson.videoUrl} 
+                    title={currentLesson.title}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Lesson Content */}
+            <Card>
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <CardTitle className="text-xl sm:text-2xl mb-2 break-words">{currentLesson.title}</CardTitle>
+                    {currentLesson.duration && (
+                      <CardDescription>{currentLesson.duration}</CardDescription>
+                    )}
+                  </div>
+                  {currentLesson.isCompleted && (
+                    <Badge className="bg-green-500 shrink-0 w-fit">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Completed
+                    </Badge>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {currentLesson.description && (
+                  <p className="text-muted-foreground">{currentLesson.description}</p>
+                )}
+                <Separator />
+                {currentLesson.content && (
+                  <HtmlContentRenderer content={currentLesson.content} />
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Navigation and Actions */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+              <Button
+                variant="outline"
+                onClick={handlePrevious}
+                disabled={currentIndex === 0}
+                className="order-2 sm:order-1"
+                size="sm"
+              >
+                <ChevronLeft className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline">Previous</span>
+                <span className="xs:hidden">Prev</span>
+              </Button>
+
+              <div className="flex items-center justify-center gap-2 order-1 sm:order-2">
+                {!currentLesson.isCompleted && (
+                  <Button onClick={handleMarkComplete} disabled={marking} size="sm" className="w-full sm:w-auto">
+                    {marking ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Marking...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Mark as Complete
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+
+              <Button
+                onClick={handleNext}
+                disabled={currentIndex === course.lessons.length - 1}
+                className="order-3"
+                size="sm"
+              >
+                <span className="hidden xs:inline">Next Lesson</span>
+                <span className="xs:hidden">Next</span>
+                <ChevronRight className="h-4 w-4 ml-1 sm:ml-2" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>

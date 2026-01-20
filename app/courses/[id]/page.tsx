@@ -109,7 +109,7 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
               </div>
             ) : null}
             
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex flex-wrap items-center gap-2 mb-4">
               {course.category && (
                 <Badge variant="secondary">{course.category}</Badge>
               )}
@@ -136,10 +136,10 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
               )}
             </div>
 
-            <h1 className="text-4xl font-bold mb-4">{course.title}</h1>
-            <p className="text-lg text-muted-foreground mb-6">{course.description}</p>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">{course.title}</h1>
+            <p className="text-base sm:text-lg text-muted-foreground mb-6">{course.description}</p>
 
-            <div className="flex items-center gap-6 text-sm">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm">
               <div className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5 text-primary" />
                 <span>{course.lessons.length} lessons</span>
@@ -299,35 +299,38 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
 
                     return (
                       <AccordionItem key={lesson.id} value={lesson.id}>
-                        <AccordionTrigger className="hover:no-underline">
-                          <div className="flex items-center gap-3 flex-1 text-left">
-                            <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary font-medium text-sm">
+                        <AccordionTrigger className="hover:no-underline py-3 sm:py-4">
+                          <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-1 text-left">
+                            <div className="flex items-center justify-center h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-primary/10 text-primary font-medium text-xs sm:text-sm shrink-0 mt-0.5 sm:mt-0">
                               {index + 1}
                             </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium">{lesson.title}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                                <span className="font-medium text-sm sm:text-base break-words">{lesson.title}</span>
                                 {lesson.isFree && (
-                                  <Badge variant="outline" className="text-xs">Free Preview</Badge>
+                                  <Badge variant="outline" className="text-[10px] sm:text-xs">Free</Badge>
                                 )}
                                 {!canAccess && (
-                                  <Lock className="h-4 w-4 text-muted-foreground" />
+                                  <Lock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground shrink-0" />
                                 )}
                                 {isCompleted && (
-                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                  <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-500 shrink-0" />
                                 )}
                               </div>
+                              {lesson.duration && (
+                                <span className="text-xs sm:text-sm text-muted-foreground mt-1 block sm:hidden">{lesson.duration}</span>
+                              )}
                             </div>
                             {lesson.duration && (
-                              <span className="text-sm text-muted-foreground">{lesson.duration}</span>
+                              <span className="text-sm text-muted-foreground hidden sm:block shrink-0">{lesson.duration}</span>
                             )}
                           </div>
                         </AccordionTrigger>
                         <AccordionContent>
-                          <div className="pl-11 space-y-2">
-                            <p className="text-muted-foreground">{lesson.description}</p>
+                          <div className="pl-8 sm:pl-11 space-y-2">
+                            <p className="text-sm sm:text-base text-muted-foreground">{lesson.description}</p>
                             {canAccess && (
-                              <Button asChild variant="outline" size="sm">
+                              <Button asChild variant="outline" size="sm" className="w-full sm:w-auto">
                                 <Link href={`/courses/${course.id}/learn?lesson=${lesson.id}`}>
                                   {isCompleted ? "Review Lesson" : "Start Lesson"}
                                 </Link>
@@ -357,11 +360,11 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
                       return (
                         <>
                           <h3>What You&apos;ll Learn</h3>
-                          <ul>
+                          <ol className="list-decimal list-inside space-y-1">
                             {points.map((point: string, index: number) => (
                               <li key={index}>{point}</li>
                             ))}
-                          </ul>
+                          </ol>
                         </>
                       )
                     } catch {

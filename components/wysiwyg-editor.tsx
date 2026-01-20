@@ -1,6 +1,6 @@
 "use client"
 
-import { useEditor, EditorContent } from "@tiptap/react"
+import { useEditor, EditorContent, Extension } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import Underline from "@tiptap/extension-underline"
 import Link from "@tiptap/extension-link"
@@ -66,17 +66,82 @@ import {
   Edit,
   Palette,
   Highlighter,
+  ALargeSmall,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // Create lowlight instance with common languages
 const lowlight = createLowlight(common)
 
+// Line height options
+const LINE_HEIGHTS = [
+  { value: "1", label: "1.0 (Compact)" },
+  { value: "1.25", label: "1.25" },
+  { value: "1.5", label: "1.5 (Normal)" },
+  { value: "1.75", label: "1.75" },
+  { value: "2", label: "2.0 (Relaxed)" },
+  { value: "2.5", label: "2.5 (Loose)" },
+]
+
+// Custom Line Height Extension
+const LineHeight = Extension.create({
+  name: "lineHeight",
+
+  addOptions() {
+    return {
+      types: ["paragraph", "heading"],
+      defaultLineHeight: "1.5",
+    }
+  },
+
+  addGlobalAttributes() {
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          lineHeight: {
+            default: null,
+            parseHTML: (element) => element.style.lineHeight || null,
+            renderHTML: (attributes) => {
+              if (!attributes.lineHeight) {
+                return {}
+              }
+              return {
+                style: `line-height: ${attributes.lineHeight}`,
+              }
+            },
+          },
+        },
+      },
+    ]
+  },
+
+  addCommands() {
+    return {
+      setLineHeight:
+        (lineHeight: string) =>
+        ({ commands }) => {
+          return this.options.types.every((type: string) =>
+            commands.updateAttributes(type, { lineHeight })
+          )
+        },
+      unsetLineHeight:
+        () =>
+        ({ commands }) => {
+          return this.options.types.every((type: string) =>
+            commands.resetAttributes(type, "lineHeight")
+          )
+        },
+    }
+  },
+})
+
 interface WysiwygEditorProps {
   value: string
   onChange: (value: string) => void
   placeholder?: string
   minHeight?: string
+  isModal?: boolean
 }
 
 const LANGUAGES = [
@@ -163,7 +228,8 @@ export function WysiwygEditor({
   value, 
   onChange, 
   placeholder = "Start writing your content...",
-  minHeight = "300px" 
+  minHeight = "300px",
+  isModal = false 
 }: WysiwygEditorProps) {
   const [linkDialogOpen, setLinkDialogOpen] = useState(false)
   const [linkUrl, setLinkUrl] = useState("")
@@ -179,6 +245,7 @@ export function WysiwygEditor({
       Underline,
       TextStyle,
       Color,
+      LineHeight,
       Highlight.configure({
         multicolor: true,
       }),
@@ -266,9 +333,9 @@ export function WysiwygEditor({
   }
 
   return (
-    <div className="border rounded-lg overflow-hidden bg-background">
-      {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-1 p-2 border-b bg-muted/30">
+    <div className="border rounded-lg bg-background">
+      {/* Toolbar - sticky under navbar or at top if in modal */}
+      <div className={`flex flex-wrap items-center gap-1 p-2 border-b bg-background sticky ${isModal ? 'top-0' : 'top-16'} z-40 rounded-t-lg shadow-sm`}>
         {/* Undo/Redo */}
         <ToolbarButton
           onClick={() => editor.chain().focus().undo().run()}
@@ -435,6 +502,42 @@ export function WysiwygEditor({
         >
           <AlignRight className="h-4 w-4" />
         </ToolbarButton>
+
+        {/* Line Height */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2 gap-1"
+              title="Line Height"
+            >
+              <ALargeSmall className="h-4 w-4" />
+              <span className="text-xs hidden sm:inline">Line</span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-40 p-2" align="start">
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground mb-2">Line Height</p>
+              {LINE_HEIGHTS.map((item) => (
+                <button
+                  key={item.value}
+                  type="button"
+                  className={cn(
+                    "w-full text-left px-2 py-1.5 text-sm rounded hover:bg-accent transition-colors",
+                    editor.getAttributes("paragraph").lineHeight === item.value && "bg-accent"
+                  )}
+                  onClick={() => {
+                    (editor.chain().focus() as any).setLineHeight(item.value).run()
+                  }}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
 
         <ToolbarDivider />
 
