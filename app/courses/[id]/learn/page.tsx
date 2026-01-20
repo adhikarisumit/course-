@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { CheckCircle, ChevronLeft, ChevronRight, BookOpen, Lock, Loader2, Video, Calendar, ExternalLink } from "lucide-react"
+import { CheckCircle, ChevronLeft, ChevronRight, BookOpen, Lock, Loader2, Video, Calendar, ExternalLink, FileText } from "lucide-react"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
 import { YouTubePlayer } from "@/components/youtube-player"
+import { HtmlContentRenderer } from "@/components/html-content-renderer"
 
 interface Lesson {
   id: string
@@ -258,10 +259,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                 )}
                 <Separator />
                 {currentLesson.content && (
-                  <div
-                    className="prose prose-gray dark:prose-invert max-w-none"
-                    dangerouslySetInnerHTML={{ __html: currentLesson.content }}
-                  />
+                  <HtmlContentRenderer content={currentLesson.content} />
                 )}
               </CardContent>
             </Card>

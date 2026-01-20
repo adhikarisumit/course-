@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import Link from "next/link"
 import Image from "next/image"
-import { BookOpen, Clock, Award, Lock, CheckCircle, Play, Video, Calendar, ExternalLink } from "lucide-react"
+import { BookOpen, Clock, Award, Lock, CheckCircle, Play, Video, Calendar, ExternalLink, FileText } from "lucide-react"
 import { YouTubePlayer } from "@/components/youtube-player"
 
 export default async function CoursePage({ params }: { params: Promise<{ id: string }> }) {
@@ -115,6 +115,18 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
               )}
               {course.level && (
                 <Badge variant="outline">{course.level}</Badge>
+              )}
+              {(course as any).courseType === "reading" && (
+                <Badge variant="outline" className="gap-1">
+                  <FileText className="h-3 w-3" />
+                  Reading
+                </Badge>
+              )}
+              {(course as any).courseType === "live" && (
+                <Badge variant="outline" className="gap-1">
+                  <Video className="h-3 w-3" />
+                  Live
+                </Badge>
               )}
               {isEnrolled && (
                 <Badge className="bg-green-500">

@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
-import { Loader2, ArrowLeft, Save, Video, Calendar } from "lucide-react"
+import { Loader2, ArrowLeft, Save, Video, Calendar, FileText } from "lucide-react"
 import Link from "next/link"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
@@ -172,9 +172,9 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
                 <RadioGroup 
                   value={formData.courseType} 
                   onValueChange={(value) => setFormData({ ...formData, courseType: value })}
-                  className="flex gap-4"
+                  className="grid grid-cols-1 md:grid-cols-3 gap-4"
                 >
-                  <div className="flex items-center space-x-2 border rounded-lg p-4 flex-1 cursor-pointer hover:bg-accent" onClick={() => setFormData({ ...formData, courseType: "recorded" })}>
+                  <div className="flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:bg-accent" onClick={() => setFormData({ ...formData, courseType: "recorded" })}>
                     <RadioGroupItem value="recorded" id="recorded" />
                     <Label htmlFor="recorded" className="flex items-center gap-2 cursor-pointer flex-1">
                       <Video className="h-4 w-4" />
@@ -184,13 +184,23 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
                       </div>
                     </Label>
                   </div>
-                  <div className="flex items-center space-x-2 border rounded-lg p-4 flex-1 cursor-pointer hover:bg-accent" onClick={() => setFormData({ ...formData, courseType: "live" })}>
+                  <div className="flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:bg-accent" onClick={() => setFormData({ ...formData, courseType: "live" })}>
                     <RadioGroupItem value="live" id="live" />
                     <Label htmlFor="live" className="flex items-center gap-2 cursor-pointer flex-1">
                       <Calendar className="h-4 w-4" />
                       <div>
                         <div className="font-medium">Live Course</div>
                         <div className="text-xs text-muted-foreground">Scheduled live sessions</div>
+                      </div>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:bg-accent" onClick={() => setFormData({ ...formData, courseType: "reading" })}>
+                    <RadioGroupItem value="reading" id="reading" />
+                    <Label htmlFor="reading" className="flex items-center gap-2 cursor-pointer flex-1">
+                      <FileText className="h-4 w-4" />
+                      <div>
+                        <div className="font-medium">Reading Course</div>
+                        <div className="text-xs text-muted-foreground">Markdown content with code examples</div>
                       </div>
                     </Label>
                   </div>

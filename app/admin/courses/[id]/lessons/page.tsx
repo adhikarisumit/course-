@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
 import { Loader2, Plus, ArrowLeft, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { UploadButton } from "@/lib/uploadthing"
+import { WysiwygEditor } from "@/components/wysiwyg-editor"
 
 interface Lesson {
   id: string
@@ -145,50 +145,51 @@ export default function ManageLessonsPage({ params }: { params: Promise<{ id: st
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="content">Content (HTML)</Label>
-                  <Textarea
-                    id="content"
-                    placeholder="Lesson content, notes, or transcript..."
-                    rows={4}
+                  <Label htmlFor="content">Lesson Content</Label>
+                  <WysiwygEditor
                     value={newLesson.content}
-                    onChange={(e) => setNewLesson({ ...newLesson, content: e.target.value })}
+                    onChange={(value) => setNewLesson({ ...newLesson, content: value })}
+                    placeholder="Start typing your lesson content here..."
+                    minHeight="350px"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="videoUrl">Video URL (YouTube)</Label>
-                    <Input
-                      id="videoUrl"
-                      placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
-                      value={newLesson.videoUrl}
-                      onChange={(e) => setNewLesson({ ...newLesson, videoUrl: e.target.value })}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Supports YouTube videos including unlisted videos. Example: https://youtu.be/VIDEO_ID
-                    </p>
-                    <div className="pt-2">
-                      <p className="text-xs text-muted-foreground mb-2">Or upload video file:</p>
-                      <UploadButton
-                        endpoint="videoUploader"
-                        onClientUploadComplete={(res: Array<{ url: string }>) => {
-                          if (res?.[0]) {
-                            setNewLesson({ ...newLesson, videoUrl: res[0].url })
-                            toast.success("Video uploaded successfully!")
-                          }
-                        }}
-                        onUploadError={(error: Error) => {
-                          toast.error(`Upload failed: ${error.message}`)
-                        }}
+                  {course?.courseType !== "reading" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="videoUrl">Video URL (YouTube)</Label>
+                      <Input
+                        id="videoUrl"
+                        placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+                        value={newLesson.videoUrl}
+                        onChange={(e) => setNewLesson({ ...newLesson, videoUrl: e.target.value })}
                       />
+                      <p className="text-xs text-muted-foreground">
+                        Supports YouTube videos including unlisted videos. Example: https://youtu.be/VIDEO_ID
+                      </p>
+                      <div className="pt-2">
+                        <p className="text-xs text-muted-foreground mb-2">Or upload video file:</p>
+                        <UploadButton
+                          endpoint="videoUploader"
+                          onClientUploadComplete={(res: Array<{ url: string }>) => {
+                            if (res?.[0]) {
+                              setNewLesson({ ...newLesson, videoUrl: res[0].url })
+                              toast.success("Video uploaded successfully!")
+                            }
+                          }}
+                          onUploadError={(error: Error) => {
+                            toast.error(`Upload failed: ${error.message}`)
+                          }}
+                        />
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div className="space-y-2">
-                    <Label htmlFor="duration">Duration</Label>
+                    <Label htmlFor="duration">{course?.courseType === "reading" ? "Reading Time" : "Duration"}</Label>
                     <Input
                       id="duration"
-                      placeholder="e.g., 15 minutes"
+                      placeholder={course?.courseType === "reading" ? "e.g., 5 min read" : "e.g., 15 minutes"}
                       value={newLesson.duration}
                       onChange={(e) => setNewLesson({ ...newLesson, duration: e.target.value })}
                     />
