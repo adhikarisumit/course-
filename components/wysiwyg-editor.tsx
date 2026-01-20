@@ -45,6 +45,7 @@ import {
   Underline as UnderlineIcon,
   List,
   ListOrdered,
+  Pilcrow,
   Heading1,
   Heading2,
   Heading3,
@@ -164,27 +165,53 @@ const LANGUAGES = [
 const TEXT_COLORS = [
   { name: "Default", color: "" },
   { name: "Black", color: "#000000" },
+  { name: "White", color: "#ffffff" },
   { name: "Dark Gray", color: "#4a4a4a" },
   { name: "Gray", color: "#9ca3af" },
+  { name: "Light Gray", color: "#d1d5db" },
   { name: "Red", color: "#ef4444" },
+  { name: "Dark Red", color: "#b91c1c" },
   { name: "Orange", color: "#f97316" },
+  { name: "Dark Orange", color: "#c2410c" },
   { name: "Yellow", color: "#eab308" },
+  { name: "Amber", color: "#f59e0b" },
+  { name: "Lime", color: "#84cc16" },
   { name: "Green", color: "#22c55e" },
+  { name: "Dark Green", color: "#15803d" },
+  { name: "Teal", color: "#14b8a6" },
+  { name: "Cyan", color: "#06b6d4" },
+  { name: "Sky Blue", color: "#0ea5e9" },
   { name: "Blue", color: "#3b82f6" },
+  { name: "Dark Blue", color: "#1d4ed8" },
+  { name: "Indigo", color: "#6366f1" },
   { name: "Purple", color: "#a855f7" },
+  { name: "Dark Purple", color: "#7c3aed" },
+  { name: "Fuchsia", color: "#d946ef" },
   { name: "Pink", color: "#ec4899" },
+  { name: "Rose", color: "#f43f5e" },
 ]
 
 // Highlight colors for background
 const HIGHLIGHT_COLORS = [
   { name: "None", color: "" },
   { name: "Yellow", color: "#fef08a" },
-  { name: "Green", color: "#bbf7d0" },
-  { name: "Blue", color: "#bfdbfe" },
-  { name: "Purple", color: "#e9d5ff" },
-  { name: "Pink", color: "#fbcfe8" },
-  { name: "Red", color: "#fecaca" },
+  { name: "Light Yellow", color: "#fef9c3" },
+  { name: "Amber", color: "#fde68a" },
   { name: "Orange", color: "#fed7aa" },
+  { name: "Red", color: "#fecaca" },
+  { name: "Rose", color: "#fecdd3" },
+  { name: "Pink", color: "#fbcfe8" },
+  { name: "Fuchsia", color: "#f5d0fe" },
+  { name: "Purple", color: "#e9d5ff" },
+  { name: "Violet", color: "#ddd6fe" },
+  { name: "Indigo", color: "#c7d2fe" },
+  { name: "Blue", color: "#bfdbfe" },
+  { name: "Sky", color: "#bae6fd" },
+  { name: "Cyan", color: "#a5f3fc" },
+  { name: "Teal", color: "#99f6e4" },
+  { name: "Green", color: "#bbf7d0" },
+  { name: "Lime", color: "#d9f99d" },
+  { name: "Gray", color: "#e5e7eb" },
 ]
 
 // Toolbar Button Component
@@ -455,7 +482,14 @@ export function WysiwygEditor({
 
         <ToolbarDivider />
 
-        {/* Headings */}
+        {/* Paragraph and Headings */}
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setParagraph().run()}
+          isActive={editor.isActive("paragraph")}
+          title="Paragraph"
+        >
+          <Pilcrow className="h-4 w-4" />
+        </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
           isActive={editor.isActive("heading", { level: 1 })}
