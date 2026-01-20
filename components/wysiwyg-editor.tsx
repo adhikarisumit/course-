@@ -234,7 +234,7 @@ function ToolbarButton({
       variant="ghost"
       size="sm"
       className={cn(
-        "h-8 w-8 p-0",
+        "h-7 w-7 sm:h-8 sm:w-8 p-0 shrink-0",
         isActive && "bg-accent text-accent-foreground"
       )}
       onClick={onClick}
@@ -248,7 +248,7 @@ function ToolbarButton({
 
 // Toolbar Divider
 function ToolbarDivider() {
-  return <div className="w-px h-6 bg-border mx-1" />
+  return <div className="w-px h-5 sm:h-6 bg-border mx-0.5 sm:mx-1 shrink-0 hidden sm:block" />
 }
 
 export function WysiwygEditor({ 
@@ -360,9 +360,9 @@ export function WysiwygEditor({
   }
 
   return (
-    <div className="border rounded-lg bg-background">
+    <div className="border rounded-lg bg-background overflow-hidden">
       {/* Toolbar - sticky under navbar or at top if in modal */}
-      <div className={`flex flex-wrap items-center gap-1 p-2 border-b bg-background sticky ${isModal ? 'top-0' : 'top-16'} z-40 rounded-t-lg shadow-sm`}>
+      <div className={`flex flex-wrap items-center gap-0.5 sm:gap-1 p-1.5 sm:p-2 border-b bg-background sticky ${isModal ? 'top-0' : 'top-16'} z-40 rounded-t-lg shadow-sm overflow-x-auto`}>
         {/* Undo/Redo */}
         <ToolbarButton
           onClick={() => editor.chain().focus().undo().run()}

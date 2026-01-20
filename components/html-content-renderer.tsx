@@ -41,19 +41,19 @@ function CodeBlockWithCopy({ code, language }: CodeBlockWithCopyProps) {
   const normalizedLanguage = languageMap[language?.toLowerCase()] || language?.toLowerCase() || "text";
 
   return (
-    <div className="relative group my-4">
-      <div className="absolute right-2 top-2 z-10">
+    <div className="relative group my-3 sm:my-4 -mx-2 sm:mx-0">
+      <div className="absolute right-1 sm:right-2 top-1 sm:top-2 z-10">
         <Button
           variant="ghost"
           size="icon"
           onClick={copyToClipboard}
-          className="h-8 w-8 bg-gray-800/50 hover:bg-gray-700 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+          className="h-6 w-6 sm:h-8 sm:w-8 bg-gray-800/50 hover:bg-gray-700 text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
         >
-          {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+          {copied ? <Check className="h-3 w-3 sm:h-4 sm:w-4" /> : <Copy className="h-3 w-3 sm:h-4 sm:w-4" />}
         </Button>
       </div>
-      <div className="absolute left-2 top-2 z-10">
-        <span className="text-xs text-gray-400 bg-gray-800/50 px-2 py-1 rounded">
+      <div className="absolute left-1 sm:left-2 top-1 sm:top-2 z-10">
+        <span className="text-[10px] sm:text-xs text-gray-400 bg-gray-800/50 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
           {language || "code"}
         </span>
       </div>
@@ -63,8 +63,8 @@ function CodeBlockWithCopy({ code, language }: CodeBlockWithCopyProps) {
         customStyle={{
           margin: 0,
           borderRadius: "0.5rem",
-          paddingTop: "2.5rem",
-          fontSize: "0.875rem",
+          paddingTop: "2rem",
+          fontSize: "0.75rem",
           lineHeight: "1.5",
         }}
         showLineNumbers={code.split("\n").length > 3}
@@ -214,22 +214,29 @@ export function HtmlContentRenderer({ content, className = "" }: HtmlContentRend
   }, [content, mounted]);
 
   // Define prose classes with inline style support and proper list styling
-  const proseClasses = `prose prose-sm sm:prose dark:prose-invert max-w-none 
+  const proseClasses = `prose prose-sm sm:prose dark:prose-invert max-w-none overflow-hidden break-words
+    [&_*]:max-w-full
     [&_p[style]]:leading-[unset] [&_li[style]]:leading-[unset] 
     [&_h1[style]]:leading-[unset] [&_h2[style]]:leading-[unset] [&_h3[style]]:leading-[unset]
     [&_h4[style]]:leading-[unset] [&_h5[style]]:leading-[unset] [&_h6[style]]:leading-[unset]
     [&_div[style]]:leading-[unset] [&_span[style]]:leading-[unset]
     [&_hr]:my-6 [&_hr]:border-border
-    [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-4
-    [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-4
-    [&_li]:my-1 [&_li]:pl-1
-    [&_p]:my-3
-    [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mt-6 [&_h1]:mb-4
-    [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mt-5 [&_h2]:mb-3
-    [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-4 [&_h3]:mb-2
-    [&_h4]:text-lg [&_h4]:font-medium [&_h4]:mt-3 [&_h4]:mb-2
-    [&_h5]:text-base [&_h5]:font-medium [&_h5]:mt-2 [&_h5]:mb-1
-    [&_h6]:text-sm [&_h6]:font-medium [&_h6]:mt-2 [&_h6]:mb-1
+    [&_ul]:list-disc [&_ul]:pl-4 [&_ul]:sm:pl-6 [&_ul]:my-3 [&_ul]:sm:my-4 [&_ul]:max-w-full
+    [&_ol]:list-decimal [&_ol]:pl-4 [&_ol]:sm:pl-6 [&_ol]:my-3 [&_ol]:sm:my-4 [&_ol]:max-w-full
+    [&_li]:my-1 [&_li]:pl-0.5 [&_li]:sm:pl-1
+    [&_p]:my-2 [&_p]:sm:my-3 [&_p]:break-words [&_p]:overflow-hidden
+    [&_h1]:text-xl [&_h1]:sm:text-2xl [&_h1]:md:text-3xl [&_h1]:font-bold [&_h1]:mt-4 [&_h1]:sm:mt-6 [&_h1]:mb-3 [&_h1]:sm:mb-4 [&_h1]:break-words
+    [&_h2]:text-lg [&_h2]:sm:text-xl [&_h2]:md:text-2xl [&_h2]:font-semibold [&_h2]:mt-4 [&_h2]:sm:mt-5 [&_h2]:mb-2 [&_h2]:sm:mb-3 [&_h2]:break-words
+    [&_h3]:text-base [&_h3]:sm:text-lg [&_h3]:md:text-xl [&_h3]:font-semibold [&_h3]:mt-3 [&_h3]:sm:mt-4 [&_h3]:mb-2 [&_h3]:break-words
+    [&_h4]:text-sm [&_h4]:sm:text-base [&_h4]:md:text-lg [&_h4]:font-medium [&_h4]:mt-2 [&_h4]:sm:mt-3 [&_h4]:mb-1 [&_h4]:sm:mb-2
+    [&_h5]:text-sm [&_h5]:sm:text-base [&_h5]:font-medium [&_h5]:mt-2 [&_h5]:mb-1
+    [&_h6]:text-xs [&_h6]:sm:text-sm [&_h6]:font-medium [&_h6]:mt-2 [&_h6]:mb-1
+    [&_pre]:overflow-x-auto [&_pre]:max-w-full [&_pre]:text-xs [&_pre]:sm:text-sm [&_pre]:!whitespace-pre-wrap
+    [&_code]:text-xs [&_code]:sm:text-sm [&_code]:break-all [&_code]:whitespace-pre-wrap
+    [&_table]:text-xs [&_table]:sm:text-sm [&_table]:block [&_table]:overflow-x-auto [&_table]:max-w-full [&_table]:w-full
+    [&_img]:max-w-full [&_img]:h-auto
+    [&_a]:break-all
+    [&_span]:break-words
     ${className}`;
 
   if (!mounted) {
@@ -244,8 +251,8 @@ export function HtmlContentRenderer({ content, className = "" }: HtmlContentRend
   if (processedElements.length === 0 && content) {
     // Fallback: render raw HTML if parsing produced no elements
     return (
-      <div className={proseClasses}>
-        <div dangerouslySetInnerHTML={{ __html: content }} />
+      <div className={proseClasses} style={{ maxWidth: '100%', overflowWrap: 'break-word', wordBreak: 'break-word' }}>
+        <div dangerouslySetInnerHTML={{ __html: content }} style={{ maxWidth: '100%' }} />
       </div>
     );
   }
@@ -254,6 +261,7 @@ export function HtmlContentRenderer({ content, className = "" }: HtmlContentRend
     <div 
       ref={containerRef} 
       className={proseClasses}
+      style={{ maxWidth: '100%', overflowWrap: 'break-word', wordBreak: 'break-word' }}
     >
       {processedElements}
     </div>

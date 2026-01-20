@@ -376,4 +376,88 @@
   text-decoration: underline;
 }
 
+/* Mobile responsive lesson content styles */
+.lesson-content,
+.prose {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  max-width: 100% !important;
+  width: 100%;
+}
+
+.lesson-content *,
+.prose * {
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+.lesson-content > *,
+.prose > * {
+  max-width: 100% !important;
+}
+
+.lesson-content pre,
+.prose pre {
+  overflow-x: auto;
+  max-width: 100% !important;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.lesson-content code,
+.prose code {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.lesson-content table,
+.prose table {
+  display: block;
+  overflow-x: auto;
+  max-width: 100% !important;
+  width: 100%;
+}
+
+.lesson-content img,
+.prose img {
+  max-width: 100% !important;
+  height: auto;
+}
+
+/* Override any inline width styles */
+.lesson-content [style*="width"],
+.prose [style*="width"] {
+  max-width: 100% !important;
+}
+
+/* Mobile specific overrides */
+@media (max-width: 640px) {
+  .lesson-content table,
+  .prose table {
+    font-size: 0.75rem;
+  }
+  
+  .lesson-content pre,
+  .prose pre {
+    font-size: 0.75rem;
+    padding: 0.75rem;
+  }
+  
+  .lesson-content h1,
+  .prose h1 {
+    font-size: 1.25rem;
+  }
+  
+  .lesson-content h2,
+  .prose h2 {
+    font-size: 1.125rem;
+  }
+  
+  .lesson-content h3,
+  .prose h3 {
+    font-size: 1rem;
+  }
+}
+
 /* End of file — no JSX/HTML here */
