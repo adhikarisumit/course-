@@ -11,6 +11,9 @@ import { TableHeader } from "@tiptap/extension-table-header"
 import TextAlign from "@tiptap/extension-text-align"
 import Placeholder from "@tiptap/extension-placeholder"
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight"
+import { Color } from "@tiptap/extension-color"
+import { TextStyle } from "@tiptap/extension-text-style"
+import Highlight from "@tiptap/extension-highlight"
 import { common, createLowlight } from "lowlight"
 import { useCallback, useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
@@ -61,6 +64,8 @@ import {
   Columns,
   Eye,
   Edit,
+  Palette,
+  Highlighter,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -88,6 +93,33 @@ const LANGUAGES = [
   { value: "bash", label: "Bash/Shell" },
   { value: "json", label: "JSON" },
   { value: "xml", label: "XML" },
+]
+
+// Text colors for the color picker
+const TEXT_COLORS = [
+  { name: "Default", color: "" },
+  { name: "Black", color: "#000000" },
+  { name: "Dark Gray", color: "#4a4a4a" },
+  { name: "Gray", color: "#9ca3af" },
+  { name: "Red", color: "#ef4444" },
+  { name: "Orange", color: "#f97316" },
+  { name: "Yellow", color: "#eab308" },
+  { name: "Green", color: "#22c55e" },
+  { name: "Blue", color: "#3b82f6" },
+  { name: "Purple", color: "#a855f7" },
+  { name: "Pink", color: "#ec4899" },
+]
+
+// Highlight colors for background
+const HIGHLIGHT_COLORS = [
+  { name: "None", color: "" },
+  { name: "Yellow", color: "#fef08a" },
+  { name: "Green", color: "#bbf7d0" },
+  { name: "Blue", color: "#bfdbfe" },
+  { name: "Purple", color: "#e9d5ff" },
+  { name: "Pink", color: "#fbcfe8" },
+  { name: "Red", color: "#fecaca" },
+  { name: "Orange", color: "#fed7aa" },
 ]
 
 // Toolbar Button Component
@@ -145,6 +177,11 @@ export function WysiwygEditor({
         codeBlock: false, // We'll use CodeBlockLowlight instead
       }),
       Underline,
+      TextStyle,
+      Color,
+      Highlight.configure({
+        multicolor: true,
+      }),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
@@ -272,6 +309,82 @@ export function WysiwygEditor({
         >
           <UnderlineIcon className="h-4 w-4" />
         </ToolbarButton>
+
+        {/* Text Color */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              title="Text Color"
+            >
+              <Palette className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-2" align="start">
+            <div className="grid grid-cols-4 gap-1">
+              {TEXT_COLORS.map((item) => (
+                <button
+                  key={item.name}
+                  type="button"
+                  className={cn(
+                    "w-6 h-6 rounded border border-border hover:scale-110 transition-transform",
+                    item.color === "" && "bg-gradient-to-br from-white to-gray-200 dark:from-gray-800 dark:to-gray-600"
+                  )}
+                  style={item.color ? { backgroundColor: item.color } : undefined}
+                  title={item.name}
+                  onClick={() => {
+                    if (item.color === "") {
+                      editor.chain().focus().unsetColor().run()
+                    } else {
+                      editor.chain().focus().setColor(item.color).run()
+                    }
+                  }}
+                />
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        {/* Highlight */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              title="Highlight"
+            >
+              <Highlighter className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-2" align="start">
+            <div className="grid grid-cols-4 gap-1">
+              {HIGHLIGHT_COLORS.map((item) => (
+                <button
+                  key={item.name}
+                  type="button"
+                  className={cn(
+                    "w-6 h-6 rounded border border-border hover:scale-110 transition-transform",
+                    item.color === "" && "bg-gradient-to-br from-white to-gray-200 dark:from-gray-800 dark:to-gray-600 relative after:absolute after:inset-0 after:flex after:items-center after:justify-center after:text-xs after:content-['✕']"
+                  )}
+                  style={item.color ? { backgroundColor: item.color } : undefined}
+                  title={item.name}
+                  onClick={() => {
+                    if (item.color === "") {
+                      editor.chain().focus().unsetHighlight().run()
+                    } else {
+                      editor.chain().focus().setHighlight({ color: item.color }).run()
+                    }
+                  }}
+                />
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
 
         <ToolbarDivider />
 
