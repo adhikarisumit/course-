@@ -1,27 +1,65 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ensureAdminExists } from '../../../scripts/setup-db'
+import prisma from '@/lib/prisma'
+import bcrypt from 'bcryptjs'
 
 /**
  * API endpoint to ensure admin user exists
- * This can be called from client-side to guarantee admin persistence
+ * This is called at runtime to guarantee admin persistence
  */
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔄 Ensuring admin user exists via API...')
+    const email = process.env.SUPER_ADMIN_EMAIL
+    const password = process.env.SUPER_ADMIN_PASSWORD
+    const name = process.env.SUPER_ADMIN_NAME || 'Super Admin'
 
-    const success = ensureAdminExists()
-
-    if (success) {
-      return NextResponse.json({
-        success: true,
-        message: 'Admin user ensured to exist'
-      })
-    } else {
+    if (!email || !password) {
+      console.log('⚠️ SUPER_ADMIN_EMAIL or SUPER_ADMIN_PASSWORD not set')
       return NextResponse.json({
         success: false,
-        message: 'Failed to ensure admin user exists'
+        message: 'Admin credentials not configured in environment'
       }, { status: 500 })
     }
+
+    // Check if admin already exists
+    const existingAdmin = await prisma.user.findUnique({
+      where: { email }
+    })
+
+    if (existingAdmin) {
+      // Update existing admin to ensure correct role and credentials
+      await prisma.user.update({
+        where: { email },
+        data: {
+          password: await bcrypt.hash(password, 12),
+          name,
+          role: 'admin',
+          isFrozen: false,
+          profileVerified: true,
+          emailVerified: new Date(),
+        }
+      })
+      console.log('✅ Admin user updated')
+    } else {
+      // Create new admin
+      await prisma.user.create({
+        data: {
+          email,
+          password: await bcrypt.hash(password, 12),
+          name,
+          role: 'admin',
+          isFrozen: false,
+          profileVerified: true,
+          emailVerified: new Date(),
+          sessionVersion: 0,
+        }
+      })
+      console.log('✅ Admin user created')
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Admin user ensured to exist'
+    })
 
   } catch (error) {
     console.error('Error ensuring admin exists:', error)
