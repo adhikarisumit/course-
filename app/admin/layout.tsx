@@ -56,11 +56,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
 
     // Check actual role from database to handle stale JWT tokens
-    if (session.user.email) {
+    if (session.user.email && !roleChecked) {
       fetch(`/api/auth/check-admin?email=${encodeURIComponent(session.user.email)}`)
         .then(res => res.json())
         .then(data => {
-          setDbRole(data.isAdmin ? 'admin' : 'student')
+          const actualRole = data.role || (data.isAdmin ? 'admin' : 'student')
+          setDbRole(actualRole)
           setRoleChecked(true)
           if (!data.isAdmin) {
             router.push("/portal/dashboard")
@@ -74,7 +75,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           }
         })
     }
-  }, [session, status, router])
+  }, [session, status, router, roleChecked])
 
   if (status === "loading" || !session?.user || !roleChecked) {
     return null
@@ -82,7 +83,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   // Use database role if available, otherwise session role
   const effectiveRole = dbRole || session.user.role
-  if (effectiveRole !== "admin" && effectiveRole !== "super" && dbRole !== "admin") {
+  if (effectiveRole !== "admin" && effectiveRole !== "super") {
     return null
   }
 
