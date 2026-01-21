@@ -63,7 +63,7 @@ export default function ResourcePurchasePage({ params }: { params: Promise<{ id:
   const sendEmail = (e: React.MouseEvent) => {
     e.preventDefault()
 
-    const email = "sumitadhikari2341@gmail.com"
+    const email = "proteclink.com@gmail.com"
     const subject = `Resource Purchase - ${resource.title}`
     const body = `Hi, I have sent payment via PayPay (ID: aatit) for the resource "${resource.title}".
 
@@ -177,7 +177,7 @@ Resource Details:
           </div>
 
           <div className="text-center text-sm text-muted-foreground">
-            <p>Having trouble? Contact us at <a href="mailto:sumitadhikari2341@gmail.com" className="text-primary hover:underline">sumitadhikari2341@gmail.com</a></p>
+            <p>Having trouble? Contact us at <a href="mailto:proteclink.com@gmail.com" className="text-primary hover:underline">proteclink.com@gmail.com</a></p>
           </div>
         </CardContent>
       </Card>

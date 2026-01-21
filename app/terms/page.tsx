@@ -95,7 +95,7 @@ export default function TermsPage() {
 
         <h2 className="text-2xl font-bold mt-8 mb-4">Contact Information</h2>
         <p className="text-muted-foreground">
-          If you have any questions about these Terms of Service, please contact us at sumitadhikari2341@gmail.com
+          If you have any questions about these Terms of Service, please contact us at proteclink.com@gmail.com
         </p>
       </div>
     </div>

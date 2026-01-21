@@ -25,7 +25,7 @@ import { Badge } from "@/components/ui/badge"
 import { MessageCircle, LayoutDashboard, Menu, User, LogOut, Megaphone } from "lucide-react"
 import { useSession, signOut } from "next-auth/react"
 
-const SUPER_ADMIN_EMAIL = "sumitadhikari2341@gmail.com"
+const SUPER_ADMIN_EMAIL = "proteclink.com@gmail.com"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession()

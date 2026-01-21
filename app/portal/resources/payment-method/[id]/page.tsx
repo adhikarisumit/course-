@@ -80,7 +80,7 @@ export default function PaymentMethodPage() {
   const sendEmail = (e: React.MouseEvent) => {
     e.preventDefault()
     
-    const email = "sumitadhikari2341@gmail.com"
+    const email = "proteclink.com@gmail.com"
     const subject = `Resource Purchase - ${purchase?.resource.title}`
     const body = `Hi, I have sent payment via PayPay (ID: aatit) for the resource "${purchase?.resource.title}".
 
@@ -201,7 +201,7 @@ Please activate my access. I have attached the payment receipt.`
                   </li>
                   <li className="flex gap-2">
                     <span className="font-semibold">3.</span>
-                    <span>Send payment receipt to <strong>sumitadhikari2341@gmail.com</strong> with subject:</span>
+                    <span>Send payment receipt to <strong>proteclink.com@gmail.com</strong> with subject:</span>
                   </li>
                   <li className="ml-5">
                     <div className="bg-white dark:bg-gray-900 p-3 rounded border text-xs font-mono">
@@ -217,7 +217,7 @@ Please activate my access. I have attached the payment receipt.`
 
               <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mt-4">
                 <p className="text-sm text-center">
-                  <strong>Email Address:</strong> sumitadhikari2341@gmail.com
+                  <strong>Email Address:</strong> proteclink.com@gmail.com
                 </p>
               </div>
 
@@ -228,7 +228,7 @@ Please activate my access. I have attached the payment receipt.`
                 </h5>
                 <ol className="text-sm text-green-800 dark:text-green-200 space-y-1 list-decimal list-inside">
                   <li>Complete the PayPay payment using the ID above</li>
-                  <li>Send the payment receipt to sumitadhikari2341@gmail.com</li>
+                  <li>Send the payment receipt to proteclink.com@gmail.com</li>
                   <li>Our admin team will verify and approve your purchase</li>
                   <li>You will receive access to the resource within 24 hours</li>
                 </ol>

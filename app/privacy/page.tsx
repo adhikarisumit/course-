@@ -100,7 +100,7 @@ export default function PrivacyPage() {
 
         <h2 className="text-2xl font-bold mt-8 mb-4">Contact Us</h2>
         <p className="text-muted-foreground">
-          If you have questions about this Privacy Policy, please contact us at sumitadhikari2341@gmail.com
+          If you have questions about this Privacy Policy, please contact us at proteclink.com@gmail.com
         </p>
       </div>
     </div>

@@ -23,8 +23,8 @@ export default function ContactPage() {
               <CardDescription>Send us an email and we'll get back to you within 24 hours.</CardDescription>
             </CardHeader>
             <CardContent>
-              <a href="mailto:sumitadhikari2341@gmail.com" className="text-primary hover:underline text-lg font-medium">
-                sumitadhikari2341@gmail.com
+              <a href="mailto:proteclink.com@gmail.com" className="text-primary hover:underline text-lg font-medium">
+                proteclink.com@gmail.com
               </a>
             </CardContent>
           </Card>
