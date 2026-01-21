@@ -36,3 +36,40 @@ export async function POST(req: NextRequest) {
     )
   }
 }
+
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const email = searchParams.get("email")
+
+    if (!email) {
+      return NextResponse.json(
+        { error: "Email is required" },
+        { status: 400 }
+      )
+    }
+
+    const normalizedEmail = email.toLowerCase().trim()
+
+    // Find user and check if they're an admin
+    const user = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+      select: {
+        role: true,
+      }
+    })
+
+    // Return whether the email belongs to an admin
+    return NextResponse.json({
+      isAdmin: user?.role === "admin" || user?.role === "super" || false,
+      role: user?.role || null
+    })
+
+  } catch (error) {
+    console.error("Error checking admin email:", error)
+    return NextResponse.json(
+      { error: "Failed to check email" },
+      { status: 500 }
+    )
+  }
+}

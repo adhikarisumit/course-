@@ -32,6 +32,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter()
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [dbRole, setDbRole] = useState<string | null>(null)
+  const [roleChecked, setRoleChecked] = useState(false)
 
   useEffect(() => {
     if (status === "loading") return
@@ -53,12 +55,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       return
     }
 
-    if (session.user.role !== "admin" && session.user.role !== "super") {
-      router.push("/portal/dashboard")
+    // Check actual role from database to handle stale JWT tokens
+    if (session.user.email) {
+      fetch(`/api/auth/check-admin?email=${encodeURIComponent(session.user.email)}`)
+        .then(res => res.json())
+        .then(data => {
+          setDbRole(data.isAdmin ? 'admin' : 'student')
+          setRoleChecked(true)
+          if (!data.isAdmin) {
+            router.push("/portal/dashboard")
+          }
+        })
+        .catch(() => {
+          setRoleChecked(true)
+          // Fallback to session role check
+          if (session.user.role !== "admin" && session.user.role !== "super") {
+            router.push("/portal/dashboard")
+          }
+        })
     }
   }, [session, status, router])
 
-  if (status === "loading" || !session?.user || (session.user.role !== "admin" && session.user.role !== "super")) {
+  if (status === "loading" || !session?.user || !roleChecked) {
+    return null
+  }
+
+  // Use database role if available, otherwise session role
+  const effectiveRole = dbRole || session.user.role
+  if (effectiveRole !== "admin" && effectiveRole !== "super" && dbRole !== "admin") {
     return null
   }
 
