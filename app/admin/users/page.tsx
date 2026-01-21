@@ -1055,7 +1055,7 @@ export default function AdminUsersPage() {
                             userName={user.name || user.email}
                             onBanned={loadUsers} 
                           />
-                          {(session?.user?.role === "super" || session?.user?.email === "proteclink.com@gmail.com") ? (
+                          {(session?.user?.role === "super" || session?.user?.email === process.env.NEXT_PUBLIC_SUPER_ADMIN_EMAIL) ? (
                             <>
                               <ChatModalWrapper
                                 user={{ id: user.id, name: user.name || user.email }}
