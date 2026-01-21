@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     // Return whether the email belongs to an admin
     // This is used to show appropriate UI messaging
     return NextResponse.json({
-      isAdmin: user?.role === "admin" || false
+      isAdmin: user?.role === "admin" || user?.role === "super" || false
     })
 
   } catch (error) {

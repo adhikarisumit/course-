@@ -344,7 +344,7 @@ export default async function DashboardPage() {
                       View Profile
                     </Link>
                   </Button>
-                  {session.user.role === "admin" && (
+                  {(session.user.role === "admin" || session.user.role === "super") && (
                     <Button asChild variant="outline" className="w-full" size="sm">
                       <Link href="/admin/courses">
                         <Settings className="mr-2 h-4 w-4" />

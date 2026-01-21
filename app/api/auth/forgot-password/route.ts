@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: "If an account exists with this email, a password reset code has been sent.",
-      isAdmin: user?.role === "admin" || false
+      isAdmin: user?.role === "admin" || user?.role === "super" || false
     })
 
   } catch (error) {

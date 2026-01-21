@@ -21,7 +21,7 @@ export default async function PortalLayout({
       select: { role: true },
     })
 
-    if (user?.role === "admin") {
+    if (user?.role === "admin" || user?.role === "super") {
       redirect("/admin")
     }
   }

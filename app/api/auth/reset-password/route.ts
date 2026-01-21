@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: "Password has been reset successfully",
-      isAdmin: user.role === "admin"
+      isAdmin: user.role === "admin" || user.role === "super"
     })
 
   } catch (error) {

@@ -12,7 +12,7 @@ export async function POST(
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    if (session.user.role !== "admin") {
+    if (session.user.role !== "admin" && session.user.role !== "super") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 

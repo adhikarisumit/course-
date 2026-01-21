@@ -130,7 +130,7 @@ export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
               <span>Profile</span>
             </Link>
           </DropdownMenuItem>
-          {session.user.role === "admin" && (
+          {(session.user.role === "admin" || session.user.role === "super") && (
             <DropdownMenuItem asChild>
               <Link href="/admin/courses" className="cursor-pointer">
                 <Settings className="mr-2 h-4 w-4" />

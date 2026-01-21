@@ -53,12 +53,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       return
     }
 
-    if (session.user.role !== "admin") {
+    if (session.user.role !== "admin" && session.user.role !== "super") {
       router.push("/portal/dashboard")
     }
   }, [session, status, router])
 
-  if (status === "loading" || !session?.user || session.user.role !== "admin") {
+  if (status === "loading" || !session?.user || (session.user.role !== "admin" && session.user.role !== "super")) {
     return null
   }
 

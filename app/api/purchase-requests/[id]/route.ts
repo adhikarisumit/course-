@@ -30,7 +30,7 @@ export async function GET(
     }
 
     // Only allow the user who made the request or admins to view it
-    if (purchaseRequest.userId !== session.user.id && session.user.role !== "admin") {
+    if (purchaseRequest.userId !== session.user.id && session.user.role !== "admin" && session.user.role !== "super") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
     }
 

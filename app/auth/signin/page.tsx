@@ -102,7 +102,7 @@ export default function SignInPage() {
         const session = await response.json()
         
         // Redirect based on user role
-        if (session?.user?.role === "admin") {
+        if (session?.user?.role === "admin" || session?.user?.role === "super") {
           router.push("/admin")
         } else {
           router.push("/portal/dashboard")

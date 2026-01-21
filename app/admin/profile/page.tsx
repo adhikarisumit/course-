@@ -21,7 +21,7 @@ export default async function AdminProfilePage() {
     where: { email: session.user.email },
   })
 
-  if (!user || user.role !== "admin") {
+  if (!user || (user.role !== "admin" && user.role !== "super")) {
     redirect("/portal/dashboard")
   }
 

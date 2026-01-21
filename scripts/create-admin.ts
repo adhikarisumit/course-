@@ -31,7 +31,7 @@ async function createAdminUser() {
         data: {
           password: await bcrypt.hash(password, 12),
           name: name,
-          role: "admin",
+          role: "super",
           isFrozen: false,
           profileVerified: true,
           emailVerified: new Date(),
@@ -50,7 +50,7 @@ async function createAdminUser() {
           email,
           password: hashedPassword,
           name,
-          role: "admin",
+          role: "super",
           isFrozen: false,
           profileVerified: true,
           emailVerified: new Date(),

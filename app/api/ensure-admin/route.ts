@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
         data: {
           password: await bcrypt.hash(password, 12),
           name,
-          role: 'admin',
+          role: 'super',
           isFrozen: false,
           profileVerified: true,
           emailVerified: new Date(),
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
           email,
           password: await bcrypt.hash(password, 12),
           name,
-          role: 'admin',
+          role: 'super',
           isFrozen: false,
           profileVerified: true,
           emailVerified: new Date(),
