@@ -76,13 +76,12 @@ export async function POST(request: Request) {
       amount = item.price || 0
       itemTitle = item.title
 
-      // Check if already purchased
-      const existingPurchase = await prisma.resourcePurchase.findUnique({
+      // Check if already purchased (only block if status is "completed")
+      const existingPurchase = await prisma.resourcePurchase.findFirst({
         where: {
-          userId_resourceId: {
-            userId: session.user.id,
-            resourceId: itemId,
-          },
+          userId: session.user.id,
+          resourceId: itemId,
+          status: "completed",
         },
       })
 

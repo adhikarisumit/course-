@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useMemo, useCallback } from "react"
-import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -9,8 +8,9 @@ import { Badge } from "@/components/ui/badge"
 import { ExternalLink, Settings, Eye, EyeOff, RefreshCw, Clock, Search, X } from "lucide-react"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
-import { optimizedDbQueries, PerformanceMonitor } from "@/lib/performance"
+import { PerformanceMonitor } from "@/lib/performance"
 import { ResourceGridSkeleton } from "@/components/skeletons"
+import { PurchaseModal } from "@/components/purchase-modal"
 
 interface Resource {
   id: string
@@ -38,8 +38,9 @@ export default function SoftwaresPage() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const [purchaseModalOpen, setPurchaseModalOpen] = useState(false)
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(null)
   const { data: session } = useSession()
-  const router = useRouter()
 
   useEffect(() => {
     fetchResources()
@@ -86,30 +87,9 @@ export default function SoftwaresPage() {
     )
   }, [resourcePurchases])
 
-const handlePurchase = useCallback(async (resource: Resource) => {
-    try {
-      const response = await fetch("/api/resources/purchase", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          resourceId: resource.id,
-          amount: resource.price,
-        }),
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        router.push(`/portal/resources/payment-method/${data.purchase.id}`)
-      } else {
-        const error = await response.json()
-        toast.error(error.message || "Failed to create purchase")
-      }
-    } catch (error) {
-      console.error("Error creating purchase:", error)
-      toast.error("Failed to create purchase")
-    }
+  const handlePurchase = useCallback((resource: Resource) => {
+    setSelectedResource(resource)
+    setPurchaseModalOpen(true)
   }, [])
 
   const handleClick = useCallback(async (resource: Resource) => {
@@ -341,6 +321,15 @@ const handlePurchase = useCallback(async (resource: Resource) => {
           ))}
         </div>
       )}
+
+      {/* Purchase Modal */}
+      <PurchaseModal
+        open={purchaseModalOpen}
+        onOpenChange={setPurchaseModalOpen}
+        resource={selectedResource}
+        userEmail={session?.user?.email || ""}
+        onSuccess={fetchResources}
+      />
     </div>
   )
 }

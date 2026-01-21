@@ -19,9 +19,9 @@ export async function POST(
 
     const purchaseId = id
 
-    const purchase = await prisma.resourcePurchase.update({
+    // Get purchase info before deleting for response
+    const purchase = await prisma.resourcePurchase.findUnique({
       where: { id: purchaseId },
-      data: { status: "rejected" },
       include: {
         user: {
           select: {
@@ -39,8 +39,20 @@ export async function POST(
       },
     })
 
+    if (!purchase) {
+      return NextResponse.json(
+        { message: "Purchase not found" },
+        { status: 404 }
+      )
+    }
+
+    // Delete the purchase record instead of just updating status
+    await prisma.resourcePurchase.delete({
+      where: { id: purchaseId },
+    })
+
     return NextResponse.json({
-      message: "Purchase rejected successfully",
+      message: "Purchase rejected and removed successfully",
       purchase,
     })
   } catch (error) {
