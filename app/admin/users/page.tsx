@@ -741,7 +741,7 @@ export default function AdminUsersPage() {
   )
 
   const studentCount = users.filter(u => u.role === "student" && !u.isBanned).length
-  const adminCount = users.filter(u => u.role === "admin").length
+  const adminCount = users.filter(u => u.role === "admin" || u.role === "super").length
   const bannedCount = users.filter(u => u.isBanned).length
 
   if (loading) {
@@ -753,7 +753,7 @@ export default function AdminUsersPage() {
   }
 
   // Separate users by role and ban status
-  const adminUsers = filteredUsers.filter((user) => user.role === "admin")
+  const adminUsers = filteredUsers.filter((user) => user.role === "admin" || user.role === "super")
   const studentUsers = filteredUsers.filter((user) => user.role === "student" && !user.isBanned)
   const bannedUsers = filteredUsers.filter((user) => user.isBanned)
 
