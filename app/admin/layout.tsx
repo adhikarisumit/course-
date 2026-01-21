@@ -32,20 +32,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter()
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [isClient, setIsClient] = useState(false)
+
+  // Mark when component is mounted on client
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   useEffect(() => {
-    if (status === "loading") return
+    if (!isClient || status === "loading") return
+
+    let isMounted = true
 
     // Ensure admin user exists (backup safety measure)
     fetch('/api/ensure-admin')
       .then(response => response.json())
       .then(data => {
-        if (data.success) {
+        if (isMounted && data.success) {
           console.log('✅ Admin user verified/created')
         }
       })
       .catch(error => {
-        console.warn('⚠️ Could not verify admin user:', error)
+        if (isMounted) {
+          console.warn('⚠️ Could not verify admin user:', error)
+        }
       })
 
     if (!session?.user) {
@@ -57,9 +67,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (session.user.role === "student") {
       router.push("/portal/dashboard")
     }
-  }, [session, status, router])
 
-  if (status === "loading" || !session?.user) {
+    return () => {
+      isMounted = false
+    }
+  }, [session, status, router, isClient])
+
+  if (!isClient || status === "loading" || !session?.user) {
     return null
   }
 

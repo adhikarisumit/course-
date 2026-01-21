@@ -94,16 +94,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         })
         token.sessionVersion = dbUser?.sessionVersion ?? 0
       } else if (token.id) {
-        // Check sessionVersion on subsequent calls
+        // Check sessionVersion and refresh role from database on subsequent calls
         try {
           const currentUser = await prisma.user.findUnique({
             where: { id: token.id as string },
-            select: { sessionVersion: true }
+            select: { sessionVersion: true, role: true }
           })
           
           if (!currentUser || currentUser.sessionVersion !== token.sessionVersion) {
             // Session is invalid, return null to clear the token
             return null
+          }
+          
+          // Always sync role from database to handle role changes
+          if (currentUser.role !== token.role) {
+            token.role = currentUser.role
           }
         } catch {
           // If there's an error checking the user, invalidate the session
