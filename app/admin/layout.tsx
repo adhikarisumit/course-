@@ -32,53 +32,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter()
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [isClient, setIsClient] = useState(false)
-
-  // Mark when component is mounted on client
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
 
   useEffect(() => {
-    if (!isClient || status === "loading") return
-
-    let isMounted = true
-
-    // Ensure admin user exists (backup safety measure)
-    fetch('/api/ensure-admin')
-      .then(response => response.json())
-      .then(data => {
-        if (isMounted && data.success) {
-          console.log('✅ Admin user verified/created')
-        }
-      })
-      .catch(error => {
-        if (isMounted) {
-          console.warn('⚠️ Could not verify admin user:', error)
-        }
-      })
+    if (status === "loading") return
 
     if (!session?.user) {
       router.push("/auth/signin")
-      return
     }
+  }, [session, status, router])
 
-    // Simple role check - only redirect if definitely a student
-    if (session.user.role === "student") {
-      router.push("/portal/dashboard")
-    }
-
-    return () => {
-      isMounted = false
-    }
-  }, [session, status, router, isClient])
-
-  if (!isClient || status === "loading" || !session?.user) {
-    return null
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    )
   }
 
-  // Allow access if role is admin, super, or not yet set (let API routes handle actual authorization)
-  if (session.user.role === "student") {
+  if (!session?.user) {
     return null
   }
 
