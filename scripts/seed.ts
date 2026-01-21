@@ -17,8 +17,8 @@ async function main() {
     execSync("tsx scripts/check-mentors.ts", { stdio: "inherit" })
 
     console.log("\n✅ Database seeding completed successfully!")
-    console.log("\n🔑 Admin credentials are now available.")
-    console.log("   Run 'npm run create-admin' anytime to see credentials again.")
+    console.log("\n🔑 Admin user is configured from environment variables.")
+    console.log("   Make sure SUPER_ADMIN_EMAIL and SUPER_ADMIN_PASSWORD are set in .env")
 
   } catch (error) {
     console.error("❌ Error during seeding:", error)

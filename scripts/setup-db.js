@@ -23,7 +23,7 @@ function setupDatabase() {
     fs.writeFileSync(markerPath, new Date().toISOString())
 
     console.log('✅ Database setup complete!')
-    console.log('🔑 Admin credentials are ready and will persist through resets.')
+    console.log('🔑 Admin user configured from environment variables.')
     console.log('📝 Admin creation marker created.')
 
   } catch (error) {

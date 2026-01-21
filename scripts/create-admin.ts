@@ -60,9 +60,9 @@ async function createAdminUser() {
     }
 
     console.log(`✅ Super admin user ${email} is ready`)
-    console.log(`\n🔑 Super Admin Credentials:`)
+    console.log(`\n🔑 Super Admin Setup Complete:`)
     console.log(`   Email: ${email}`)
-    console.log(`   Password: ${password}`)
+    console.log(`   Password: [SET FROM ENVIRONMENT VARIABLE]`)
     console.log(`   Role: ${admin.role}`)
     console.log(`\n🛡️  Super admin access is guaranteed even after database resets!`)
     console.log(`🔒 This admin user cannot be deleted through normal means.`)
