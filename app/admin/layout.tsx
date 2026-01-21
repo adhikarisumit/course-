@@ -32,8 +32,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter()
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [dbRole, setDbRole] = useState<string | null>(null)
-  const [roleChecked, setRoleChecked] = useState(false)
 
   useEffect(() => {
     if (status === "loading") return
@@ -55,39 +53,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       return
     }
 
-    // Check actual role from database to handle stale JWT tokens
-    if (session.user.email && !roleChecked) {
-      fetch(`/api/auth/check-admin?email=${encodeURIComponent(session.user.email)}`)
-        .then(res => res.json())
-        .then(data => {
-          const actualRole = data.role || (data.isAdmin ? 'admin' : 'student')
-          setDbRole(actualRole)
-          setRoleChecked(true)
-          if (!data.isAdmin) {
-            router.push("/portal/dashboard")
-          }
-        })
-        .catch(() => {
-          setRoleChecked(true)
-          // Fallback to session role check
-          if (session.user.role !== "admin" && session.user.role !== "super") {
-            router.push("/portal/dashboard")
-          }
-        })
+    // Simple role check - only redirect if definitely a student
+    if (session.user.role === "student") {
+      router.push("/portal/dashboard")
     }
-  }, [session, status, router, roleChecked])
+  }, [session, status, router])
 
-  if (status === "loading" || !session?.user || !roleChecked) {
+  if (status === "loading" || !session?.user) {
     return null
   }
 
-  // Use database role if available, otherwise session role
-  const effectiveRole = dbRole || session.user.role
-  if (effectiveRole !== "admin" && effectiveRole !== "super") {
+  // Allow access if role is admin, super, or not yet set (let API routes handle actual authorization)
+  if (session.user.role === "student") {
     return null
   }
 
-  const isSuperAdmin = session.user.email === SUPER_ADMIN_EMAIL
+  // Super admin check - either by role or email
+  const isSuperAdmin = session.user.role === "super" || session.user.email === SUPER_ADMIN_EMAIL
 
   const userInitials = session.user.name
     ?.split(" ")
