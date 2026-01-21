@@ -14,7 +14,8 @@ export default auth(async (req) => {
     const isStudentPortal = req.nextUrl.pathname.startsWith('/portal')
     const isAdminPage = req.nextUrl.pathname.startsWith('/admin')
     const isCoursePage = req.nextUrl.pathname.startsWith('/courses/')
-    const isAdmin = req.auth?.user?.role?.toUpperCase() === 'ADMIN'
+    const userRole = req.auth?.user?.role?.toLowerCase()
+    const isAdmin = userRole === 'admin' || userRole === 'super'
 
     // Redirect logged in users away from auth pages
     if (isLoggedIn && isAuthPage) {

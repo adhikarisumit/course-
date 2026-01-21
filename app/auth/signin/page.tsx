@@ -168,12 +168,14 @@ export default function SignInPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                <Link 
-                  href={`/auth/forgot-password?email=${encodeURIComponent(formData.email)}${isAdminEmail ? "&admin=true" : ""}`}
-                  className="text-xs text-primary hover:underline font-medium"
-                >
-                  Forgot password?
-                </Link>
+                {isAdminEmail && (
+                  <Link 
+                    href={`/auth/forgot-password?email=${encodeURIComponent(formData.email)}&admin=true`}
+                    className="text-xs text-primary hover:underline font-medium"
+                  >
+                    Forgot password?
+                  </Link>
+                )}
               </div>
               <Input
                 id="password"
