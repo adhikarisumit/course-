@@ -215,7 +215,7 @@ export default async function ProfilePage() {
                     >
                       <div>
                         <div className="font-medium">
-                          ${(payment.amount / 100).toFixed(2)}
+                          ¥{payment.amount}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {new Date(payment.createdAt).toLocaleDateString()}
