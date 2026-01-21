@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -8,10 +8,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "sonner"
-import { ArrowLeft, Mail, Shield } from "lucide-react"
+import { ArrowLeft, Mail, Shield, Loader2 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const initialEmail = searchParams.get("email") || ""
@@ -132,5 +132,25 @@ export default function ForgotPasswordPage() {
         </CardFooter>
       </Card>
     </div>
+  )
+}
+
+function ForgotPasswordLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/20 to-background p-4">
+      <Card className="w-full max-w-md">
+        <CardContent className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+export default function ForgotPasswordPage() {
+  return (
+    <Suspense fallback={<ForgotPasswordLoading />}>
+      <ForgotPasswordContent />
+    </Suspense>
   )
 }
