@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Loader2, Users, Search, Mail, Calendar, BookOpen, Key, Copy, Check, Download, CheckCircle, Shield, UserPlus, Eye, EyeOff } from "lucide-react"
+import { Loader2, Users, Search, Mail, Calendar, BookOpen, Key, Copy, Check, Download, CheckCircle, Shield, UserPlus, Eye, EyeOff, Ban } from "lucide-react"
 import { toast } from "sonner"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
@@ -212,6 +212,126 @@ function VerifyProfileButton({ userId, userRole, currentUserRole, isVerified, on
         </>
       )}
     </Button>
+  );
+}
+
+function BanUserButton({ userId, userRole, currentUserRole, isBanned, userName, onBanned }: { 
+  userId: string, 
+  userRole: string, 
+  currentUserRole: string, 
+  isBanned: boolean,
+  userName: string,
+  onBanned: () => void 
+}) {
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [banReason, setBanReason] = useState("");
+  
+  // Only super admin or admin can ban/unban students
+  if ((currentUserRole !== "super" && currentUserRole !== "admin") || userRole !== "student") return null;
+  
+  const handleToggle = async () => {
+    setLoading(true);
+    try {
+      const action = isBanned ? "unban" : "ban";
+      const res = await fetch(`/api/admin/users/${userId}`, { 
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, reason: banReason })
+      });
+      
+      if (res.ok) {
+        toast.success(`User ${isBanned ? "unbanned" : "banned"} successfully`);
+        setOpen(false);
+        setBanReason("");
+        onBanned();
+      } else {
+        const data = await res.json();
+        toast.error(data?.error || "Failed to update ban status");
+      }
+    } catch (e) {
+      toast.error("Failed to update ban status");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (isBanned) {
+    // Show unban button directly
+    return (
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={handleToggle} 
+        disabled={loading}
+        className="text-green-600 hover:text-green-700 hover:bg-green-50"
+      >
+        {loading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <>
+            <Ban className="h-4 w-4 mr-2" />
+            Unban
+          </>
+        )}
+      </Button>
+    );
+  }
+  
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button 
+          variant="outline" 
+          size="sm"
+          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+        >
+          <Ban className="h-4 w-4 mr-2" />
+          Ban
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Ban User</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to ban {userName}? They will be immediately logged out and unable to sign in.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="ban-reason">Reason for ban (optional)</Label>
+            <Input
+              id="ban-reason"
+              value={banReason}
+              onChange={(e) => setBanReason(e.target.value)}
+              placeholder="Enter reason for banning this user"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button 
+            variant="destructive" 
+            onClick={handleToggle} 
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Banning...
+              </>
+            ) : (
+              <>
+                <Ban className="mr-2 h-4 w-4" />
+                Ban User
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -508,6 +628,9 @@ interface User {
   email: string
   role: string
   profileVerified: boolean
+  isBanned: boolean
+  bannedAt: string | null
+  banReason: string | null
   createdAt: string
   image: string | null
   _count: {
@@ -617,8 +740,9 @@ export default function AdminUsersPage() {
     user.name?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const studentCount = users.filter(u => u.role === "student").length
+  const studentCount = users.filter(u => u.role === "student" && !u.isBanned).length
   const adminCount = users.filter(u => u.role === "admin").length
+  const bannedCount = users.filter(u => u.isBanned).length
 
   if (loading) {
     return (
@@ -628,9 +752,10 @@ export default function AdminUsersPage() {
     )
   }
 
-  // Separate users by role
+  // Separate users by role and ban status
   const adminUsers = filteredUsers.filter((user) => user.role === "admin")
-  const studentUsers = filteredUsers.filter((user) => user.role === "student")
+  const studentUsers = filteredUsers.filter((user) => user.role === "student" && !user.isBanned)
+  const bannedUsers = filteredUsers.filter((user) => user.isBanned)
 
   return (
     <div className="container mx-auto p-4 md:p-6">
@@ -670,7 +795,7 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mb-6">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -700,6 +825,16 @@ export default function AdminUsersPage() {
             <div className="text-2xl font-bold">{adminCount}</div>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Banned</CardTitle>
+            <Ban className="h-4 w-4 text-red-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-500">{bannedCount}</div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Search */}
@@ -720,11 +855,12 @@ export default function AdminUsersPage() {
         </CardContent>
       </Card>
 
-      {/* Users List - Tabs for Admins and Students */}
+      {/* Users List - Tabs for Admins, Students and Banned */}
       <Tabs defaultValue="students" className="w-full mt-4">
         <TabsList>
           <TabsTrigger value="students">Students ({studentUsers.length})</TabsTrigger>
           <TabsTrigger value="admins">Admins ({adminUsers.length})</TabsTrigger>
+          <TabsTrigger value="banned" className="text-red-500 data-[state=active]:text-red-600">Banned ({bannedUsers.length})</TabsTrigger>
         </TabsList>
         <TabsContent value="students">
           <Card>
@@ -754,6 +890,12 @@ export default function AdminUsersPage() {
                           </Avatar>
                           <p className="font-medium">{user.name || "No name"}</p>
                           <Badge variant="secondary">student</Badge>
+                          {user.isBanned && (
+                            <Badge variant="destructive">
+                              <Ban className="h-3 w-3 mr-1" />
+                              Banned
+                            </Badge>
+                          )}
                           {user.profileVerified && (
                             <Badge variant="default" className="bg-blue-600 hover:bg-blue-700">
                               <CheckCircle className="h-3 w-3 mr-1" />
@@ -904,6 +1046,14 @@ export default function AdminUsersPage() {
                             currentUserRole={session?.user?.role || ""} 
                             isVerified={user.profileVerified}
                             onVerified={loadUsers} 
+                          />
+                          <BanUserButton 
+                            userId={user.id} 
+                            userRole={user.role} 
+                            currentUserRole={session?.user?.role || ""} 
+                            isBanned={user.isBanned}
+                            userName={user.name || user.email}
+                            onBanned={loadUsers} 
                           />
                           {(session?.user?.role === "super" || session?.user?.email === "sumitadhikari2341@gmail.com") ? (
                             <>
@@ -1105,6 +1255,81 @@ export default function AdminUsersPage() {
                         <EditUserButton user={user} currentUserRole={session?.user?.role || ""} onUpdated={loadUsers} />
                         <DeleteUserButton userId={user.id} userRole={user.role} currentUserRole={session?.user?.role || ""} onDeleted={loadUsers} />
                         {/* No chat or delete chat for admins */}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="banned">
+          <Card className="border-red-200 dark:border-red-800">
+            <CardHeader>
+              <CardTitle className="text-red-600">Banned Users ({bannedUsers.length})</CardTitle>
+              <CardDescription>Users who have been banned from the platform</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {bannedUsers.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No banned users</p>
+              ) : (
+                <div className="space-y-4">
+                  {bannedUsers.map((user) => (
+                    <div
+                      key={user.id}
+                      className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-4 border border-red-200 dark:border-red-800 rounded-lg bg-red-50/50 dark:bg-red-950/20"
+                    >
+                      <div className="flex-1 space-y-1 w-full min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 min-w-0">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={user.image || undefined} alt={user.name || "User"} />
+                            <AvatarFallback>
+                              {user.name
+                                ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+                                : "U"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <p className="font-medium">{user.name || "No name"}</p>
+                          <Badge variant="secondary">{user.role}</Badge>
+                          <Badge variant="destructive">
+                            <Ban className="h-3 w-3 mr-1" />
+                            Banned
+                          </Badge>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground min-w-0">
+                          <div className="flex items-center gap-1">
+                            <Mail className="h-3 w-3" />
+                            <span>{user.email}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            <span>Joined {new Date(user.createdAt).toLocaleDateString()}</span>
+                          </div>
+                          {user.bannedAt && (
+                            <div className="flex items-center gap-1 text-red-600">
+                              <Ban className="h-3 w-3" />
+                              <span>Banned {new Date(user.bannedAt).toLocaleDateString()}</span>
+                            </div>
+                          )}
+                        </div>
+                        {user.banReason && (
+                          <div className="text-sm text-red-600 dark:text-red-400 mt-1">
+                            <span className="font-medium">Reason:</span> {user.banReason}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-2 items-stretch sm:items-end w-full sm:w-auto mt-4 sm:mt-0">
+                        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                          <BanUserButton 
+                            userId={user.id} 
+                            userRole={user.role} 
+                            currentUserRole={session?.user?.role || ""} 
+                            isBanned={user.isBanned}
+                            userName={user.name || user.email}
+                            onBanned={loadUsers} 
+                          />
+                          <DeleteUserButton userId={user.id} userRole={user.role} currentUserRole={session?.user?.role || ""} onDeleted={loadUsers} />
+                        </div>
                       </div>
                     </div>
                   ))}

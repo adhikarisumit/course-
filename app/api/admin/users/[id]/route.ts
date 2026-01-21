@@ -2,41 +2,68 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
 
-// PATCH /api/admin/users/[id] - Toggle profile verification
+// PATCH /api/admin/users/[id] - Toggle profile verification or ban/unban user
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  // Only super admin can verify profiles
-  if (session.user.role !== "super") {
-    return NextResponse.json({ error: "Forbidden: Only super admin can verify profiles" }, { status: 403 })
-  }
-
   const { id } = await params
-  const { action } = await req.json()
-
-  if (action !== "verify" && action !== "unverify") {
-    return NextResponse.json({ error: "Invalid action" }, { status: 400 })
-  }
+  const { action, reason } = await req.json()
 
   const user = await prisma.user.findUnique({ where: { id } })
   if (!user) {
     return NextResponse.json({ error: "User not found" }, { status: 404 })
   }
 
-  if (user.role !== "student") {
-    return NextResponse.json({ error: "Only student profiles can be verified" }, { status: 400 })
+  // Handle ban/unban actions
+  if (action === "ban" || action === "unban") {
+    // Only super admin or admin can ban/unban users
+    if (session.user.role !== "super" && session.user.role !== "admin") {
+      return NextResponse.json({ error: "Forbidden: Only admin can ban/unban users" }, { status: 403 })
+    }
+
+    // Cannot ban super admin or admin users
+    if (user.role === "super" || user.role === "admin") {
+      return NextResponse.json({ error: "Cannot ban admin users" }, { status: 400 })
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: { 
+        isBanned: action === "ban",
+        bannedAt: action === "ban" ? new Date() : null,
+        banReason: action === "ban" ? (reason || "No reason provided") : null,
+        sessionVersion: { increment: 1 }, // Invalidate all sessions when banned
+      },
+      select: { id: true, isBanned: true, bannedAt: true, banReason: true }
+    })
+
+    return NextResponse.json(updatedUser)
   }
 
-  const updatedUser = await prisma.user.update({
-    where: { id },
-    data: { profileVerified: action === "verify" },
-    select: { id: true, profileVerified: true }
-  })
+  // Handle verify/unverify actions
+  if (action === "verify" || action === "unverify") {
+    // Only super admin can verify profiles
+    if (session.user.role !== "super") {
+      return NextResponse.json({ error: "Forbidden: Only super admin can verify profiles" }, { status: 403 })
+    }
 
-  return NextResponse.json(updatedUser)
+    if (user.role !== "student") {
+      return NextResponse.json({ error: "Only student profiles can be verified" }, { status: 400 })
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: { profileVerified: action === "verify" },
+      select: { id: true, profileVerified: true }
+    })
+
+    return NextResponse.json(updatedUser)
+  }
+
+  return NextResponse.json({ error: "Invalid action" }, { status: 400 })
 }
 
 // PUT /api/admin/users/[id] - Update user details

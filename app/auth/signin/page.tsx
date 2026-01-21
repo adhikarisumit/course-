@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -9,24 +9,77 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { signIn } from "next-auth/react"
 import { toast } from "sonner"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, Ban } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function SignInPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [showVerificationAlert, setShowVerificationAlert] = useState(false)
+  const [showBannedAlert, setShowBannedAlert] = useState(false)
+  const [isAdminEmail, setIsAdminEmail] = useState(false)
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   })
 
+  // Check if email belongs to an admin (with debounce)
+  const checkAdminEmail = useCallback(async (email: string) => {
+    if (!email || !email.includes("@")) {
+      setIsAdminEmail(false)
+      return
+    }
+    try {
+      const response = await fetch("/api/auth/check-admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setIsAdminEmail(data.isAdmin)
+      }
+    } catch {
+      setIsAdminEmail(false)
+    }
+  }, [])
+
+  // Debounced email check
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      checkAdminEmail(formData.email)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [formData.email, checkAdminEmail])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setShowVerificationAlert(false)
+    setShowBannedAlert(false)
 
     try {
+      // First check if user is banned or unverified
+      const checkResponse = await fetch("/api/auth/check-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email }),
+      })
+      
+      if (!checkResponse.ok) {
+        const checkData = await checkResponse.json()
+        if (checkData.error === "banned") {
+          setShowBannedAlert(true)
+          setIsLoading(false)
+          return
+        }
+        if (checkData.error === "unverified") {
+          setShowVerificationAlert(true)
+          setIsLoading(false)
+          return
+        }
+      }
+
       const result = await signIn("credentials", {
         email: formData.email,
         password: formData.password,
@@ -35,8 +88,10 @@ export default function SignInPage() {
 
       if (result?.error) {
         // Check if it's an email verification error
-        if (result.error.includes("verify your email")) {
+        if (result.error.includes("verify your email") || (result.error.includes("verify") && result.error.includes("email"))) {
           setShowVerificationAlert(true)
+        } else if (result.error.toLowerCase().includes("banned")) {
+          setShowBannedAlert(true)
         } else {
           toast.error("Invalid email or password")
         }
@@ -71,6 +126,15 @@ export default function SignInPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {showBannedAlert && (
+            <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-800 dark:bg-red-950/50 dark:border-red-800 dark:text-red-200">
+              <Ban className="h-4 w-4" />
+              <AlertDescription className="ml-2">
+                <p className="font-medium">Account Banned</p>
+                <p className="text-sm mt-1">Your account has been banned from this platform. If you believe this is a mistake, please contact support for assistance.</p>
+              </AlertDescription>
+            </Alert>
+          )}
           {showVerificationAlert && (
             <Alert variant="destructive" className="bg-amber-50 border-amber-200 text-amber-800">
               <AlertCircle className="h-4 w-4" />
@@ -102,7 +166,17 @@ export default function SignInPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                {isAdminEmail && (
+                  <Link 
+                    href={`/auth/forgot-password?email=${encodeURIComponent(formData.email)}&admin=true`}
+                    className="text-xs text-primary hover:underline font-medium"
+                  >
+                    Forgot password?
+                  </Link>
+                )}
+              </div>
               <Input
                 id="password"
                 type="password"

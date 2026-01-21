@@ -29,6 +29,10 @@ export async function GET(req: NextRequest) {
         createdAt: true,
         image: true,
         emailVerified: true,
+        profileVerified: true,
+        isBanned: true,
+        bannedAt: true,
+        banReason: true,
         _count: {
           select: {
             enrollments: true,

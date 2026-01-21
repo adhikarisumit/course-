@@ -58,6 +58,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           throw new Error("Please verify your email before signing in")
         }
 
+        // Check if account is banned
+        if (user.isBanned) {
+          throw new Error("Your account has been banned. Please contact support for assistance.")
+        }
+
         const isCorrectPassword = await bcrypt.compare(
           credentials.password as string,
           user.password

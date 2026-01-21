@@ -16,6 +16,9 @@ model User {
   password         String?
   role             String       @default("student")
   isFrozen         Boolean      @default(false)
+  isBanned         Boolean      @default(false)
+  bannedAt         DateTime?
+  banReason        String?
   profileVerified  Boolean      @default(false)
   sessionVersion   Int          @default(0)
   createdAt        DateTime     @default(now())
