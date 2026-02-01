@@ -49,8 +49,13 @@ export default async function DashboardPage() {
     .join("")
     .toUpperCase() || "U"
 
-  // Find the super admin user to chat with
-  const admin = await prisma.user.findFirst({ where: { email: process.env.SUPER_ADMIN_EMAIL, role: "admin" } });
+  // Find the super admin user to chat with (role can be "admin" or "super")
+  const admin = await prisma.user.findFirst({ 
+    where: { 
+      email: process.env.SUPER_ADMIN_EMAIL, 
+      role: { in: ["admin", "super"] } 
+    } 
+  });
 
   // Get first name for greeting
   const firstName = session.user.name?.split(" ")[0] || "Student"
@@ -72,7 +77,7 @@ export default async function DashboardPage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              {session.user.role === "student" && admin && (
+              {(session.user.role === "student" || (!session.user.role || (session.user.role !== "admin" && session.user.role !== "super"))) && admin && (
                 <ClientChatWithTeacherModalWrapper
                   currentUserId={session.user.id}
                   teacherId={admin.id}
