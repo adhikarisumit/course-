@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Mail, Calendar, Shield, User as UserIcon, CheckCircle } from "lucide-react"
+import { Mail, Calendar, Shield, User as UserIcon, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import prisma from "@/lib/prisma"
@@ -84,7 +84,9 @@ export default async function ProfilePage() {
                 <h3 className="text-xl font-semibold flex items-center gap-2">
                   {user.name}
                   {user.profileVerified && (
-                    <CheckCircle className="h-5 w-5 text-blue-600" />
+                    <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-blue-500" title="Verified">
+                      <Check className="h-3 w-3 text-white stroke-[3]" />
+                    </span>
                   )}
                 </h3>
                 <div className="flex items-center gap-2 mt-2">
@@ -93,8 +95,10 @@ export default async function ProfilePage() {
                     {user.role}
                   </Badge>
                   {user.profileVerified && (
-                    <Badge variant="default" className="bg-blue-600 hover:bg-blue-700">
-                      <CheckCircle className="mr-1 h-3 w-3" />
+                    <Badge variant="default" className="bg-blue-500 hover:bg-blue-600">
+                      <span className="inline-flex items-center justify-center h-3 w-3 rounded-full bg-white mr-1">
+                        <Check className="h-2 w-2 text-blue-500 stroke-[3]" />
+                      </span>
                       Verified
                     </Badge>
                   )}
