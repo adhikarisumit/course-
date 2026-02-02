@@ -25,6 +25,7 @@ export default function ManageAdminsPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [admins, setAdmins] = useState<Admin[]>([])
+  const [superAdmins, setSuperAdmins] = useState<Admin[]>([])
   const [dialogOpen, setDialogOpen] = useState(false)
   const [creating, setCreating] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
@@ -68,7 +69,8 @@ export default function ManageAdminsPage() {
       const response = await fetch("/api/admin/manage-admins")
       if (response.ok) {
         const data = await response.json()
-        setAdmins(data)
+        setAdmins(data.admins || [])
+        setSuperAdmins(data.superAdmins || [])
       } else {
         toast.error("Failed to load admins")
       }
@@ -250,26 +252,34 @@ export default function ManageAdminsPage() {
         </Dialog>
       </div>
 
-      {/* Super Admin Info */}
+      {/* Super Admins */}
       <Card className="mb-6 border-primary/50 bg-primary/5">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
-            Super Admin
+            Super Admins ({superAdmins.length})
           </CardTitle>
-          <CardDescription>Primary administrator with full access</CardDescription>
+          <CardDescription>Administrators with full access</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="font-medium">{session.user?.name || "Super Admin"}</p>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Mail className="h-3 w-3" />
-                <span>{superAdminEmail}</span>
-              </div>
+          {superAdmins.length === 0 ? (
+            <p className="text-muted-foreground text-center py-4">No super admins found</p>
+          ) : (
+            <div className="space-y-4">
+              {superAdmins.map((admin) => (
+                <div key={admin.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="space-y-1">
+                    <p className="font-medium">{admin.name || "Super Admin"}</p>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Mail className="h-3 w-3" />
+                      <span>{admin.email}</span>
+                    </div>
+                  </div>
+                  <Badge className="bg-primary">Super Admin</Badge>
+                </div>
+              ))}
             </div>
-            <Badge className="bg-primary">Super Admin</Badge>
-          </div>
+          )}
         </CardContent>
       </Card>
 

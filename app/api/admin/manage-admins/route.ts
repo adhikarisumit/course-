@@ -16,12 +16,10 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Fetch all admins (role: "admin")
     const admins = await prisma.user.findMany({
       where: {
         role: "admin",
-        email: {
-          not: SUPER_ADMIN_EMAIL, // Exclude super admin from list
-        },
       },
       select: {
         id: true,
@@ -35,7 +33,24 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    return NextResponse.json(admins)
+    // Fetch all super admins (role: "super")
+    const superAdmins = await prisma.user.findMany({
+      where: {
+        role: "super",
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    })
+
+    return NextResponse.json({ admins, superAdmins })
   } catch (error) {
     console.error("Error fetching admins:", error)
     return NextResponse.json(
