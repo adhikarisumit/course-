@@ -19,7 +19,7 @@ export default function JishoPage() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Japanese Dictionary</h1>
             <p className="text-sm text-muted-foreground">
-              Search words, kanji, and phrases • Powered by Jisho.org
+              Search words, kanji, and phrases
             </p>
           </div>
         </div>
@@ -27,31 +27,6 @@ export default function JishoPage() {
 
       {/* Dictionary Component */}
       <JishoDictionary />
-
-      {/* Attribution Footer */}
-      <div className="mt-8 pt-6 border-t text-center text-sm text-muted-foreground">
-        <p>
-          Dictionary data provided by{" "}
-          <a
-            href="https://jisho.org"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:underline"
-          >
-            Jisho.org
-          </a>
-          {" "}using the{" "}
-          <a
-            href="https://www.edrdg.org/jmdict/j_jmdict.html"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:underline"
-          >
-            JMdict
-          </a>
-          {" "}project
-        </p>
-      </div>
     </div>
   )
 }
