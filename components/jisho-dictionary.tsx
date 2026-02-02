@@ -413,6 +413,10 @@ export default function JishoDictionary() {
                       value={keyword}
                       onChange={(e) => setKeyword(e.target.value)}
                       onFocus={() => setShowHistory(true)}
+                      onBlur={(e) => {
+                        // Delay hiding to allow click events on dropdown items
+                        setTimeout(() => setShowHistory(false), 200)
+                      }}
                       className="pl-10 pr-4 h-12 text-lg"
                       autoComplete="off"
                     />
@@ -430,37 +434,47 @@ export default function JishoDictionary() {
                         <X className="h-4 w-4" />
                       </Button>
                     )}
-                  </div>
 
-                  {/* Quick search history dropdown */}
-                  {showHistory && searchHistory.length > 0 && !keyword && (
-                    <Card className="absolute z-10 w-full max-w-xl mt-1 shadow-lg">
-                      <CardContent className="p-2">
-                        <div className="flex items-center justify-between px-2 py-1 mb-1">
-                          <span className="text-xs text-muted-foreground">Recent searches</span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 text-xs"
-                            onClick={clearHistory}
-                          >
-                            Clear
-                          </Button>
-                        </div>
-                        {searchHistory.slice(0, 5).map((item) => (
-                          <button
-                            key={item.timestamp}
-                            type="button"
-                            className="flex items-center gap-2 w-full px-3 py-2 text-left hover:bg-muted rounded-md transition-colors"
-                            onClick={() => handleHistoryClick(item.keyword)}
-                          >
-                            <History className="h-3 w-3 text-muted-foreground" />
-                            <span>{item.keyword}</span>
-                          </button>
-                        ))}
-                      </CardContent>
-                    </Card>
-                  )}
+                    {/* Quick search history dropdown */}
+                    {showHistory && searchHistory.length > 0 && !keyword && (
+                      <Card className="absolute left-0 right-0 top-full z-50 mt-1 shadow-lg border bg-background">
+                        <CardContent className="p-2">
+                          <div className="flex items-center justify-between px-2 py-1 mb-1">
+                            <span className="text-xs text-muted-foreground">Recent searches</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 text-xs"
+                              onMouseDown={(e) => {
+                                e.preventDefault()
+                                clearHistory()
+                              }}
+                            >
+                              Clear
+                            </Button>
+                          </div>
+                          {searchHistory.slice(0, 5).map((item) => (
+                            <button
+                              key={item.timestamp}
+                              type="button"
+                              className="flex items-center gap-2 w-full px-3 py-2 text-left hover:bg-muted active:bg-muted rounded-md transition-colors touch-manipulation"
+                              onMouseDown={(e) => {
+                                e.preventDefault()
+                                handleHistoryClick(item.keyword)
+                              }}
+                              onTouchEnd={(e) => {
+                                e.preventDefault()
+                                handleHistoryClick(item.keyword)
+                              }}
+                            >
+                              <History className="h-3 w-3 text-muted-foreground" />
+                              <span>{item.keyword}</span>
+                            </button>
+                          ))}
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
 
                   <div className="flex gap-2">
                     <Button type="submit" className="flex-1 h-11" disabled={loading}>
