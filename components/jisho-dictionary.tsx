@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect, useRef } from "react"
-import { Search, Volume2, Book, Star, Copy, Check, Loader2, ChevronDown, ChevronUp, BookOpen, Languages, Tag, ExternalLink, History, X, Bookmark, BookmarkCheck, MessageSquareText, Pencil } from "lucide-react"
+import { Search, Volume2, Book, Star, Copy, Check, Loader2, ChevronDown, ChevronUp, BookOpen, Languages, Tag, ExternalLink, History, X, Bookmark, BookmarkCheck, MessageSquareText, Pencil, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -10,6 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import KanjiStrokeModal from "@/components/kanji-stroke-modal"
@@ -114,6 +116,8 @@ export default function JishoDictionary() {
   const [activeTab, setActiveTab] = useState("search")
   const [selectedKanji, setSelectedKanji] = useState<string | null>(null)
   const [kanjiModalOpen, setKanjiModalOpen] = useState(false)
+  const [showNepali, setShowNepali] = useState(true)
+  const [showVietnamese, setShowVietnamese] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const { toast } = useToast()
 
@@ -127,6 +131,8 @@ export default function JishoDictionary() {
   useEffect(() => {
     const savedHistory = localStorage.getItem("jisho-search-history")
     const savedBookmarks = localStorage.getItem("jisho-bookmarks")
+    const savedNepaliPref = localStorage.getItem("jisho-show-nepali")
+    const savedVietnamesePref = localStorage.getItem("jisho-show-vietnamese")
     
     if (savedHistory) {
       try {
@@ -142,6 +148,14 @@ export default function JishoDictionary() {
       } catch (e) {
         console.error("Failed to load bookmarks:", e)
       }
+    }
+
+    if (savedNepaliPref !== null) {
+      setShowNepali(savedNepaliPref === "true")
+    }
+
+    if (savedVietnamesePref !== null) {
+      setShowVietnamese(savedVietnamesePref === "true")
     }
   }, [])
 
@@ -329,6 +343,26 @@ export default function JishoDictionary() {
     return date.toLocaleDateString()
   }
 
+  // Toggle Nepali translations
+  const toggleNepali = () => {
+    const newValue = !showNepali
+    setShowNepali(newValue)
+    localStorage.setItem("jisho-show-nepali", String(newValue))
+    toast({
+      description: newValue ? "Nepali translations enabled" : "Nepali translations disabled",
+    })
+  }
+
+  // Toggle Vietnamese translations
+  const toggleVietnamese = () => {
+    const newValue = !showVietnamese
+    setShowVietnamese(newValue)
+    localStorage.setItem("jisho-show-vietnamese", String(newValue))
+    toast({
+      description: newValue ? "Vietnamese translations enabled" : "Vietnamese translations disabled",
+    })
+  }
+
   return (
     <TooltipProvider>
       <div className="space-y-6">
@@ -479,10 +513,34 @@ export default function JishoDictionary() {
             {/* Results */}
             {results.length > 0 && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <p className="text-sm text-muted-foreground">
                     Found {results.length} result{results.length > 1 ? "s" : ""}
                   </p>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="nepali-toggle" className="text-sm text-muted-foreground cursor-pointer flex items-center gap-1.5">
+                        <Globe className="h-4 w-4" />
+                        नेपाली
+                      </Label>
+                      <Switch
+                        id="nepali-toggle"
+                        checked={showNepali}
+                        onCheckedChange={toggleNepali}
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="vietnamese-toggle" className="text-sm text-muted-foreground cursor-pointer flex items-center gap-1.5">
+                        <Globe className="h-4 w-4" />
+                        Tiếng Việt
+                      </Label>
+                      <Switch
+                        id="vietnamese-toggle"
+                        checked={showVietnamese}
+                        onCheckedChange={toggleVietnamese}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="grid gap-4">
@@ -500,6 +558,8 @@ export default function JishoDictionary() {
                       getJlptDisplay={getJlptDisplay}
                       getPosColor={getPosColor}
                       onKanjiClick={openKanjiModal}
+                      showNepali={showNepali}
+                      showVietnamese={showVietnamese}
                     />
                   ))}
                 </div>
@@ -673,6 +733,8 @@ interface WordCardProps {
   getJlptDisplay: (jlpt: string[]) => React.ReactNode
   getPosColor: (pos: string) => string
   onKanjiClick: (kanji: string) => void
+  showNepali: boolean
+  showVietnamese: boolean
 }
 
 function WordCard({
@@ -687,12 +749,100 @@ function WordCard({
   getJlptDisplay,
   getPosColor,
   onKanjiClick,
+  showNepali,
+  showVietnamese,
 }: WordCardProps) {
   const mainWord = word.japanese[0]?.word || word.japanese[0]?.reading || ""
   const reading = word.japanese[0]?.reading || ""
   const [sentences, setSentences] = useState<ExampleSentence[]>([])
   const [loadingSentences, setLoadingSentences] = useState(false)
   const [sentencesLoaded, setSentencesLoaded] = useState(false)
+  const [nepaliTranslations, setNepaliTranslations] = useState<Record<number, string>>({})
+  const [loadingNepali, setLoadingNepali] = useState<Record<number, boolean>>({})
+  const [vietnameseTranslations, setVietnameseTranslations] = useState<Record<number, string>>({})
+  const [loadingVietnamese, setLoadingVietnamese] = useState<Record<number, boolean>>({})
+
+  // Fetch Nepali translation for a meaning
+  const fetchNepaliTranslation = useCallback(async (text: string, index: number) => {
+    if (nepaliTranslations[index] || loadingNepali[index]) return
+    
+    setLoadingNepali(prev => ({ ...prev, [index]: true }))
+    try {
+      const response = await fetch(`/api/jisho/translate?text=${encodeURIComponent(text)}&from=en&to=ne`)
+      if (response.ok) {
+        const data = await response.json()
+        if (data.translated) {
+          setNepaliTranslations(prev => ({ ...prev, [index]: data.translated }))
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch Nepali translation:", error)
+    } finally {
+      setLoadingNepali(prev => ({ ...prev, [index]: false }))
+    }
+  }, [nepaliTranslations, loadingNepali])
+
+  // Fetch Vietnamese translation for a meaning
+  const fetchVietnameseTranslation = useCallback(async (text: string, index: number) => {
+    if (vietnameseTranslations[index] || loadingVietnamese[index]) return
+    
+    setLoadingVietnamese(prev => ({ ...prev, [index]: true }))
+    try {
+      const response = await fetch(`/api/jisho/translate?text=${encodeURIComponent(text)}&from=en&to=vi`)
+      if (response.ok) {
+        const data = await response.json()
+        if (data.translated) {
+          setVietnameseTranslations(prev => ({ ...prev, [index]: data.translated }))
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch Vietnamese translation:", error)
+    } finally {
+      setLoadingVietnamese(prev => ({ ...prev, [index]: false }))
+    }
+  }, [vietnameseTranslations, loadingVietnamese])
+
+  // Fetch Nepali translations when showNepali is enabled
+  useEffect(() => {
+    if (showNepali && word.senses.length > 0) {
+      // Fetch translation for the first meaning immediately
+      const primaryMeaning = word.senses[0]?.english_definitions.join("; ")
+      if (primaryMeaning && !nepaliTranslations[0]) {
+        fetchNepaliTranslation(primaryMeaning, 0)
+      }
+    }
+  }, [showNepali, word.senses, fetchNepaliTranslation, nepaliTranslations])
+
+  // Fetch Vietnamese translations when showVietnamese is enabled
+  useEffect(() => {
+    if (showVietnamese && word.senses.length > 0) {
+      // Fetch translation for the first meaning immediately
+      const primaryMeaning = word.senses[0]?.english_definitions.join("; ")
+      if (primaryMeaning && !vietnameseTranslations[0]) {
+        fetchVietnameseTranslation(primaryMeaning, 0)
+      }
+    }
+  }, [showVietnamese, word.senses, fetchVietnameseTranslation, vietnameseTranslations])
+
+  // Fetch all translations when expanded
+  useEffect(() => {
+    if (isExpanded && showNepali) {
+      word.senses.forEach((sense, idx) => {
+        const meaning = sense.english_definitions.join("; ")
+        if (meaning && !nepaliTranslations[idx]) {
+          fetchNepaliTranslation(meaning, idx)
+        }
+      })
+    }
+    if (isExpanded && showVietnamese) {
+      word.senses.forEach((sense, idx) => {
+        const meaning = sense.english_definitions.join("; ")
+        if (meaning && !vietnameseTranslations[idx]) {
+          fetchVietnameseTranslation(meaning, idx)
+        }
+      })
+    }
+  }, [isExpanded, showNepali, showVietnamese, word.senses, fetchNepaliTranslation, fetchVietnameseTranslation, nepaliTranslations, vietnameseTranslations])
 
   // Fetch example sentences when expanded
   useEffect(() => {
@@ -849,6 +999,32 @@ function WordCard({
             <p className="text-lg">
               {word.senses[0]?.english_definitions.join("; ")}
             </p>
+            {/* Nepali Translation */}
+            {showNepali && (nepaliTranslations[0] || loadingNepali[0]) && (
+              <div className="mt-2 flex items-center gap-2">
+                <Badge variant="outline" className="text-xs bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20">
+                  नेपाली
+                </Badge>
+                {loadingNepali[0] ? (
+                  <span className="text-sm text-muted-foreground animate-pulse">अनुवाद हुँदैछ...</span>
+                ) : nepaliTranslations[0] ? (
+                  <span className="text-base text-muted-foreground">{nepaliTranslations[0]}</span>
+                ) : null}
+              </div>
+            )}
+            {/* Vietnamese Translation */}
+            {showVietnamese && (vietnameseTranslations[0] || loadingVietnamese[0]) && (
+              <div className="mt-2 flex items-center gap-2">
+                <Badge variant="outline" className="text-xs bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20">
+                  Tiếng Việt
+                </Badge>
+                {loadingVietnamese[0] ? (
+                  <span className="text-sm text-muted-foreground animate-pulse">Đang dịch...</span>
+                ) : vietnameseTranslations[0] ? (
+                  <span className="text-base text-muted-foreground">{vietnameseTranslations[0]}</span>
+                ) : null}
+              </div>
+            )}
           </div>
 
           {/* Expand button if more senses */}
@@ -900,6 +1076,29 @@ function WordCard({
                     <p className="font-medium">
                       {idx + 1}. {sense.english_definitions.join("; ")}
                     </p>
+                    {/* Nepali Translation for each meaning */}
+                    {/* Nepali Translation for each meaning */}
+                    {showNepali && (nepaliTranslations[idx] || loadingNepali[idx]) && (
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className="text-xs text-orange-600 dark:text-orange-400 font-medium">नेपाली:</span>
+                        {loadingNepali[idx] ? (
+                          <span className="text-sm text-muted-foreground animate-pulse">अनुवाद हुँदैछ...</span>
+                        ) : nepaliTranslations[idx] ? (
+                          <span className="text-sm text-muted-foreground">{nepaliTranslations[idx]}</span>
+                        ) : null}
+                      </div>
+                    )}
+                    {/* Vietnamese Translation for each meaning */}
+                    {showVietnamese && (vietnameseTranslations[idx] || loadingVietnamese[idx]) && (
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className="text-xs text-red-600 dark:text-red-400 font-medium">Tiếng Việt:</span>
+                        {loadingVietnamese[idx] ? (
+                          <span className="text-sm text-muted-foreground animate-pulse">Đang dịch...</span>
+                        ) : vietnameseTranslations[idx] ? (
+                          <span className="text-sm text-muted-foreground">{vietnameseTranslations[idx]}</span>
+                        ) : null}
+                      </div>
+                    )}
                     {sense.info.length > 0 && (
                       <p className="text-sm text-muted-foreground mt-1">
                         ℹ️ {sense.info.join("; ")}
