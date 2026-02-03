@@ -25,12 +25,27 @@ interface HeaderProps {
 
 export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery)
   const router = useRouter()
   const pathname = usePathname()
+  
   const handleSearch = () => {
-    const coursesSection = document.getElementById("courses")
-    if (coursesSection) {
-      coursesSection.scrollIntoView({ behavior: "smooth" })
+    const query = localSearchQuery || searchQuery
+    if (query.trim()) {
+      // Navigate to courses page with search query
+      router.push(`/courses?search=${encodeURIComponent(query.trim())}`)
+      setMobileOpen(false)
+    } else {
+      // If no query, just go to courses page
+      router.push('/courses')
+      setMobileOpen(false)
+    }
+  }
+
+  const handleSearchInputChange = (value: string) => {
+    setLocalSearchQuery(value)
+    if (setSearchQuery) {
+      setSearchQuery(value)
     }
   }
 
@@ -63,6 +78,21 @@ export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
           <Link href="/auth/signup" onClick={() => setMobileOpen(false)}>Sign Up</Link>
         </Button>
       </div>
+    )
+  }
+
+  // Mobile signup button component (visible on small screens when not logged in)
+  function MobileSignupButton() {
+    const { data: session, status } = useSession()
+    
+    if (status === "loading" || session?.user) {
+      return null
+    }
+    
+    return (
+      <Button asChild size="sm" className="sm:hidden">
+        <Link href="/auth/signup">Sign Up</Link>
+      </Button>
     )
   }
 
@@ -166,10 +196,10 @@ export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search courses, notes, resources..."
+                    placeholder="Search courses..."
                     className="pl-10"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    value={localSearchQuery}
+                    onChange={(e) => handleSearchInputChange(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         handleSearch()
@@ -197,6 +227,7 @@ export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
               Contact
             </Link>
             <UserMenu />
+            <MobileSignupButton />
             <ThemeToggle />
             {/* mobile menu toggle */}
             <button
@@ -222,19 +253,18 @@ export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search courses, notes, resources..."
+                    placeholder="Search courses..."
                     className="pl-10"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    value={localSearchQuery}
+                    onChange={(e) => handleSearchInputChange(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         handleSearch()
-                        setMobileOpen(false)
                       }
                     }}
                   />
                 </div>
-                <Button onClick={() => { handleSearch(); setMobileOpen(false); }} size="default">
+                <Button onClick={handleSearch} size="default">
                   Search
                 </Button>
               </div>
