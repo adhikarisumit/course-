@@ -6,7 +6,6 @@ import { GraduationCap, Users, BookOpen, Star } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { useSession } from "next-auth/react";
 
 export interface Mentor {
   id: string;
@@ -24,7 +23,6 @@ export interface Mentor {
 }
 
 export default function MentorIntroClient({ mentors, totalStudents, totalCourses, avgRating }: { mentors: Mentor[], totalStudents: number, totalCourses: number, avgRating: string }) {
-  const { data: session } = useSession();
   const [openBio, setOpenBio] = useState<{ [id: string]: boolean }>({});
 
   const toggleBio = (id: string) => {
