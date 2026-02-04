@@ -104,66 +104,57 @@ export async function GET() {
       pageAdConfig: (settings as Record<string, unknown>).pageAdConfig ? JSON.parse((settings as Record<string, unknown>).pageAdConfig as string) : undefined,
     };
 
-    // Only include the active provider's settings
-    switch (settings.activeProvider) {
-      case 'adsense':
-        response.adsense = {
-          publisherId: settings.adsensePublisherId,
-            autoAds: settings.adsenseAutoAds,
-            headerSlot: settings.adsenseHeaderSlot,
-            footerSlot: settings.adsenseFooterSlot,
-            sidebarSlot: settings.adsenseSidebarSlot,
-          inArticleSlot: settings.adsenseInArticleSlot,
-        };
-        break;
-      case 'medianet':
-        response.medianet = {
-          customerId: settings.medianetCustomerId,
-            headerCode: settings.medianetHeaderCode,
-            footerCode: settings.medianetFooterCode,
-            sidebarCode: settings.medianetSidebarCode,
-          inArticleCode: settings.medianetInArticleCode,
-        };
-        break;
-      case 'amazon':
-        response.amazon = {
-          trackingId: settings.amazonTrackingId,
-            adInstanceId: settings.amazonAdInstanceId,
-            headerCode: settings.amazonHeaderCode,
-            footerCode: settings.amazonFooterCode,
-            sidebarCode: settings.amazonSidebarCode,
-          inArticleCode: settings.amazonInArticleCode,
-        };
-        break;
-      case 'propeller':
-        response.propeller = {
-          zoneId: settings.propellerZoneId,
-            headerCode: settings.propellerHeaderCode,
-            footerCode: settings.propellerFooterCode,
-            sidebarCode: settings.propellerSidebarCode,
-          inArticleCode: settings.propellerInArticleCode,
-        };
-        break;
-      case 'adsterra':
-        response.adsterra = {
-          key: settings.adsterraKey,
-            headerCode: settings.adsterraHeaderCode,
-            footerCode: settings.adsterraFooterCode,
-            sidebarCode: settings.adsterraSidebarCode,
-          inArticleCode: settings.adsterraInArticleCode,
-        };
-        break;
-      case 'custom':
-        response.custom = {
-          providerName: settings.customProviderName,
-            headScript: settings.customHeadScript,
-            headerCode: settings.customHeaderCode,
-            footerCode: settings.customFooterCode,
-            sidebarCode: settings.customSidebarCode,
-          inArticleCode: settings.customInArticleCode,
-        };
-        break;
-    }
+    // Include ALL provider settings so page-level overrides can use different providers
+    response.adsense = {
+      publisherId: settings.adsensePublisherId,
+      autoAds: settings.adsenseAutoAds,
+      headerSlot: settings.adsenseHeaderSlot,
+      footerSlot: settings.adsenseFooterSlot,
+      sidebarSlot: settings.adsenseSidebarSlot,
+      inArticleSlot: settings.adsenseInArticleSlot,
+    };
+    
+    response.medianet = {
+      customerId: settings.medianetCustomerId,
+      headerCode: settings.medianetHeaderCode,
+      footerCode: settings.medianetFooterCode,
+      sidebarCode: settings.medianetSidebarCode,
+      inArticleCode: settings.medianetInArticleCode,
+    };
+    
+    response.amazon = {
+      trackingId: settings.amazonTrackingId,
+      adInstanceId: settings.amazonAdInstanceId,
+      headerCode: settings.amazonHeaderCode,
+      footerCode: settings.amazonFooterCode,
+      sidebarCode: settings.amazonSidebarCode,
+      inArticleCode: settings.amazonInArticleCode,
+    };
+    
+    response.propeller = {
+      zoneId: settings.propellerZoneId,
+      headerCode: settings.propellerHeaderCode,
+      footerCode: settings.propellerFooterCode,
+      sidebarCode: settings.propellerSidebarCode,
+      inArticleCode: settings.propellerInArticleCode,
+    };
+    
+    response.adsterra = {
+      key: settings.adsterraKey,
+      headerCode: settings.adsterraHeaderCode,
+      footerCode: settings.adsterraFooterCode,
+      sidebarCode: settings.adsterraSidebarCode,
+      inArticleCode: settings.adsterraInArticleCode,
+    };
+    
+    response.custom = {
+      providerName: settings.customProviderName,
+      headScript: settings.customHeadScript,
+      headerCode: settings.customHeaderCode,
+      footerCode: settings.customFooterCode,
+      sidebarCode: settings.customSidebarCode,
+      inArticleCode: settings.customInArticleCode,
+    };
 
     return NextResponse.json(response);
   } catch (error) {
