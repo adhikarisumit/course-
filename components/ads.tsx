@@ -354,6 +354,8 @@ export function FooterAd({ className = '' }: AdPlacementProps) {
   const containerStyle: React.CSSProperties = { minHeight: '90px' };
   const containerClass = `w-full max-w-4xl mx-auto my-1 ${className}`;
 
+  let adCode: string | null | undefined = null;
+
   switch (settings.activeProvider) {
     case 'adsense':
       if (settings.adsense?.footerSlot && settings.adsense?.publisherId) {
@@ -369,15 +371,25 @@ export function FooterAd({ className = '' }: AdPlacementProps) {
       }
       break;
     case 'medianet':
-      return <HtmlAd code={settings.medianet?.footerCode} className={containerClass} style={containerStyle} />;
+      adCode = settings.medianet?.footerCode;
+      break;
     case 'amazon':
-      return <HtmlAd code={settings.amazon?.footerCode} className={containerClass} style={containerStyle} />;
+      adCode = settings.amazon?.footerCode;
+      break;
     case 'propeller':
-      return <HtmlAd code={settings.propeller?.footerCode} className={containerClass} style={containerStyle} />;
+      adCode = settings.propeller?.footerCode;
+      break;
     case 'adsterra':
-      return <HtmlAd code={settings.adsterra?.footerCode} className={containerClass} style={containerStyle} />;
+      adCode = settings.adsterra?.footerCode;
+      break;
     case 'custom':
-      return <HtmlAd code={settings.custom?.footerCode} className={containerClass} style={containerStyle} />;
+      adCode = settings.custom?.footerCode;
+      break;
+  }
+
+  // Return HtmlAd if we have code
+  if (adCode && adCode.trim()) {
+    return <HtmlAd code={adCode} className={containerClass} style={containerStyle} />;
   }
 
   return null;
