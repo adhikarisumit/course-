@@ -24,6 +24,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { MessageCircle, LayoutDashboard, Menu, User, LogOut, Megaphone } from "lucide-react"
 import { useSession, signOut } from "next-auth/react"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 const SUPER_ADMIN_EMAIL = process.env.NEXT_PUBLIC_SUPER_ADMIN_EMAIL || ""
 
@@ -104,9 +105,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           Export Data
         </Link>
         {isSuperAdmin && (
-          <Link href="/admin/manage-admins" className={linkClass} onClick={handleClick}>
-            Manage Admins
-          </Link>
+          <>
+            <Link href="/admin/ads" className={linkClass} onClick={handleClick}>
+              Ads
+            </Link>
+            <Link href="/admin/manage-admins" className={linkClass} onClick={handleClick}>
+              Manage Admins
+            </Link>
+          </>
         )}
       </>
     )
@@ -128,6 +134,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
             {/* Mobile Menu - only show on very small screens */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>

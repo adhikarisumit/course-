@@ -352,3 +352,82 @@ model PurchaseRequest {
   @@index([itemType])
   @@index([createdAt])
 }
+
+model AdSenseSettings {
+  id                String   @id @default(cuid())
+  publisherId       String   // Google AdSense Publisher ID (ca-pub-XXXXXXXX)
+  isEnabled         Boolean  @default(false)
+  enableAutoAds     Boolean  @default(false)
+  enableInArticle   Boolean  @default(false)
+  enableSidebar     Boolean  @default(false)
+  enableHeader      Boolean  @default(false)
+  enableFooter      Boolean  @default(false)
+  inArticleSlot     String?  // Ad slot for in-article ads
+  sidebarSlot       String?  // Ad slot for sidebar ads
+  headerSlot        String?  // Ad slot for header ads
+  footerSlot        String?  // Ad slot for footer ads
+  excludedPages     String?  // Comma-separated list of pages to exclude ads
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model AdSettings {
+  id                String   @id @default(cuid())
+  // Active Provider Selection
+  activeProvider    String   @default("none") // none, adsense, medianet, amazon, propeller, adsterra, custom
+  excludedPages     String?  // Comma-separated list of pages to exclude ads
+  
+  // Google AdSense Settings
+  adsenseEnabled      Boolean  @default(false)
+  adsensePublisherId  String?  // ca-pub-XXXXXXXX
+  adsenseAutoAds      Boolean  @default(false)
+  adsenseHeaderSlot   String?
+  adsenseFooterSlot   String?
+  adsenseSidebarSlot  String?
+  adsenseInArticleSlot String?
+  
+  // Media.net Settings
+  medianetEnabled     Boolean  @default(false)
+  medianetCustomerId  String?  // cid value
+  medianetHeaderCode  String?  // Full ad code for header
+  medianetFooterCode  String?
+  medianetSidebarCode String?
+  medianetInArticleCode String?
+  
+  // Amazon Native Ads Settings
+  amazonEnabled       Boolean  @default(false)
+  amazonTrackingId    String?  // Tracking ID
+  amazonAdInstanceId  String?  // Ad instance ID
+  amazonHeaderCode    String?
+  amazonFooterCode    String?
+  amazonSidebarCode   String?
+  amazonInArticleCode String?
+  
+  // PropellerAds Settings
+  propellerEnabled    Boolean  @default(false)
+  propellerZoneId     String?
+  propellerHeaderCode String?
+  propellerFooterCode String?
+  propellerSidebarCode String?
+  propellerInArticleCode String?
+  
+  // Adsterra Settings
+  adsterraEnabled     Boolean  @default(false)
+  adsterraKey         String?
+  adsterraHeaderCode  String?
+  adsterraFooterCode  String?
+  adsterraSidebarCode String?
+  adsterraInArticleCode String?
+  
+  // Custom Ad Provider
+  customEnabled       Boolean  @default(false)
+  customProviderName  String?
+  customHeadScript    String?  // Script to inject in <head>
+  customHeaderCode    String?
+  customFooterCode    String?
+  customSidebarCode   String?
+  customInArticleCode String?
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}

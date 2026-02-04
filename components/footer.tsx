@@ -4,6 +4,7 @@ import type React from "react"
 import { BookOpen, Github, Twitter, Linkedin } from "lucide-react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
+import { FooterAd } from "@/components/ads"
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -133,6 +134,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
+          <FooterAd />
           <p>© {currentYear} Proteclink. All rights reserved. Empowering education through innovative learning management solutions.</p>
         </div>
       </div>

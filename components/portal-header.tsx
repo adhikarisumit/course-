@@ -18,6 +18,7 @@ import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 const navigation = [
   { name: "Dashboard", href: "/portal/dashboard", icon: Home },
@@ -82,6 +83,9 @@ export default function PortalHeader() {
 
         {/* Right Side - User Menu */}
         <div className="flex items-center gap-3">
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
           {/* Mobile Menu - Only render after mount to avoid hydration mismatch */}
           {mounted ? (
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>

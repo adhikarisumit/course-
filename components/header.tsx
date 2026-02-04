@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { HeaderAd } from "@/components/ads"
 
 interface HeaderProps {
   searchQuery?: string
@@ -291,6 +292,9 @@ export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
           </div>
         </div>
       )}
+
+      {/* Header Ad - displayed below the navigation */}
+      <HeaderAd />
     </header>
   )
 }

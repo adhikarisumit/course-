@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/components/auth-provider"
+import { AdProvider } from "@/components/ads"
 import { Toaster } from "@/components/ui/sonner"
 // Import database initialization to ensure admin user exists
 import "@/lib/init-db"
@@ -35,7 +36,9 @@ export default function RootLayout({
       <body className={`font-sans antialiased`} suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true} enableColorScheme={false}>
           <AuthProvider>
-            {children}
+            <AdProvider>
+              {children}
+            </AdProvider>
             <Toaster />
           </AuthProvider>
         </ThemeProvider>
