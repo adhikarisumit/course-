@@ -25,9 +25,12 @@ import {
   Code,
   Globe,
   Zap,
-  ShieldAlert
+  ShieldAlert,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface AdSettings {
   id: string;
@@ -260,6 +263,31 @@ export default function AdsManagementPage() {
   const getActiveProviderLabel = () => {
     const provider = providers.find(p => p.value === settings.activeProvider);
     return provider?.label || 'None';
+  };
+
+  // Helper to check if a field has content
+  const hasContent = (value: string | null | undefined): boolean => {
+    return !!(value && value.trim().length > 0);
+  };
+
+  // Status indicator component for fields
+  const FieldStatus = ({ value, label }: { value: string | null | undefined; label: string }) => {
+    const filled = hasContent(value);
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${filled ? 'bg-green-500/10 text-green-600 dark:text-green-400' : 'bg-muted text-muted-foreground'}`}>
+              {filled ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+              {filled ? 'Set' : 'Empty'}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{filled ? `${label} is configured (${value?.length} chars)` : `${label} is not set`}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
   };
 
   if (loading) {
@@ -519,43 +547,59 @@ export default function AdsManagementPage() {
 
                 <div className="grid gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="medianetHeaderCode">Header Ad Code</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="medianetHeaderCode">Header Ad Code</Label>
+                      <FieldStatus value={settings.medianetHeaderCode} label="Header Ad Code" />
+                    </div>
                     <Textarea
                       id="medianetHeaderCode"
                       placeholder="<div id='medianet_header'>...</div>"
                       value={settings.medianetHeaderCode || ''}
                       onChange={(e) => handleChange('medianetHeaderCode', e.target.value)}
                       rows={3}
+                      className={hasContent(settings.medianetHeaderCode) ? 'border-green-500/50' : ''}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="medianetFooterCode">Footer Ad Code</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="medianetFooterCode">Footer Ad Code</Label>
+                      <FieldStatus value={settings.medianetFooterCode} label="Footer Ad Code" />
+                    </div>
                     <Textarea
                       id="medianetFooterCode"
                       placeholder="<div id='medianet_footer'>...</div>"
                       value={settings.medianetFooterCode || ''}
                       onChange={(e) => handleChange('medianetFooterCode', e.target.value)}
                       rows={3}
+                      className={hasContent(settings.medianetFooterCode) ? 'border-green-500/50' : ''}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="medianetSidebarCode">Sidebar Ad Code</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="medianetSidebarCode">Sidebar Ad Code</Label>
+                      <FieldStatus value={settings.medianetSidebarCode} label="Sidebar Ad Code" />
+                    </div>
                     <Textarea
                       id="medianetSidebarCode"
                       placeholder="<div id='medianet_sidebar'>...</div>"
                       value={settings.medianetSidebarCode || ''}
                       onChange={(e) => handleChange('medianetSidebarCode', e.target.value)}
                       rows={3}
+                      className={hasContent(settings.medianetSidebarCode) ? 'border-green-500/50' : ''}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="medianetInArticleCode">In-Article Ad Code</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="medianetInArticleCode">In-Article Ad Code</Label>
+                      <FieldStatus value={settings.medianetInArticleCode} label="In-Article Ad Code" />
+                    </div>
                     <Textarea
                       id="medianetInArticleCode"
                       placeholder="<div id='medianet_article'>...</div>"
                       value={settings.medianetInArticleCode || ''}
                       onChange={(e) => handleChange('medianetInArticleCode', e.target.value)}
                       rows={3}
+                      className={hasContent(settings.medianetInArticleCode) ? 'border-green-500/50' : ''}
                     />
                   </div>
                 </div>
@@ -611,43 +655,59 @@ export default function AdsManagementPage() {
 
                 <div className="grid gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="amazonHeaderCode">Header Ad Code</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="amazonHeaderCode">Header Ad Code</Label>
+                      <FieldStatus value={settings.amazonHeaderCode} label="Header Ad Code" />
+                    </div>
                     <Textarea
                       id="amazonHeaderCode"
                       placeholder="<script>amzn_assoc_...</script>"
                       value={settings.amazonHeaderCode || ''}
                       onChange={(e) => handleChange('amazonHeaderCode', e.target.value)}
                       rows={3}
+                      className={hasContent(settings.amazonHeaderCode) ? 'border-green-500/50' : ''}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="amazonFooterCode">Footer Ad Code</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="amazonFooterCode">Footer Ad Code</Label>
+                      <FieldStatus value={settings.amazonFooterCode} label="Footer Ad Code" />
+                    </div>
                     <Textarea
                       id="amazonFooterCode"
                       placeholder="<script>amzn_assoc_...</script>"
                       value={settings.amazonFooterCode || ''}
                       onChange={(e) => handleChange('amazonFooterCode', e.target.value)}
                       rows={3}
+                      className={hasContent(settings.amazonFooterCode) ? 'border-green-500/50' : ''}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="amazonSidebarCode">Sidebar Ad Code</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="amazonSidebarCode">Sidebar Ad Code</Label>
+                      <FieldStatus value={settings.amazonSidebarCode} label="Sidebar Ad Code" />
+                    </div>
                     <Textarea
                       id="amazonSidebarCode"
                       placeholder="<script>amzn_assoc_...</script>"
                       value={settings.amazonSidebarCode || ''}
                       onChange={(e) => handleChange('amazonSidebarCode', e.target.value)}
                       rows={3}
+                      className={hasContent(settings.amazonSidebarCode) ? 'border-green-500/50' : ''}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="amazonInArticleCode">In-Article Ad Code</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="amazonInArticleCode">In-Article Ad Code</Label>
+                      <FieldStatus value={settings.amazonInArticleCode} label="In-Article Ad Code" />
+                    </div>
                     <Textarea
                       id="amazonInArticleCode"
                       placeholder="<script>amzn_assoc_...</script>"
                       value={settings.amazonInArticleCode || ''}
                       onChange={(e) => handleChange('amazonInArticleCode', e.target.value)}
                       rows={3}
+                      className={hasContent(settings.amazonInArticleCode) ? 'border-green-500/50' : ''}
                     />
                   </div>
                 </div>
@@ -692,43 +752,59 @@ export default function AdsManagementPage() {
 
                 <div className="grid gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="propellerHeaderCode">Header Ad Code</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="propellerHeaderCode">Header Ad Code</Label>
+                      <FieldStatus value={settings.propellerHeaderCode} label="Header Ad Code" />
+                    </div>
                     <Textarea
                       id="propellerHeaderCode"
                       placeholder="<script data-cfasync='false'>...</script>"
                       value={settings.propellerHeaderCode || ''}
                       onChange={(e) => handleChange('propellerHeaderCode', e.target.value)}
                       rows={3}
+                      className={hasContent(settings.propellerHeaderCode) ? 'border-green-500/50' : ''}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="propellerFooterCode">Footer Ad Code</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="propellerFooterCode">Footer Ad Code</Label>
+                      <FieldStatus value={settings.propellerFooterCode} label="Footer Ad Code" />
+                    </div>
                     <Textarea
                       id="propellerFooterCode"
                       placeholder="<script data-cfasync='false'>...</script>"
                       value={settings.propellerFooterCode || ''}
                       onChange={(e) => handleChange('propellerFooterCode', e.target.value)}
                       rows={3}
+                      className={hasContent(settings.propellerFooterCode) ? 'border-green-500/50' : ''}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="propellerSidebarCode">Sidebar Ad Code</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="propellerSidebarCode">Sidebar Ad Code</Label>
+                      <FieldStatus value={settings.propellerSidebarCode} label="Sidebar Ad Code" />
+                    </div>
                     <Textarea
                       id="propellerSidebarCode"
                       placeholder="<script data-cfasync='false'>...</script>"
                       value={settings.propellerSidebarCode || ''}
                       onChange={(e) => handleChange('propellerSidebarCode', e.target.value)}
                       rows={3}
+                      className={hasContent(settings.propellerSidebarCode) ? 'border-green-500/50' : ''}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="propellerInArticleCode">In-Article Ad Code</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="propellerInArticleCode">In-Article Ad Code</Label>
+                      <FieldStatus value={settings.propellerInArticleCode} label="In-Article Ad Code" />
+                    </div>
                     <Textarea
                       id="propellerInArticleCode"
                       placeholder="<script data-cfasync='false'>...</script>"
                       value={settings.propellerInArticleCode || ''}
                       onChange={(e) => handleChange('propellerInArticleCode', e.target.value)}
                       rows={3}
+                      className={hasContent(settings.propellerInArticleCode) ? 'border-green-500/50' : ''}
                     />
                   </div>
                 </div>
@@ -773,43 +849,59 @@ export default function AdsManagementPage() {
 
                 <div className="grid gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="adsterraHeaderCode">Header Ad Code</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="adsterraHeaderCode">Header Ad Code</Label>
+                      <FieldStatus value={settings.adsterraHeaderCode} label="Header Ad Code" />
+                    </div>
                     <Textarea
                       id="adsterraHeaderCode"
                       placeholder="<script async='async' data-cfasync='false' src='...'></script>"
                       value={settings.adsterraHeaderCode || ''}
                       onChange={(e) => handleChange('adsterraHeaderCode', e.target.value)}
                       rows={3}
+                      className={hasContent(settings.adsterraHeaderCode) ? 'border-green-500/50' : ''}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="adsterraFooterCode">Footer Ad Code</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="adsterraFooterCode">Footer Ad Code</Label>
+                      <FieldStatus value={settings.adsterraFooterCode} label="Footer Ad Code" />
+                    </div>
                     <Textarea
                       id="adsterraFooterCode"
                       placeholder="<script async='async' data-cfasync='false' src='...'></script>"
                       value={settings.adsterraFooterCode || ''}
                       onChange={(e) => handleChange('adsterraFooterCode', e.target.value)}
                       rows={3}
+                      className={hasContent(settings.adsterraFooterCode) ? 'border-green-500/50' : ''}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="adsterraSidebarCode">Sidebar Ad Code</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="adsterraSidebarCode">Sidebar Ad Code</Label>
+                      <FieldStatus value={settings.adsterraSidebarCode} label="Sidebar Ad Code" />
+                    </div>
                     <Textarea
                       id="adsterraSidebarCode"
                       placeholder="<script async='async' data-cfasync='false' src='...'></script>"
                       value={settings.adsterraSidebarCode || ''}
                       onChange={(e) => handleChange('adsterraSidebarCode', e.target.value)}
                       rows={3}
+                      className={hasContent(settings.adsterraSidebarCode) ? 'border-green-500/50' : ''}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="adsterraInArticleCode">In-Article Ad Code</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="adsterraInArticleCode">In-Article Ad Code</Label>
+                      <FieldStatus value={settings.adsterraInArticleCode} label="In-Article Ad Code" />
+                    </div>
                     <Textarea
                       id="adsterraInArticleCode"
                       placeholder="<script async='async' data-cfasync='false' src='...'></script>"
                       value={settings.adsterraInArticleCode || ''}
                       onChange={(e) => handleChange('adsterraInArticleCode', e.target.value)}
                       rows={3}
+                      className={hasContent(settings.adsterraInArticleCode) ? 'border-green-500/50' : ''}
                     />
                   </div>
                 </div>
@@ -850,13 +942,17 @@ export default function AdsManagementPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="customHeadScript">Head Script (Optional)</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="customHeadScript">Head Script (Optional)</Label>
+                    <FieldStatus value={settings.customHeadScript} label="Head Script" />
+                  </div>
                   <Textarea
                     id="customHeadScript"
                     placeholder="<script src='...'></script>"
                     value={settings.customHeadScript || ''}
                     onChange={(e) => handleChange('customHeadScript', e.target.value)}
                     rows={3}
+                    className={hasContent(settings.customHeadScript) ? 'border-green-500/50' : ''}
                   />
                   <p className="text-xs text-muted-foreground">
                     JavaScript/CSS that needs to be loaded in the document head
@@ -868,43 +964,59 @@ export default function AdsManagementPage() {
 
                 <div className="grid gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="customHeaderCode">Header Ad Code</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="customHeaderCode">Header Ad Code</Label>
+                      <FieldStatus value={settings.customHeaderCode} label="Header Ad Code" />
+                    </div>
                     <Textarea
                       id="customHeaderCode"
                       placeholder="<div>Your header ad code here...</div>"
                       value={settings.customHeaderCode || ''}
                       onChange={(e) => handleChange('customHeaderCode', e.target.value)}
                       rows={4}
+                      className={hasContent(settings.customHeaderCode) ? 'border-green-500/50' : ''}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="customFooterCode">Footer Ad Code</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="customFooterCode">Footer Ad Code</Label>
+                      <FieldStatus value={settings.customFooterCode} label="Footer Ad Code" />
+                    </div>
                     <Textarea
                       id="customFooterCode"
                       placeholder="<div>Your footer ad code here...</div>"
                       value={settings.customFooterCode || ''}
                       onChange={(e) => handleChange('customFooterCode', e.target.value)}
                       rows={4}
+                      className={hasContent(settings.customFooterCode) ? 'border-green-500/50' : ''}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="customSidebarCode">Sidebar Ad Code</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="customSidebarCode">Sidebar Ad Code</Label>
+                      <FieldStatus value={settings.customSidebarCode} label="Sidebar Ad Code" />
+                    </div>
                     <Textarea
                       id="customSidebarCode"
                       placeholder="<div>Your sidebar ad code here...</div>"
                       value={settings.customSidebarCode || ''}
                       onChange={(e) => handleChange('customSidebarCode', e.target.value)}
                       rows={4}
+                      className={hasContent(settings.customSidebarCode) ? 'border-green-500/50' : ''}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="customInArticleCode">In-Article Ad Code</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="customInArticleCode">In-Article Ad Code</Label>
+                      <FieldStatus value={settings.customInArticleCode} label="In-Article Ad Code" />
+                    </div>
                     <Textarea
                       id="customInArticleCode"
                       placeholder="<div>Your in-article ad code here...</div>"
                       value={settings.customInArticleCode || ''}
                       onChange={(e) => handleChange('customInArticleCode', e.target.value)}
                       rows={4}
+                      className={hasContent(settings.customInArticleCode) ? 'border-green-500/50' : ''}
                     />
                   </div>
                 </div>
