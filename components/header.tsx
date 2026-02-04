@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Cpu, Search, Menu, X, User, LogOut, LayoutDashboard, Settings } from "lucide-react"
+import { Cpu, Search, Menu, X, User, LogOut, LayoutDashboard, Settings, Book, Code2 } from "lucide-react"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -227,6 +227,30 @@ export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
             <Link href="/contact" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
               Contact
             </Link>
+            {/* Free Tools Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="hidden sm:flex items-center gap-1 text-sm font-medium hover:text-primary">
+                  Tools
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Free Tools</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/jisho" className="cursor-pointer">
+                    <Book className="mr-2 h-4 w-4" />
+                    <span>Japanese Dictionary</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/playground" className="cursor-pointer">
+                    <Code2 className="mr-2 h-4 w-4" />
+                    <span>Code Playground</span>
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <UserMenu />
             <MobileSignupButton />
             <ThemeToggle />
@@ -284,6 +308,19 @@ export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
               <Link href="/contact" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
                 Contact
               </Link>
+              <div className="w-full border-t border-border pt-3 mt-1">
+                <p className="text-xs text-muted-foreground mb-2 text-right">Free Tools</p>
+                <div className="flex flex-col gap-2 items-end">
+                  <Link href="/jisho" className="text-sm font-medium hover:text-primary transition-colors py-1 flex items-center gap-2" onClick={() => setMobileOpen(false)}>
+                    <Book className="h-4 w-4" />
+                    Japanese Dictionary
+                  </Link>
+                  <Link href="/playground" className="text-sm font-medium hover:text-primary transition-colors py-1 flex items-center gap-2" onClick={() => setMobileOpen(false)}>
+                    <Code2 className="h-4 w-4" />
+                    Code Playground
+                  </Link>
+                </div>
+              </div>
             </div>
             {/* Mobile auth buttons for non-authenticated users */}
             <div className="block sm:hidden">
