@@ -68,6 +68,7 @@ import {
   Palette,
   Highlighter,
   ALargeSmall,
+  Megaphone,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -263,6 +264,8 @@ export function WysiwygEditor({
   const [codeDialogOpen, setCodeDialogOpen] = useState(false)
   const [codeLanguage, setCodeLanguage] = useState("javascript")
   const [isPreview, setIsPreview] = useState(false)
+  const [adDialogOpen, setAdDialogOpen] = useState(false)
+  const [adCode, setAdCode] = useState("")
 
   const editor = useEditor({
     extensions: [
@@ -354,6 +357,19 @@ export function WysiwygEditor({
     editor.chain().focus().setCodeBlock({ language: codeLanguage }).run()
     setCodeDialogOpen(false)
   }, [editor, codeLanguage])
+
+  const insertAdPlaceholder = useCallback(() => {
+    if (!editor) return
+    
+    // Insert ad placeholder HTML that will be rendered as an ad component
+    const adHtml = adCode 
+      ? `<div class="ad-placeholder" data-ad-type="custom" data-ad-code="${encodeURIComponent(adCode)}"><div class="ad-placeholder-inner" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 16px; border-radius: 8px; text-align: center; margin: 16px 0;"><span style="color: white; font-weight: 600;">📢 Custom Ad Code Block</span></div></div>`
+      : `<div class="ad-placeholder" data-ad-type="default"><div class="ad-placeholder-inner" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 16px; border-radius: 8px; text-align: center; margin: 16px 0;"><span style="color: white; font-weight: 600;">📢 Ad Placeholder (Global Ad)</span></div></div>`
+    
+    editor.chain().focus().insertContent(adHtml).run()
+    setAdDialogOpen(false)
+    setAdCode("")
+  }, [editor, adCode])
 
   if (!editor) {
     return <div className="border rounded-lg p-4 min-h-[300px] animate-pulse bg-muted/20" />
@@ -783,6 +799,19 @@ export function WysiwygEditor({
           <span className="text-xs">Link</span>
         </Button>
 
+        {/* Ad Placeholder */}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-8 px-2 gap-1"
+          onClick={() => setAdDialogOpen(true)}
+          title="Insert Ad Placeholder"
+        >
+          <Megaphone className="h-4 w-4" />
+          <span className="text-xs">Ad</span>
+        </Button>
+
         {/* Spacer */}
         <div className="flex-1" />
 
@@ -933,6 +962,48 @@ export function WysiwygEditor({
             </Button>
             <Button type="button" onClick={insertCodeBlock}>
               Insert Code Block
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Ad Placeholder Dialog */}
+      <Dialog open={adDialogOpen} onOpenChange={setAdDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Insert Ad Placeholder</DialogTitle>
+            <DialogDescription>
+              Insert an ad into your lesson content. Leave empty to use the global ad settings, or paste custom ad code.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Custom Ad Code (Optional)</Label>
+              <textarea
+                className="w-full min-h-[150px] p-3 rounded-md border border-input bg-background text-sm font-mono resize-y focus:outline-none focus:ring-2 focus:ring-ring"
+                placeholder="Paste your ad code here (HTML/JavaScript)...&#10;&#10;Leave empty to use global ad settings."
+                value={adCode}
+                onChange={(e) => setAdCode(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Tip: You can paste ad network code (Google AdSense, etc.) or custom HTML/JS here.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setAdDialogOpen(false)
+                setAdCode("")
+              }}
+            >
+              Cancel
+            </Button>
+            <Button type="button" onClick={insertAdPlaceholder}>
+              <Megaphone className="h-4 w-4 mr-2" />
+              {adCode ? "Insert Custom Ad" : "Insert Global Ad"}
             </Button>
           </DialogFooter>
         </DialogContent>

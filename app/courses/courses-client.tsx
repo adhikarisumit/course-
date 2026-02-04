@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, Fragment } from "react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import Image from "next/image"
 import { Clock, BookOpen, Lock, CheckCircle, Search, X } from "lucide-react"
+import { SidebarAd, InArticleAd } from "@/components/ads"
 
 interface Course {
   id: string
@@ -121,94 +122,134 @@ export function CoursesClient({ courses, initialSearch }: CoursesClientProps) {
           )}
         </div>
 
-        {/* Courses Grid */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredCourses.map((course) => {
-            const isEnrolled = course.enrollments && course.enrollments.length > 0
+        {/* Courses Grid with Sidebar */}
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Main Content */}
+          <div className="flex-1">
+            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {filteredCourses.map((course, index) => {
+                const isEnrolled = course.enrollments && course.enrollments.length > 0
 
-            return (
-              <Card key={course.id} className="flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
-                {course.image && (
-                  <div className="relative h-48 w-full">
-                    <Image
-                      src={course.image}
-                      alt={course.title}
-                      fill
-                      className="object-cover"
-                    />
-                    {course.isPaid && !isEnrolled && (
-                      <div className="absolute top-4 right-4">
-                        <Badge className="bg-primary">
-                          ¥{course.price}
-                        </Badge>
+                return (
+                  <Fragment key={course.id}>
+                    <Card className="flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
+                      {course.image && (
+                        <div className="relative h-48 w-full">
+                          <Image
+                            src={course.image}
+                            alt={course.title}
+                            fill
+                            className="object-cover"
+                          />
+                          {course.isPaid && !isEnrolled && (
+                            <div className="absolute top-4 right-4">
+                              <Badge className="bg-primary">
+                                ¥{course.price}
+                              </Badge>
+                            </div>
+                          )}
+                          {isEnrolled && (
+                            <div className="absolute top-4 right-4">
+                              <Badge className="bg-green-500">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Enrolled
+                              </Badge>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
+                      <CardHeader>
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <CardTitle className="text-xl line-clamp-2">{course.title}</CardTitle>
+                        </div>
+                        {course.category && (
+                          <Badge variant="secondary" className="w-fit">
+                            {course.category}
+                          </Badge>
+                        )}
+                      </CardHeader>
+
+                      <CardContent className="flex-1">
+                        <CardDescription className="line-clamp-3 mb-4">
+                          {course.description}
+                        </CardDescription>
+                        
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <BookOpen className="h-4 w-4" />
+                            <span>{course.lessons.length} lessons</span>
+                          </div>
+                          {course.duration && (
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              <span>{course.duration}</span>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+
+                      <CardFooter className="flex gap-2">
+                        {isEnrolled ? (
+                          <Button asChild className="w-full">
+                            <Link href={`/courses/${course.id}`}>
+                              Continue Learning
+                            </Link>
+                          </Button>
+                        ) : course.isPaid ? (
+                          <Button asChild className="w-full">
+                            <Link href={`/courses/${course.id}`}>
+                              <Lock className="h-4 w-4 mr-2" />
+                              Enroll Now - ¥{course.price}
+                            </Link>
+                          </Button>
+                        ) : (
+                          <Button asChild className="w-full">
+                            <Link href={`/courses/${course.id}`}>
+                              Start Free Course
+                            </Link>
+                          </Button>
+                        )}
+                      </CardFooter>
+                    </Card>
+                    {/* In-article ad after every 6 courses */}
+                    {(index + 1) % 6 === 0 && index !== filteredCourses.length - 1 && (
+                      <div className="sm:col-span-2 xl:col-span-3">
+                        <InArticleAd />
                       </div>
                     )}
-                    {isEnrolled && (
-                      <div className="absolute top-4 right-4">
-                        <Badge className="bg-green-500">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Enrolled
-                        </Badge>
-                      </div>
-                    )}
-                  </div>
-                )}
-                
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <CardTitle className="text-xl line-clamp-2">{course.title}</CardTitle>
-                  </div>
-                  {course.category && (
-                    <Badge variant="secondary" className="w-fit">
-                      {course.category}
-                    </Badge>
-                  )}
+                  </Fragment>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="lg:w-72 xl:w-80 shrink-0 space-y-6">
+            <SidebarAd />
+            
+            {/* Category Quick Links */}
+            {categories.length > 0 && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Categories</CardTitle>
                 </CardHeader>
-
-                <CardContent className="flex-1">
-                  <CardDescription className="line-clamp-3 mb-4">
-                    {course.description}
-                  </CardDescription>
-                  
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <BookOpen className="h-4 w-4" />
-                      <span>{course.lessons.length} lessons</span>
-                    </div>
-                    {course.duration && (
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        <span>{course.duration}</span>
-                      </div>
-                    )}
-                  </div>
+                <CardContent className="space-y-2">
+                  {categories.slice(0, 5).map((category) => (
+                    <Button
+                      key={category}
+                      variant="ghost"
+                      className="w-full justify-start h-auto py-2 px-3"
+                      onClick={() => setSearchQuery(category)}
+                    >
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      {category}
+                    </Button>
+                  ))}
                 </CardContent>
-
-                <CardFooter className="flex gap-2">
-                  {isEnrolled ? (
-                    <Button asChild className="w-full">
-                      <Link href={`/courses/${course.id}`}>
-                        Continue Learning
-                      </Link>
-                    </Button>
-                  ) : course.isPaid ? (
-                    <Button asChild className="w-full">
-                      <Link href={`/courses/${course.id}`}>
-                        <Lock className="h-4 w-4 mr-2" />
-                        Enroll Now - ¥{course.price}
-                      </Link>
-                    </Button>
-                  ) : (
-                    <Button asChild className="w-full">
-                      <Link href={`/courses/${course.id}`}>
-                        Start Free Course
-                      </Link>
-                    </Button>
-                  )}
-                </CardFooter>
               </Card>
-            )
-          })}
+            )}
+          </div>
         </div>
 
         {filteredCourses.length === 0 && (

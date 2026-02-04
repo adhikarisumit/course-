@@ -31,11 +31,21 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
 interface AdSettings {
   id: string;
   activeProvider: string;
   excludedPages: string | null;
+  // Ad Placement Controls
+  showHeaderAd: boolean;
+  showFooterAd: boolean;
+  showSidebarAd: boolean;
+  showInArticleAd: boolean;
+  showHomePageAd: boolean;
+  showCoursePageAd: boolean;
+  showPortalAd: boolean;
+  showBlogAd: boolean;
   // AdSense
   adsenseEnabled: boolean;
   adsensePublisherId: string | null;
@@ -87,6 +97,15 @@ const defaultSettings: AdSettings = {
   id: '',
   activeProvider: 'none',
   excludedPages: '',
+  // Ad Placement Controls
+  showHeaderAd: true,
+  showFooterAd: true,
+  showSidebarAd: true,
+  showInArticleAd: true,
+  showHomePageAd: true,
+  showCoursePageAd: true,
+  showPortalAd: true,
+  showBlogAd: true,
   // AdSense
   adsenseEnabled: false,
   adsensePublisherId: '',
@@ -408,6 +427,116 @@ export default function AdsManagementPage() {
           </CardContent>
         </Card>
 
+        {/* Ad Placement Controls */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <LayoutTemplate className="h-5 w-5" />
+              Ad Placements
+            </CardTitle>
+            <CardDescription>
+              Control where ads appear on your website
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Position-based placements */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Ad Positions</Label>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm">Header Ad</Label>
+                    <p className="text-xs text-muted-foreground">Top of page</p>
+                  </div>
+                  <Switch
+                    checked={settings.showHeaderAd}
+                    onCheckedChange={(checked) => handleChange('showHeaderAd', checked)}
+                  />
+                </div>
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm">Footer Ad</Label>
+                    <p className="text-xs text-muted-foreground">Bottom of page</p>
+                  </div>
+                  <Switch
+                    checked={settings.showFooterAd}
+                    onCheckedChange={(checked) => handleChange('showFooterAd', checked)}
+                  />
+                </div>
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm">Sidebar Ad</Label>
+                    <p className="text-xs text-muted-foreground">Side panels</p>
+                  </div>
+                  <Switch
+                    checked={settings.showSidebarAd}
+                    onCheckedChange={(checked) => handleChange('showSidebarAd', checked)}
+                  />
+                </div>
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm">In-Article Ad</Label>
+                    <p className="text-xs text-muted-foreground">Within content</p>
+                  </div>
+                  <Switch
+                    checked={settings.showInArticleAd}
+                    onCheckedChange={(checked) => handleChange('showInArticleAd', checked)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Page-based placements */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Page Visibility</Label>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm">Home Page</Label>
+                    <p className="text-xs text-muted-foreground">Main landing</p>
+                  </div>
+                  <Switch
+                    checked={settings.showHomePageAd}
+                    onCheckedChange={(checked) => handleChange('showHomePageAd', checked)}
+                  />
+                </div>
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm">Course Pages</Label>
+                    <p className="text-xs text-muted-foreground">Course content</p>
+                  </div>
+                  <Switch
+                    checked={settings.showCoursePageAd}
+                    onCheckedChange={(checked) => handleChange('showCoursePageAd', checked)}
+                  />
+                </div>
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm">Portal</Label>
+                    <p className="text-xs text-muted-foreground">User dashboard</p>
+                  </div>
+                  <Switch
+                    checked={settings.showPortalAd}
+                    onCheckedChange={(checked) => handleChange('showPortalAd', checked)}
+                  />
+                </div>
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm">Blog/Articles</Label>
+                    <p className="text-xs text-muted-foreground">Blog posts</p>
+                  </div>
+                  <Switch
+                    checked={settings.showBlogAd}
+                    onCheckedChange={(checked) => handleChange('showBlogAd', checked)}
+                  />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Provider Configuration Tabs */}
         <Tabs defaultValue="adsense" className="w-full">
           <div className="w-full overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
@@ -545,9 +674,9 @@ export default function AdsManagementPage() {
                 <Separator />
                 <p className="text-sm font-medium">Ad Codes (Paste full ad code from Media.net)</p>
 
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                <div className="grid gap-4 overflow-hidden">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <Label htmlFor="medianetHeaderCode">Header Ad Code</Label>
                       <FieldStatus value={settings.medianetHeaderCode} label="Header Ad Code" />
                     </div>
@@ -557,11 +686,11 @@ export default function AdsManagementPage() {
                       value={settings.medianetHeaderCode || ''}
                       onChange={(e) => handleChange('medianetHeaderCode', e.target.value)}
                       rows={3}
-                      className={hasContent(settings.medianetHeaderCode) ? 'border-green-500/50' : ''}
+                      className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.medianetHeaderCode) ? 'border-green-500/50' : '')}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <Label htmlFor="medianetFooterCode">Footer Ad Code</Label>
                       <FieldStatus value={settings.medianetFooterCode} label="Footer Ad Code" />
                     </div>
@@ -571,11 +700,11 @@ export default function AdsManagementPage() {
                       value={settings.medianetFooterCode || ''}
                       onChange={(e) => handleChange('medianetFooterCode', e.target.value)}
                       rows={3}
-                      className={hasContent(settings.medianetFooterCode) ? 'border-green-500/50' : ''}
+                      className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.medianetFooterCode) ? 'border-green-500/50' : '')}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <Label htmlFor="medianetSidebarCode">Sidebar Ad Code</Label>
                       <FieldStatus value={settings.medianetSidebarCode} label="Sidebar Ad Code" />
                     </div>
@@ -585,11 +714,11 @@ export default function AdsManagementPage() {
                       value={settings.medianetSidebarCode || ''}
                       onChange={(e) => handleChange('medianetSidebarCode', e.target.value)}
                       rows={3}
-                      className={hasContent(settings.medianetSidebarCode) ? 'border-green-500/50' : ''}
+                      className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.medianetSidebarCode) ? 'border-green-500/50' : '')}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <Label htmlFor="medianetInArticleCode">In-Article Ad Code</Label>
                       <FieldStatus value={settings.medianetInArticleCode} label="In-Article Ad Code" />
                     </div>
@@ -599,7 +728,7 @@ export default function AdsManagementPage() {
                       value={settings.medianetInArticleCode || ''}
                       onChange={(e) => handleChange('medianetInArticleCode', e.target.value)}
                       rows={3}
-                      className={hasContent(settings.medianetInArticleCode) ? 'border-green-500/50' : ''}
+                      className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.medianetInArticleCode) ? 'border-green-500/50' : '')}
                     />
                   </div>
                 </div>
@@ -653,9 +782,9 @@ export default function AdsManagementPage() {
                 <Separator />
                 <p className="text-sm font-medium">Ad Codes (Paste full ad code from Amazon)</p>
 
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                <div className="grid gap-4 overflow-hidden">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <Label htmlFor="amazonHeaderCode">Header Ad Code</Label>
                       <FieldStatus value={settings.amazonHeaderCode} label="Header Ad Code" />
                     </div>
@@ -665,11 +794,11 @@ export default function AdsManagementPage() {
                       value={settings.amazonHeaderCode || ''}
                       onChange={(e) => handleChange('amazonHeaderCode', e.target.value)}
                       rows={3}
-                      className={hasContent(settings.amazonHeaderCode) ? 'border-green-500/50' : ''}
+                      className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.amazonHeaderCode) ? 'border-green-500/50' : '')}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <Label htmlFor="amazonFooterCode">Footer Ad Code</Label>
                       <FieldStatus value={settings.amazonFooterCode} label="Footer Ad Code" />
                     </div>
@@ -679,11 +808,11 @@ export default function AdsManagementPage() {
                       value={settings.amazonFooterCode || ''}
                       onChange={(e) => handleChange('amazonFooterCode', e.target.value)}
                       rows={3}
-                      className={hasContent(settings.amazonFooterCode) ? 'border-green-500/50' : ''}
+                      className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.amazonFooterCode) ? 'border-green-500/50' : '')}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <Label htmlFor="amazonSidebarCode">Sidebar Ad Code</Label>
                       <FieldStatus value={settings.amazonSidebarCode} label="Sidebar Ad Code" />
                     </div>
@@ -693,11 +822,11 @@ export default function AdsManagementPage() {
                       value={settings.amazonSidebarCode || ''}
                       onChange={(e) => handleChange('amazonSidebarCode', e.target.value)}
                       rows={3}
-                      className={hasContent(settings.amazonSidebarCode) ? 'border-green-500/50' : ''}
+                      className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.amazonSidebarCode) ? 'border-green-500/50' : '')}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <Label htmlFor="amazonInArticleCode">In-Article Ad Code</Label>
                       <FieldStatus value={settings.amazonInArticleCode} label="In-Article Ad Code" />
                     </div>
@@ -707,7 +836,7 @@ export default function AdsManagementPage() {
                       value={settings.amazonInArticleCode || ''}
                       onChange={(e) => handleChange('amazonInArticleCode', e.target.value)}
                       rows={3}
-                      className={hasContent(settings.amazonInArticleCode) ? 'border-green-500/50' : ''}
+                      className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.amazonInArticleCode) ? 'border-green-500/50' : '')}
                     />
                   </div>
                 </div>
@@ -750,9 +879,9 @@ export default function AdsManagementPage() {
                 <Separator />
                 <p className="text-sm font-medium">Ad Codes (Paste full ad code from PropellerAds)</p>
 
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                <div className="grid gap-4 overflow-hidden">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <Label htmlFor="propellerHeaderCode">Header Ad Code</Label>
                       <FieldStatus value={settings.propellerHeaderCode} label="Header Ad Code" />
                     </div>
@@ -762,11 +891,11 @@ export default function AdsManagementPage() {
                       value={settings.propellerHeaderCode || ''}
                       onChange={(e) => handleChange('propellerHeaderCode', e.target.value)}
                       rows={3}
-                      className={hasContent(settings.propellerHeaderCode) ? 'border-green-500/50' : ''}
+                      className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.propellerHeaderCode) ? 'border-green-500/50' : '')}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <Label htmlFor="propellerFooterCode">Footer Ad Code</Label>
                       <FieldStatus value={settings.propellerFooterCode} label="Footer Ad Code" />
                     </div>
@@ -776,11 +905,11 @@ export default function AdsManagementPage() {
                       value={settings.propellerFooterCode || ''}
                       onChange={(e) => handleChange('propellerFooterCode', e.target.value)}
                       rows={3}
-                      className={hasContent(settings.propellerFooterCode) ? 'border-green-500/50' : ''}
+                      className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.propellerFooterCode) ? 'border-green-500/50' : '')}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <Label htmlFor="propellerSidebarCode">Sidebar Ad Code</Label>
                       <FieldStatus value={settings.propellerSidebarCode} label="Sidebar Ad Code" />
                     </div>
@@ -790,11 +919,11 @@ export default function AdsManagementPage() {
                       value={settings.propellerSidebarCode || ''}
                       onChange={(e) => handleChange('propellerSidebarCode', e.target.value)}
                       rows={3}
-                      className={hasContent(settings.propellerSidebarCode) ? 'border-green-500/50' : ''}
+                      className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.propellerSidebarCode) ? 'border-green-500/50' : '')}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <Label htmlFor="propellerInArticleCode">In-Article Ad Code</Label>
                       <FieldStatus value={settings.propellerInArticleCode} label="In-Article Ad Code" />
                     </div>
@@ -804,7 +933,7 @@ export default function AdsManagementPage() {
                       value={settings.propellerInArticleCode || ''}
                       onChange={(e) => handleChange('propellerInArticleCode', e.target.value)}
                       rows={3}
-                      className={hasContent(settings.propellerInArticleCode) ? 'border-green-500/50' : ''}
+                      className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.propellerInArticleCode) ? 'border-green-500/50' : '')}
                     />
                   </div>
                 </div>
@@ -847,9 +976,9 @@ export default function AdsManagementPage() {
                 <Separator />
                 <p className="text-sm font-medium">Ad Codes (Paste full ad code from Adsterra)</p>
 
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                <div className="grid gap-4 overflow-hidden">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <Label htmlFor="adsterraHeaderCode">Header Ad Code</Label>
                       <FieldStatus value={settings.adsterraHeaderCode} label="Header Ad Code" />
                     </div>
@@ -859,11 +988,11 @@ export default function AdsManagementPage() {
                       value={settings.adsterraHeaderCode || ''}
                       onChange={(e) => handleChange('adsterraHeaderCode', e.target.value)}
                       rows={3}
-                      className={hasContent(settings.adsterraHeaderCode) ? 'border-green-500/50' : ''}
+                      className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.adsterraHeaderCode) ? 'border-green-500/50' : '')}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <Label htmlFor="adsterraFooterCode">Footer Ad Code</Label>
                       <FieldStatus value={settings.adsterraFooterCode} label="Footer Ad Code" />
                     </div>
@@ -873,11 +1002,11 @@ export default function AdsManagementPage() {
                       value={settings.adsterraFooterCode || ''}
                       onChange={(e) => handleChange('adsterraFooterCode', e.target.value)}
                       rows={3}
-                      className={hasContent(settings.adsterraFooterCode) ? 'border-green-500/50' : ''}
+                      className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.adsterraFooterCode) ? 'border-green-500/50' : '')}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <Label htmlFor="adsterraSidebarCode">Sidebar Ad Code</Label>
                       <FieldStatus value={settings.adsterraSidebarCode} label="Sidebar Ad Code" />
                     </div>
@@ -887,11 +1016,11 @@ export default function AdsManagementPage() {
                       value={settings.adsterraSidebarCode || ''}
                       onChange={(e) => handleChange('adsterraSidebarCode', e.target.value)}
                       rows={3}
-                      className={hasContent(settings.adsterraSidebarCode) ? 'border-green-500/50' : ''}
+                      className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.adsterraSidebarCode) ? 'border-green-500/50' : '')}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <Label htmlFor="adsterraInArticleCode">In-Article Ad Code</Label>
                       <FieldStatus value={settings.adsterraInArticleCode} label="In-Article Ad Code" />
                     </div>
@@ -901,7 +1030,7 @@ export default function AdsManagementPage() {
                       value={settings.adsterraInArticleCode || ''}
                       onChange={(e) => handleChange('adsterraInArticleCode', e.target.value)}
                       rows={3}
-                      className={hasContent(settings.adsterraInArticleCode) ? 'border-green-500/50' : ''}
+                      className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.adsterraInArticleCode) ? 'border-green-500/50' : '')}
                     />
                   </div>
                 </div>
@@ -941,8 +1070,8 @@ export default function AdsManagementPage() {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
+                <div className="space-y-2 min-w-0">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
                     <Label htmlFor="customHeadScript">Head Script (Optional)</Label>
                     <FieldStatus value={settings.customHeadScript} label="Head Script" />
                   </div>
@@ -952,7 +1081,7 @@ export default function AdsManagementPage() {
                     value={settings.customHeadScript || ''}
                     onChange={(e) => handleChange('customHeadScript', e.target.value)}
                     rows={3}
-                    className={hasContent(settings.customHeadScript) ? 'border-green-500/50' : ''}
+                    className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.customHeadScript) ? 'border-green-500/50' : '')}
                   />
                   <p className="text-xs text-muted-foreground">
                     JavaScript/CSS that needs to be loaded in the document head
@@ -962,9 +1091,9 @@ export default function AdsManagementPage() {
                 <Separator />
                 <p className="text-sm font-medium">Ad Placement Codes</p>
 
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                <div className="grid gap-4 overflow-hidden">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <Label htmlFor="customHeaderCode">Header Ad Code</Label>
                       <FieldStatus value={settings.customHeaderCode} label="Header Ad Code" />
                     </div>
@@ -974,11 +1103,11 @@ export default function AdsManagementPage() {
                       value={settings.customHeaderCode || ''}
                       onChange={(e) => handleChange('customHeaderCode', e.target.value)}
                       rows={4}
-                      className={hasContent(settings.customHeaderCode) ? 'border-green-500/50' : ''}
+                      className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.customHeaderCode) ? 'border-green-500/50' : '')}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <Label htmlFor="customFooterCode">Footer Ad Code</Label>
                       <FieldStatus value={settings.customFooterCode} label="Footer Ad Code" />
                     </div>
@@ -988,11 +1117,11 @@ export default function AdsManagementPage() {
                       value={settings.customFooterCode || ''}
                       onChange={(e) => handleChange('customFooterCode', e.target.value)}
                       rows={4}
-                      className={hasContent(settings.customFooterCode) ? 'border-green-500/50' : ''}
+                      className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.customFooterCode) ? 'border-green-500/50' : '')}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <Label htmlFor="customSidebarCode">Sidebar Ad Code</Label>
                       <FieldStatus value={settings.customSidebarCode} label="Sidebar Ad Code" />
                     </div>
@@ -1002,11 +1131,11 @@ export default function AdsManagementPage() {
                       value={settings.customSidebarCode || ''}
                       onChange={(e) => handleChange('customSidebarCode', e.target.value)}
                       rows={4}
-                      className={hasContent(settings.customSidebarCode) ? 'border-green-500/50' : ''}
+                      className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.customSidebarCode) ? 'border-green-500/50' : '')}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <Label htmlFor="customInArticleCode">In-Article Ad Code</Label>
                       <FieldStatus value={settings.customInArticleCode} label="In-Article Ad Code" />
                     </div>
@@ -1016,7 +1145,7 @@ export default function AdsManagementPage() {
                       value={settings.customInArticleCode || ''}
                       onChange={(e) => handleChange('customInArticleCode', e.target.value)}
                       rows={4}
-                      className={hasContent(settings.customInArticleCode) ? 'border-green-500/50' : ''}
+                      className={cn('break-all overflow-x-auto text-xs sm:text-sm', hasContent(settings.customInArticleCode) ? 'border-green-500/50' : '')}
                     />
                   </div>
                 </div>

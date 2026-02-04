@@ -6,6 +6,7 @@ import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/pris
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Check, Copy } from "lucide-react";
+import { InArticleAd, HtmlAd } from "@/components/ads";
 
 interface CodeBlockWithCopyProps {
   code: string;
@@ -142,6 +143,30 @@ export function HtmlContentRenderer({ content, className = "" }: HtmlContentRend
       if (node.nodeType !== Node.ELEMENT_NODE) return;
 
       const element = node as Element;
+
+      // Check if this is an ad placeholder
+      if (element.classList.contains("ad-placeholder")) {
+        const adType = element.getAttribute("data-ad-type");
+        const adCodeEncoded = element.getAttribute("data-ad-code");
+        
+        if (adType === "custom" && adCodeEncoded) {
+          // Custom ad code
+          const adCode = decodeURIComponent(adCodeEncoded);
+          elements.push(
+            <div key={elementKey++} className="my-1">
+              <HtmlAd code={adCode} />
+            </div>
+          );
+        } else {
+          // Default global ad
+          elements.push(
+            <div key={elementKey++} className="my-1">
+              <InArticleAd />
+            </div>
+          );
+        }
+        return;
+      }
 
       // Check if this is a pre element with code
       if (element.tagName === "PRE") {

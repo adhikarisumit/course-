@@ -54,7 +54,7 @@ export async function PUT(
     const { 
       title, description, videoUrl, category, level, duration, price, isPaid, isPublished, accessDurationMonths,
       courseType, meetingLink, meetingPlatform, scheduledStartTime, scheduledEndTime, isRecurring, recurringSchedule,
-      features, whatYouWillLearn
+      features, whatYouWillLearn, adCode, showAds
     } = body
 
     if (!title) {
@@ -92,6 +92,8 @@ export async function PUT(
         recurringSchedule: recurringSchedule || null,
         features: features || null,
         whatYouWillLearn: whatYouWillLearn || null,
+        adCode: adCode || null,
+        showAds: showAds !== undefined ? showAds : true,
       } as any,
     })
 

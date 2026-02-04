@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
-import { Loader2, ArrowLeft, Save, Video, Calendar, FileText } from "lucide-react"
+import { Loader2, ArrowLeft, Save, Video, Calendar, FileText, Megaphone } from "lucide-react"
 import Link from "next/link"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
@@ -37,6 +37,8 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
     scheduledEndTime: "",
     isRecurring: false,
     recurringSchedule: "",
+    adCode: "",
+    showAds: true,
   })
   
   const [features, setFeatures] = useState<string[]>([])
@@ -70,6 +72,8 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
         scheduledEndTime: course.scheduledEndTime ? new Date(course.scheduledEndTime).toISOString().slice(0, 16) : "",
         isRecurring: course.isRecurring || false,
         recurringSchedule: course.recurringSchedule || "",
+        adCode: course.adCode || "",
+        showAds: course.showAds !== undefined ? course.showAds : true,
       })
       
       if (course.features) {
@@ -106,6 +110,8 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
         accessDurationMonths: parseInt(formData.accessDurationMonths) || 6,
         features: JSON.stringify(features),
         whatYouWillLearn: JSON.stringify(learningPoints),
+        adCode: formData.adCode || null,
+        showAds: formData.showAds,
       }
 
       if (formData.courseType === "live") {
@@ -522,6 +528,48 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
                   checked={formData.isPublished}
                   onCheckedChange={(checked) => setFormData({ ...formData, isPublished: checked })}
                 />
+              </div>
+
+              {/* Course Ad Settings */}
+              <div className="space-y-4 border-t pt-6">
+                <div className="flex items-center gap-2">
+                  <Megaphone className="h-5 w-5 text-primary" />
+                  <h3 className="text-lg font-semibold">Course Ad Settings</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Add custom ad code that will be displayed specifically within this course pages.
+                </p>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="showAds">Enable Ads for This Course</Label>
+                    <p className="text-sm text-muted-foreground">Show ads on this course&apos;s pages</p>
+                  </div>
+                  <Switch
+                    id="showAds"
+                    checked={formData.showAds}
+                    onCheckedChange={(checked) => setFormData({ ...formData, showAds: checked })}
+                  />
+                </div>
+
+                {formData.showAds && (
+                  <div className="space-y-2">
+                    <Label htmlFor="adCode">Custom Ad Code (HTML/JavaScript)</Label>
+                    <Textarea
+                      id="adCode"
+                      value={formData.adCode}
+                      onChange={(e) => setFormData({ ...formData, adCode: e.target.value })}
+                      placeholder={`<!-- Paste your ad code here -->
+<script async src="https://example.com/ad.js"></script>
+<ins class="ad-unit" data-ad-client="..." data-ad-slot="..."></ins>`}
+                      className="min-h-[200px] font-mono text-sm"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Paste your ad network code (AdSense, Media.net, etc.). This ad will appear on the course detail and lesson pages.
+                      Leave empty to use global ad settings.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Submit Button */}

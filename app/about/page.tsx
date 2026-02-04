@@ -1,6 +1,7 @@
 import { BookOpen, Target, Users, Award, GraduationCap, Zap, Shield, Heart } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Header } from "@/components/header"
+import { InArticleAd } from "@/components/ads"
 
 export default function AboutPage() {
   return (
@@ -75,6 +76,11 @@ export default function AboutPage() {
             We believe in the power of education to transform lives, and we're committed to providing the tools that
             make exceptional online learning possible.
           </p>
+
+          {/* In-Article Ad */}
+          <div className="my-6 not-prose">
+            <InArticleAd />
+          </div>
 
           <h2 className="text-2xl font-bold mb-4">Key Features</h2>
           <div className="grid md:grid-cols-2 gap-6 mb-6">

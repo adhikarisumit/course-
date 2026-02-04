@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator"
 import { SignOutButton } from "@/components/sign-out-button"
 import ClientChatWithTeacherModalWrapper from "./client-chat-with-teacher-modal-wrapper"
 import NoticeBoard from "@/components/notice-board"
+import { SidebarAd } from "@/components/ads"
 
 export default async function DashboardPage() {
   const session = await auth()
@@ -266,6 +267,9 @@ export default async function DashboardPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Sidebar Ad */}
+            <SidebarAd />
+            
             {/* Quick Access */}
             <Card className="shadow-sm">
               <CardHeader className="pb-3">

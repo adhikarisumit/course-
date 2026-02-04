@@ -11,6 +11,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { BookOpen, Clock, Award, Lock, CheckCircle, Play, Video, Calendar, ExternalLink, FileText } from "lucide-react"
 import { YouTubePlayer } from "@/components/youtube-player"
+import { SidebarAd, InArticleAd, CourseAd } from "@/components/ads"
 
 export default async function CoursePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -277,7 +278,17 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
                 </div>
               </CardContent>
             </Card>
+            
+            {/* Sidebar Ad */}
+            <div className="mt-6">
+              <SidebarAd />
+            </div>
           </div>
+        </div>
+
+        {/* Course-Specific Ad before content */}
+        <div className="my-6">
+          <CourseAd adCode={(course as any).adCode} showAds={(course as any).showAds} />
         </div>
 
         {/* Course Content */}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, createContext, useContext } from 'react';
+import { useEffect, useState, useCallback, createContext, useContext, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import Script from 'next/script';
 
@@ -31,6 +31,16 @@ interface GenericAdConfig {
 interface AdSettings {
   activeProvider: string;
   excludedPages: string | null;
+  // Placement controls
+  showHeaderAd?: boolean;
+  showFooterAd?: boolean;
+  showSidebarAd?: boolean;
+  showInArticleAd?: boolean;
+  showHomePageAd?: boolean;
+  showCoursePageAd?: boolean;
+  showPortalAd?: boolean;
+  showBlogAd?: boolean;
+  // Provider configs
   adsense?: AdSenseConfig;
   medianet?: GenericAdConfig;
   amazon?: GenericAdConfig;
@@ -61,6 +71,23 @@ function useIsExcludedPage(excludedPages: string | null) {
     }
     return currentPath === excluded || currentPath.startsWith(excluded + '/');
   });
+}
+
+// Helper to check if ads should show on current page type
+function useIsPageTypeAllowed(settings: AdSettings | null) {
+  const pathname = usePathname();
+  
+  if (!settings) return true;
+  
+  const currentPath = pathname.toLowerCase();
+  
+  // Check page-specific settings
+  if (currentPath === '/' && settings.showHomePageAd === false) return false;
+  if (currentPath.startsWith('/courses') && settings.showCoursePageAd === false) return false;
+  if (currentPath.startsWith('/portal') && settings.showPortalAd === false) return false;
+  if ((currentPath.startsWith('/blog') || currentPath.startsWith('/articles')) && settings.showBlogAd === false) return false;
+  
+  return true;
 }
 
 // Provider component to fetch and share settings
@@ -149,20 +176,69 @@ interface HtmlAdProps {
   style?: React.CSSProperties;
 }
 
-function HtmlAd({ code, className = '', style }: HtmlAdProps) {
+export function HtmlAd({ code, className = '', style }: HtmlAdProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
+  const [scriptLoaded, setScriptLoaded] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!code || !mounted) return null;
+  useEffect(() => {
+    if (!mounted || !code || !containerRef.current || scriptLoaded) return;
+
+    const node = containerRef.current;
+    
+    // Clear previous content
+    node.innerHTML = '';
+    
+    // Parse the code to find and execute scripts
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = code;
+    
+    // Get all elements including scripts
+    const elements = Array.from(tempDiv.childNodes);
+    
+    elements.forEach((element) => {
+      if (element.nodeName === 'SCRIPT') {
+        // Create a new script element to execute it
+        const script = document.createElement('script');
+        const originalScript = element as HTMLScriptElement;
+        
+        // Copy all attributes
+        Array.from(originalScript.attributes).forEach(attr => {
+          script.setAttribute(attr.name, attr.value);
+        });
+        
+        // Copy inline script content if any
+        if (originalScript.textContent) {
+          script.textContent = originalScript.textContent;
+        }
+        
+        node.appendChild(script);
+      } else {
+        // Clone non-script elements
+        node.appendChild(element.cloneNode(true));
+      }
+    });
+    
+    setScriptLoaded(true);
+  }, [mounted, code, scriptLoaded]);
+
+  // Return empty div on server to avoid hydration mismatch
+  if (!mounted) {
+    return <div className={`ad-container ${className}`} style={style} />;
+  }
+
+  if (!code) return null;
 
   return (
     <div 
+      ref={containerRef}
       className={`ad-container ${className}`}
       style={style}
-      dangerouslySetInnerHTML={{ __html: code }}
+      suppressHydrationWarning
     />
   );
 }
@@ -228,11 +304,14 @@ interface AdPlacementProps {
 export function HeaderAd({ className = '' }: AdPlacementProps) {
   const settings = useAds();
   const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
+  const isPageAllowed = useIsPageTypeAllowed(settings);
   
-  if (!settings || settings.activeProvider === 'none' || isExcluded) return null;
+  // Check placement settings
+  if (!settings || settings.activeProvider === 'none' || isExcluded || !isPageAllowed) return null;
+  if (settings.showHeaderAd === false) return null;
 
   const containerStyle: React.CSSProperties = { minHeight: '90px' };
-  const containerClass = `w-full max-w-4xl mx-auto my-2 ${className}`;
+  const containerClass = `w-full max-w-4xl mx-auto ${className}`;
 
   switch (settings.activeProvider) {
     case 'adsense':
@@ -266,11 +345,14 @@ export function HeaderAd({ className = '' }: AdPlacementProps) {
 export function FooterAd({ className = '' }: AdPlacementProps) {
   const settings = useAds();
   const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
+  const isPageAllowed = useIsPageTypeAllowed(settings);
   
-  if (!settings || settings.activeProvider === 'none' || isExcluded) return null;
+  // Check placement settings
+  if (!settings || settings.activeProvider === 'none' || isExcluded || !isPageAllowed) return null;
+  if (settings.showFooterAd === false) return null;
 
   const containerStyle: React.CSSProperties = { minHeight: '90px' };
-  const containerClass = `w-full max-w-4xl mx-auto my-4 ${className}`;
+  const containerClass = `w-full max-w-4xl mx-auto my-1 ${className}`;
 
   switch (settings.activeProvider) {
     case 'adsense':
@@ -304,8 +386,11 @@ export function FooterAd({ className = '' }: AdPlacementProps) {
 export function SidebarAd({ className = '' }: AdPlacementProps) {
   const settings = useAds();
   const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
+  const isPageAllowed = useIsPageTypeAllowed(settings);
   
-  if (!settings || settings.activeProvider === 'none' || isExcluded) return null;
+  // Check placement settings
+  if (!settings || settings.activeProvider === 'none' || isExcluded || !isPageAllowed) return null;
+  if (settings.showSidebarAd === false) return null;
 
   const containerStyle: React.CSSProperties = { minHeight: '250px' };
   const containerClass = `w-full ${className}`;
@@ -342,11 +427,14 @@ export function SidebarAd({ className = '' }: AdPlacementProps) {
 export function InArticleAd({ className = '' }: AdPlacementProps) {
   const settings = useAds();
   const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
+  const isPageAllowed = useIsPageTypeAllowed(settings);
   
-  if (!settings || settings.activeProvider === 'none' || isExcluded) return null;
+  // Check placement settings
+  if (!settings || settings.activeProvider === 'none' || isExcluded || !isPageAllowed) return null;
+  if (settings.showInArticleAd === false) return null;
 
   const containerStyle: React.CSSProperties = { minHeight: '280px' };
-  const containerClass = `w-full my-6 ${className}`;
+  const containerClass = `w-full my-1 ${className}`;
 
   switch (settings.activeProvider) {
     case 'adsense':
@@ -412,4 +500,39 @@ export function AutoAds() {
   }
 
   return null;
+}
+
+// ============================================
+// Course-Specific Ad Component
+// ============================================
+interface CourseAdProps {
+  adCode: string | null | undefined;
+  showAds?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export function CourseAd({ adCode, showAds = true, className = '', style }: CourseAdProps) {
+  const settings = useAds();
+  const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
+  const isPageAllowed = useIsPageTypeAllowed(settings);
+  
+  // Don't render if ads are disabled for this course
+  if (!showAds) return null;
+  
+  // Don't render if page is excluded or course ads are disabled globally
+  if (isExcluded || !isPageAllowed) return null;
+  
+  // Don't render if no ad code provided
+  if (!adCode || adCode.trim() === '') {
+    // Fall back to global in-article ad if no course-specific ad
+    return <InArticleAd className={className} style={style} />;
+  }
+  
+  // Render course-specific ad
+  return (
+    <div className={`course-ad ${className}`} style={style}>
+      <HtmlAd code={adCode} />
+    </div>
+  );
 }

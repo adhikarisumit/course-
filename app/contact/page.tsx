@@ -1,6 +1,7 @@
 import { Mail, MessageSquare } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Header } from "@/components/header"
+import { InArticleAd } from "@/components/ads"
 
 export default function ContactPage() {
   return (
@@ -43,6 +44,11 @@ export default function ContactPage() {
               </p>
             </CardContent>
           </Card>
+        </div>
+        
+        {/* In-Article Ad */}
+        <div className="mt-12 max-w-2xl mx-auto">
+          <InArticleAd />
         </div>
       </div>
     </div>

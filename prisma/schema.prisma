@@ -92,6 +92,9 @@ model Course {
   recurringSchedule    String?
   features             String?
   whatYouWillLearn     String?
+  // Course-specific Ad Settings
+  adCode               String?      // Custom HTML/JS ad code for this course
+  showAds              Boolean      @default(true)  // Enable/disable ads for this course
   createdAt            DateTime     @default(now())
   updatedAt            DateTime     @updatedAt
   isDeleted            Boolean      @default(false)
@@ -376,6 +379,16 @@ model AdSettings {
   // Active Provider Selection
   activeProvider    String   @default("none") // none, adsense, medianet, amazon, propeller, adsterra, custom
   excludedPages     String?  // Comma-separated list of pages to exclude ads
+  
+  // Ad Placement Controls
+  showHeaderAd      Boolean  @default(true)
+  showFooterAd      Boolean  @default(true)
+  showSidebarAd     Boolean  @default(true)
+  showInArticleAd   Boolean  @default(true)
+  showHomePageAd    Boolean  @default(true)
+  showCoursePageAd  Boolean  @default(true)
+  showPortalAd      Boolean  @default(true)
+  showBlogAd        Boolean  @default(true)
   
   // Google AdSense Settings
   adsenseEnabled      Boolean  @default(false)

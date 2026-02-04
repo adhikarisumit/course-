@@ -11,6 +11,7 @@ import { FileText, ExternalLink, Settings, Eye, EyeOff, RefreshCw, Package, Sear
 import { toast } from "sonner"
 import { ResourceGridSkeleton } from "@/components/skeletons"
 import { Input } from "@/components/ui/input"
+import { SidebarAd } from "@/components/ads"
 
 interface Resource {
   id: string

@@ -2,6 +2,7 @@ import dynamicImport from "next/dynamic"
 import { HomeClient } from "@/components/home-client"
 import { Hero } from "@/components/hero"
 import { Footer } from "@/components/footer"
+import { InArticleAd } from "@/components/ads"
 
 // Force dynamic rendering to always fetch fresh data
 export const dynamic = 'force-dynamic'
@@ -28,14 +29,25 @@ const CTASection = dynamicImport(() => import("@/components/cta-section").then(m
   loading: () => <div className="min-h-[300px]" />,
 })
 
+// Wrapper component for in-article ads (client component)
+function HomePageInArticleAd() {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <InArticleAd />
+    </div>
+  )
+}
+
 export default function Home() {
   return (
     <HomeClient>
       <main>
         <Hero />
         <WhyChooseUs />
+        <HomePageInArticleAd />
         <MentorIntro />
         <SuccessMetrics />
+        <HomePageInArticleAd />
         <Testimonials />
         <CTASection />
       </main>

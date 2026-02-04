@@ -13,6 +13,7 @@ import Link from "next/link"
 import { useSession } from "next-auth/react"
 import { YouTubePlayer } from "@/components/youtube-player"
 import { HtmlContentRenderer } from "@/components/html-content-renderer"
+import { CourseAd } from "@/components/ads"
 
 interface Lesson {
   id: string
@@ -41,6 +42,8 @@ interface Course {
   scheduledEndTime?: string | null
   isRecurring?: boolean
   recurringSchedule?: string | null
+  adCode?: string | null
+  showAds?: boolean
 }
 
 export default function LearnPage({ params }: { params: Promise<{ id: string }> }) {
@@ -451,6 +454,13 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                 )}
               </CardContent>
             </Card>
+
+            {/* Course-Specific Ad */}
+            {course && (
+              <div className="my-4">
+                <CourseAd adCode={course.adCode} showAds={course.showAds} />
+              </div>
+            )}
 
             {/* Navigation and Actions */}
             <div className="space-y-3">

@@ -120,6 +120,8 @@ export async function GET(
       recurringSchedule: (course as any).recurringSchedule,
       features: (course as any).features,
       accessDurationMonths: (course as any).accessDurationMonths,
+      adCode: (course as any).adCode,
+      showAds: (course as any).showAds ?? true,
     })
   } catch (error) {
     console.error("Error fetching course:", error)

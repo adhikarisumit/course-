@@ -5,6 +5,15 @@ import prisma from '@/lib/prisma';
 interface PublicAdSettings {
   activeProvider: string;
   excludedPages: string | null;
+  // Placement controls
+  showHeaderAd?: boolean;
+  showFooterAd?: boolean;
+  showSidebarAd?: boolean;
+  showInArticleAd?: boolean;
+  showHomePageAd?: boolean;
+  showCoursePageAd?: boolean;
+  showPortalAd?: boolean;
+  showBlogAd?: boolean;
   // Provider-specific settings based on active provider
   adsense?: {
     publisherId: string | null;
@@ -68,6 +77,15 @@ export async function GET() {
     const response: PublicAdSettings = {
       activeProvider: settings.activeProvider,
       excludedPages: settings.excludedPages,
+      // Placement controls (use nullish coalescing to handle undefined from old records)
+      showHeaderAd: settings.showHeaderAd ?? true,
+      showFooterAd: settings.showFooterAd ?? true,
+      showSidebarAd: settings.showSidebarAd ?? true,
+      showInArticleAd: settings.showInArticleAd ?? true,
+      showHomePageAd: settings.showHomePageAd ?? true,
+      showCoursePageAd: settings.showCoursePageAd ?? true,
+      showPortalAd: settings.showPortalAd ?? true,
+      showBlogAd: settings.showBlogAd ?? true,
     };
 
     // Only include the active provider's settings
