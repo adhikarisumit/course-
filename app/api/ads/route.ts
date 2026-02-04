@@ -91,73 +91,61 @@ export async function GET() {
     // Only include the active provider's settings
     switch (settings.activeProvider) {
       case 'adsense':
-        if (settings.adsenseEnabled) {
-          response.adsense = {
-            publisherId: settings.adsensePublisherId,
+        response.adsense = {
+          publisherId: settings.adsensePublisherId,
             autoAds: settings.adsenseAutoAds,
             headerSlot: settings.adsenseHeaderSlot,
             footerSlot: settings.adsenseFooterSlot,
             sidebarSlot: settings.adsenseSidebarSlot,
-            inArticleSlot: settings.adsenseInArticleSlot,
-          };
-        }
+          inArticleSlot: settings.adsenseInArticleSlot,
+        };
         break;
       case 'medianet':
-        if (settings.medianetEnabled) {
-          response.medianet = {
-            customerId: settings.medianetCustomerId,
+        response.medianet = {
+          customerId: settings.medianetCustomerId,
             headerCode: settings.medianetHeaderCode,
             footerCode: settings.medianetFooterCode,
             sidebarCode: settings.medianetSidebarCode,
-            inArticleCode: settings.medianetInArticleCode,
-          };
-        }
+          inArticleCode: settings.medianetInArticleCode,
+        };
         break;
       case 'amazon':
-        if (settings.amazonEnabled) {
-          response.amazon = {
-            trackingId: settings.amazonTrackingId,
+        response.amazon = {
+          trackingId: settings.amazonTrackingId,
             adInstanceId: settings.amazonAdInstanceId,
             headerCode: settings.amazonHeaderCode,
             footerCode: settings.amazonFooterCode,
             sidebarCode: settings.amazonSidebarCode,
-            inArticleCode: settings.amazonInArticleCode,
-          };
-        }
+          inArticleCode: settings.amazonInArticleCode,
+        };
         break;
       case 'propeller':
-        if (settings.propellerEnabled) {
-          response.propeller = {
-            zoneId: settings.propellerZoneId,
+        response.propeller = {
+          zoneId: settings.propellerZoneId,
             headerCode: settings.propellerHeaderCode,
             footerCode: settings.propellerFooterCode,
             sidebarCode: settings.propellerSidebarCode,
-            inArticleCode: settings.propellerInArticleCode,
-          };
-        }
+          inArticleCode: settings.propellerInArticleCode,
+        };
         break;
       case 'adsterra':
-        if (settings.adsterraEnabled) {
-          response.adsterra = {
-            key: settings.adsterraKey,
+        response.adsterra = {
+          key: settings.adsterraKey,
             headerCode: settings.adsterraHeaderCode,
             footerCode: settings.adsterraFooterCode,
             sidebarCode: settings.adsterraSidebarCode,
-            inArticleCode: settings.adsterraInArticleCode,
-          };
-        }
+          inArticleCode: settings.adsterraInArticleCode,
+        };
         break;
       case 'custom':
-        if (settings.customEnabled) {
-          response.custom = {
-            providerName: settings.customProviderName,
+        response.custom = {
+          providerName: settings.customProviderName,
             headScript: settings.customHeadScript,
             headerCode: settings.customHeaderCode,
             footerCode: settings.customFooterCode,
             sidebarCode: settings.customSidebarCode,
-            inArticleCode: settings.customInArticleCode,
-          };
-        }
+          inArticleCode: settings.customInArticleCode,
+        };
         break;
     }
 

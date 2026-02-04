@@ -202,6 +202,16 @@ export default function AdsManagementPage() {
         setSettings({
           ...defaultSettings,
           ...data,
+          // Preserve boolean values properly (use ?? to keep false values)
+          showHeaderAd: data.showHeaderAd ?? true,
+          showFooterAd: data.showFooterAd ?? true,
+          showSidebarAd: data.showSidebarAd ?? true,
+          showInArticleAd: data.showInArticleAd ?? true,
+          showHomePageAd: data.showHomePageAd ?? true,
+          showCoursePageAd: data.showCoursePageAd ?? true,
+          showPortalAd: data.showPortalAd ?? true,
+          showBlogAd: data.showBlogAd ?? true,
+          // String fields with fallback to empty string
           excludedPages: data.excludedPages || '',
           adsensePublisherId: data.adsensePublisherId || '',
           adsenseHeaderSlot: data.adsenseHeaderSlot || '',
@@ -345,7 +355,7 @@ export default function AdsManagementPage() {
   }
 
   return (
-    <div className="container px-4 sm:px-6 py-4 sm:py-8 space-y-4 sm:space-y-6">
+    <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8 space-y-4 sm:space-y-6 max-w-6xl">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">

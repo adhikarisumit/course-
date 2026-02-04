@@ -177,68 +177,92 @@ interface HtmlAdProps {
 }
 
 export function HtmlAd({ code, className = '', style }: HtmlAdProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [mounted, setMounted] = useState(false);
-  const [scriptLoaded, setScriptLoaded] = useState(false);
+  const [iframeHeight, setIframeHeight] = useState(90);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    if (!mounted || !code || !containerRef.current || scriptLoaded) return;
+    if (!mounted || !code || !iframeRef.current) return;
 
-    const node = containerRef.current;
+    const iframe = iframeRef.current;
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
     
-    // Clear previous content
-    node.innerHTML = '';
-    
-    // Parse the code to find and execute scripts
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = code;
-    
-    // Get all elements including scripts
-    const elements = Array.from(tempDiv.childNodes);
-    
-    elements.forEach((element) => {
-      if (element.nodeName === 'SCRIPT') {
-        // Create a new script element to execute it
-        const script = document.createElement('script');
-        const originalScript = element as HTMLScriptElement;
-        
-        // Copy all attributes
-        Array.from(originalScript.attributes).forEach(attr => {
-          script.setAttribute(attr.name, attr.value);
-        });
-        
-        // Copy inline script content if any
-        if (originalScript.textContent) {
-          script.textContent = originalScript.textContent;
+    if (!doc) return;
+
+    // Write the ad code into the iframe
+    doc.open();
+    doc.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            html, body { 
+              margin: 0; 
+              padding: 0; 
+              overflow: hidden;
+              width: 100%;
+              height: auto;
+            }
+            body { 
+              display: flex; 
+              justify-content: center; 
+              align-items: center;
+            }
+          </style>
+        </head>
+        <body>
+          ${code}
+        </body>
+      </html>
+    `);
+    doc.close();
+
+    // Auto-resize iframe based on content
+    const resizeIframe = () => {
+      try {
+        const body = iframe.contentDocument?.body;
+        if (body) {
+          const height = body.scrollHeight || body.offsetHeight;
+          if (height > 0) {
+            setIframeHeight(height);
+          }
         }
-        
-        node.appendChild(script);
-      } else {
-        // Clone non-script elements
-        node.appendChild(element.cloneNode(true));
+      } catch (e) {
+        // Cross-origin error, use default height
       }
-    });
-    
-    setScriptLoaded(true);
-  }, [mounted, code, scriptLoaded]);
+    };
+
+    // Check height after scripts load
+    setTimeout(resizeIframe, 500);
+    setTimeout(resizeIframe, 1000);
+    setTimeout(resizeIframe, 2000);
+  }, [mounted, code]);
 
   // Return empty div on server to avoid hydration mismatch
   if (!mounted) {
-    return <div className={`ad-container ${className}`} style={style} />;
+    return <div className={`ad-container ${className}`} />;
   }
 
   if (!code) return null;
 
   return (
-    <div 
-      ref={containerRef}
+    <iframe
+      ref={iframeRef}
       className={`ad-container ${className}`}
-      style={style}
-      suppressHydrationWarning
+      style={{ 
+        border: 'none', 
+        width: '100%', 
+        height: `${iframeHeight}px`,
+        overflow: 'hidden',
+        ...style 
+      }}
+      scrolling="no"
+      title="Advertisement"
+      sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
     />
   );
 }
@@ -310,8 +334,8 @@ export function HeaderAd({ className = '' }: AdPlacementProps) {
   if (!settings || settings.activeProvider === 'none' || isExcluded || !isPageAllowed) return null;
   if (settings.showHeaderAd === false) return null;
 
-  const containerStyle: React.CSSProperties = { minHeight: '90px' };
-  const containerClass = `w-full max-w-4xl mx-auto ${className}`;
+  const containerStyle: React.CSSProperties = { minHeight: '50px' };
+  const containerClass = `w-full max-w-4xl mx-auto flex justify-center ${className}`;
 
   switch (settings.activeProvider) {
     case 'adsense':
@@ -352,9 +376,10 @@ export function FooterAd({ className = '' }: AdPlacementProps) {
   if (settings.showFooterAd === false) return null;
 
   const containerStyle: React.CSSProperties = { minHeight: '90px' };
-  const containerClass = `w-full max-w-4xl mx-auto my-1 ${className}`;
+  const containerClass = `w-full max-w-4xl mx-auto my-1 flex justify-center ${className}`;
 
   let adCode: string | null | undefined = null;
+  let fallbackCode: string | null | undefined = null;
 
   switch (settings.activeProvider) {
     case 'adsense':
@@ -372,24 +397,30 @@ export function FooterAd({ className = '' }: AdPlacementProps) {
       break;
     case 'medianet':
       adCode = settings.medianet?.footerCode;
+      fallbackCode = settings.medianet?.headerCode;
       break;
     case 'amazon':
       adCode = settings.amazon?.footerCode;
+      fallbackCode = settings.amazon?.headerCode;
       break;
     case 'propeller':
       adCode = settings.propeller?.footerCode;
+      fallbackCode = settings.propeller?.headerCode;
       break;
     case 'adsterra':
       adCode = settings.adsterra?.footerCode;
+      fallbackCode = settings.adsterra?.headerCode;
       break;
     case 'custom':
       adCode = settings.custom?.footerCode;
+      fallbackCode = settings.custom?.headerCode;
       break;
   }
 
-  // Return HtmlAd if we have code
-  if (adCode && adCode.trim()) {
-    return <HtmlAd code={adCode} className={containerClass} style={containerStyle} />;
+  // Return HtmlAd if we have code, fallback to header code if not
+  const finalCode = (adCode && adCode.trim()) ? adCode : fallbackCode;
+  if (finalCode && finalCode.trim()) {
+    return <HtmlAd code={finalCode} className={containerClass} style={containerStyle} />;
   }
 
   return null;
@@ -405,7 +436,10 @@ export function SidebarAd({ className = '' }: AdPlacementProps) {
   if (settings.showSidebarAd === false) return null;
 
   const containerStyle: React.CSSProperties = { minHeight: '250px' };
-  const containerClass = `w-full ${className}`;
+  const containerClass = `w-full flex justify-center ${className}`;
+
+  let adCode: string | null | undefined = null;
+  let fallbackCode: string | null | undefined = null;
 
   switch (settings.activeProvider) {
     case 'adsense':
@@ -422,15 +456,31 @@ export function SidebarAd({ className = '' }: AdPlacementProps) {
       }
       break;
     case 'medianet':
-      return <HtmlAd code={settings.medianet?.sidebarCode} className={containerClass} style={containerStyle} />;
+      adCode = settings.medianet?.sidebarCode;
+      fallbackCode = settings.medianet?.headerCode;
+      break;
     case 'amazon':
-      return <HtmlAd code={settings.amazon?.sidebarCode} className={containerClass} style={containerStyle} />;
+      adCode = settings.amazon?.sidebarCode;
+      fallbackCode = settings.amazon?.headerCode;
+      break;
     case 'propeller':
-      return <HtmlAd code={settings.propeller?.sidebarCode} className={containerClass} style={containerStyle} />;
+      adCode = settings.propeller?.sidebarCode;
+      fallbackCode = settings.propeller?.headerCode;
+      break;
     case 'adsterra':
-      return <HtmlAd code={settings.adsterra?.sidebarCode} className={containerClass} style={containerStyle} />;
+      adCode = settings.adsterra?.sidebarCode;
+      fallbackCode = settings.adsterra?.headerCode;
+      break;
     case 'custom':
-      return <HtmlAd code={settings.custom?.sidebarCode} className={containerClass} style={containerStyle} />;
+      adCode = settings.custom?.sidebarCode;
+      fallbackCode = settings.custom?.headerCode;
+      break;
+  }
+
+  // Return HtmlAd if we have code, fallback to header code if not
+  const finalCode = (adCode && adCode.trim()) ? adCode : fallbackCode;
+  if (finalCode && finalCode.trim()) {
+    return <HtmlAd code={finalCode} className={containerClass} style={containerStyle} />;
   }
 
   return null;
@@ -445,8 +495,11 @@ export function InArticleAd({ className = '' }: AdPlacementProps) {
   if (!settings || settings.activeProvider === 'none' || isExcluded || !isPageAllowed) return null;
   if (settings.showInArticleAd === false) return null;
 
-  const containerStyle: React.CSSProperties = { minHeight: '280px' };
-  const containerClass = `w-full my-1 ${className}`;
+  const containerStyle: React.CSSProperties = { minHeight: '90px' };
+  const containerClass = `w-full max-w-4xl mx-auto my-1 flex justify-center ${className}`;
+
+  let adCode: string | null | undefined = null;
+  let fallbackCode: string | null | undefined = null;
 
   switch (settings.activeProvider) {
     case 'adsense':
@@ -463,15 +516,31 @@ export function InArticleAd({ className = '' }: AdPlacementProps) {
       }
       break;
     case 'medianet':
-      return <HtmlAd code={settings.medianet?.inArticleCode} className={containerClass} style={containerStyle} />;
+      adCode = settings.medianet?.inArticleCode;
+      fallbackCode = settings.medianet?.headerCode;
+      break;
     case 'amazon':
-      return <HtmlAd code={settings.amazon?.inArticleCode} className={containerClass} style={containerStyle} />;
+      adCode = settings.amazon?.inArticleCode;
+      fallbackCode = settings.amazon?.headerCode;
+      break;
     case 'propeller':
-      return <HtmlAd code={settings.propeller?.inArticleCode} className={containerClass} style={containerStyle} />;
+      adCode = settings.propeller?.inArticleCode;
+      fallbackCode = settings.propeller?.headerCode;
+      break;
     case 'adsterra':
-      return <HtmlAd code={settings.adsterra?.inArticleCode} className={containerClass} style={containerStyle} />;
+      adCode = settings.adsterra?.inArticleCode;
+      fallbackCode = settings.adsterra?.headerCode;
+      break;
     case 'custom':
-      return <HtmlAd code={settings.custom?.inArticleCode} className={containerClass} style={containerStyle} />;
+      adCode = settings.custom?.inArticleCode;
+      fallbackCode = settings.custom?.headerCode;
+      break;
+  }
+
+  // Return HtmlAd if we have code, fallback to header code if not
+  const finalCode = (adCode && adCode.trim()) ? adCode : fallbackCode;
+  if (finalCode && finalCode.trim()) {
+    return <HtmlAd code={finalCode} className={containerClass} style={containerStyle} />;
   }
 
   return null;

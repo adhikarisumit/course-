@@ -24,6 +24,15 @@ export async function GET() {
         id: '',
         activeProvider: 'none',
         excludedPages: null,
+        // Ad Placement Controls
+        showHeaderAd: true,
+        showFooterAd: true,
+        showSidebarAd: true,
+        showInArticleAd: true,
+        showHomePageAd: true,
+        showCoursePageAd: true,
+        showPortalAd: true,
+        showBlogAd: true,
         // AdSense
         adsenseEnabled: false,
         adsensePublisherId: null,
@@ -101,6 +110,15 @@ export async function POST(request: Request) {
     const data = {
       activeProvider: body.activeProvider || 'none',
       excludedPages: body.excludedPages || null,
+      // Ad Placement Controls (use ?? to preserve false values)
+      showHeaderAd: body.showHeaderAd ?? true,
+      showFooterAd: body.showFooterAd ?? true,
+      showSidebarAd: body.showSidebarAd ?? true,
+      showInArticleAd: body.showInArticleAd ?? true,
+      showHomePageAd: body.showHomePageAd ?? true,
+      showCoursePageAd: body.showCoursePageAd ?? true,
+      showPortalAd: body.showPortalAd ?? true,
+      showBlogAd: body.showBlogAd ?? true,
       // AdSense
       adsenseEnabled: body.adsenseEnabled || false,
       adsensePublisherId: body.adsensePublisherId || null,

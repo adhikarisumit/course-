@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
+import { InArticleAd, SidebarAd } from "@/components/ads"
 
 export const metadata: Metadata = {
   title: "Code Playground",
@@ -48,8 +49,25 @@ export default function PublicPlaygroundPage() {
             </div>
           </div>
 
-          {/* Code Editor Component */}
-          <CodeEditor />
+          {/* Ad before editor */}
+          <div className="mb-4">
+            <InArticleAd />
+          </div>
+
+          {/* Code Editor with optional Sidebar Ad */}
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <CodeEditor />
+            </div>
+            <div className="hidden xl:block w-[300px] shrink-0">
+              <SidebarAd />
+            </div>
+          </div>
+
+          {/* Ad after editor */}
+          <div className="mt-4">
+            <InArticleAd />
+          </div>
         </div>
       </main>
       <Footer />

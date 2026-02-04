@@ -29,25 +29,20 @@ const CTASection = dynamicImport(() => import("@/components/cta-section").then(m
   loading: () => <div className="min-h-[300px]" />,
 })
 
-// Wrapper component for in-article ads (client component)
-function HomePageInArticleAd() {
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <InArticleAd />
-    </div>
-  )
-}
-
 export default function Home() {
   return (
     <HomeClient>
-      <main>
+      <main className="space-y-0">
         <Hero />
         <WhyChooseUs />
-        <HomePageInArticleAd />
+        <div className="container mx-auto px-4 py-2">
+          <InArticleAd />
+        </div>
         <MentorIntro />
         <SuccessMetrics />
-        <HomePageInArticleAd />
+        <div className="container mx-auto px-4 py-2">
+          <InArticleAd />
+        </div>
         <Testimonials />
         <CTASection />
       </main>
