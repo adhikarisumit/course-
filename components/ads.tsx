@@ -28,6 +28,16 @@ interface GenericAdConfig {
   inArticleCode: string | null;
 }
 
+// Per-page ad configuration
+interface PageAdConfig {
+  maxAds?: number;
+  showHeader?: boolean;
+  showFooter?: boolean;
+  showInArticle?: boolean;
+  showSidebar?: boolean;
+  adProvider?: string; // Override global provider for this page
+}
+
 interface AdSettings {
   activeProvider: string;
   excludedPages: string | null;
@@ -40,6 +50,11 @@ interface AdSettings {
   showCoursePageAd?: boolean;
   showPortalAd?: boolean;
   showBlogAd?: boolean;
+  // Global ad limits
+  maxAdsPerPage?: number;
+  maxInArticleAds?: number;
+  // Per-page configuration
+  pageAdConfig?: Record<string, PageAdConfig>;
   // Provider configs
   adsense?: AdSenseConfig;
   medianet?: GenericAdConfig;
@@ -48,6 +63,18 @@ interface AdSettings {
   adsterra?: GenericAdConfig;
   custom?: GenericAdConfig;
 }
+
+// Ad counter context for tracking rendered ads
+interface AdCounterContextType {
+  inArticleCount: number;
+  totalCount: number;
+  incrementInArticle: () => boolean;
+  incrementTotal: () => boolean;
+  getPageConfig: () => PageAdConfig | null;
+  getEffectiveProvider: () => string; // Get the provider for current page (considering page overrides)
+}
+
+const AdCounterContext = createContext<AdCounterContextType | null>(null);
 
 // Context to share ad settings across components
 const AdContext = createContext<AdSettings | null>(null);
@@ -93,6 +120,7 @@ function useIsPageTypeAllowed(settings: AdSettings | null) {
 // Provider component to fetch and share settings
 export function AdProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<AdSettings | null>(null);
+  const globalScriptInjected = useRef(false);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -109,6 +137,47 @@ export function AdProvider({ children }: { children: React.ReactNode }) {
 
     fetchSettings();
   }, []);
+
+  // Inject global footer scripts (like Social Bar) directly into body
+  useEffect(() => {
+    if (!settings || settings.activeProvider === 'none' || globalScriptInjected.current) return;
+    
+    let footerCode: string | null | undefined = null;
+    
+    switch (settings.activeProvider) {
+      case 'adsterra':
+        footerCode = settings.adsterra?.footerCode;
+        break;
+      case 'propeller':
+        footerCode = settings.propeller?.footerCode;
+        break;
+      case 'custom':
+        footerCode = settings.custom?.footerCode;
+        break;
+    }
+    
+    if (footerCode && footerCode.trim()) {
+      // Create a container and inject the script
+      const container = document.createElement('div');
+      container.id = 'global-ad-scripts';
+      container.innerHTML = footerCode;
+      
+      // Execute any scripts
+      const scripts = container.getElementsByTagName('script');
+      Array.from(scripts).forEach((oldScript) => {
+        const newScript = document.createElement('script');
+        Array.from(oldScript.attributes).forEach(attr => {
+          newScript.setAttribute(attr.name, attr.value);
+        });
+        if (oldScript.textContent) {
+          newScript.textContent = oldScript.textContent;
+        }
+        document.body.appendChild(newScript);
+      });
+      
+      globalScriptInjected.current = true;
+    }
+  }, [settings]);
 
   // Render provider-specific head scripts
   const renderHeadScripts = () => {
@@ -158,9 +227,90 @@ export function AdProvider({ children }: { children: React.ReactNode }) {
   return (
     <AdContext.Provider value={settings}>
       {renderHeadScripts()}
-      {children}
+      <AdCounterProvider settings={settings}>
+        {children}
+      </AdCounterProvider>
     </AdContext.Provider>
   );
+}
+
+// Ad Counter Provider - tracks ad counts per page
+function AdCounterProvider({ children, settings }: { children: React.ReactNode; settings: AdSettings | null }) {
+  const pathname = usePathname();
+  const [inArticleCount, setInArticleCount] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+  
+  // Reset counts when pathname changes
+  useEffect(() => {
+    setInArticleCount(0);
+    setTotalCount(0);
+  }, [pathname]);
+  
+  const getPageConfig = useCallback((): PageAdConfig | null => {
+    if (!settings?.pageAdConfig) return null;
+    
+    // Check for exact match first
+    if (settings.pageAdConfig[pathname]) {
+      return settings.pageAdConfig[pathname];
+    }
+    
+    // Check for prefix matches (e.g., /courses/* matches /courses/123)
+    for (const path of Object.keys(settings.pageAdConfig)) {
+      if (path.endsWith('*') && pathname.startsWith(path.slice(0, -1))) {
+        return settings.pageAdConfig[path];
+      }
+    }
+    
+    return null;
+  }, [settings?.pageAdConfig, pathname]);
+  
+  const incrementInArticle = useCallback(() => {
+    const pageConfig = getPageConfig();
+    const maxInArticle = pageConfig?.maxAds ?? settings?.maxInArticleAds ?? 3;
+    const maxTotal = settings?.maxAdsPerPage ?? 5;
+    
+    if (inArticleCount >= maxInArticle || totalCount >= maxTotal) {
+      return false;
+    }
+    
+    setInArticleCount(prev => prev + 1);
+    setTotalCount(prev => prev + 1);
+    return true;
+  }, [inArticleCount, totalCount, settings, getPageConfig]);
+  
+  const incrementTotal = useCallback(() => {
+    const maxTotal = settings?.maxAdsPerPage ?? 5;
+    
+    if (totalCount >= maxTotal) {
+      return false;
+    }
+    
+    setTotalCount(prev => prev + 1);
+    return true;
+  }, [totalCount, settings]);
+  
+  // Get the effective ad provider for current page (considering page-specific overrides)
+  const getEffectiveProvider = useCallback(() => {
+    const pageConfig = getPageConfig();
+    
+    // If page has a specific provider set and it's not 'global', use it
+    if (pageConfig?.adProvider && pageConfig.adProvider !== 'global') {
+      return pageConfig.adProvider;
+    }
+    
+    // Otherwise, use the global provider
+    return settings?.activeProvider ?? 'none';
+  }, [getPageConfig, settings?.activeProvider]);
+  
+  return (
+    <AdCounterContext.Provider value={{ inArticleCount, totalCount, incrementInArticle, incrementTotal, getPageConfig, getEffectiveProvider }}>
+      {children}
+    </AdCounterContext.Provider>
+  );
+}
+
+export function useAdCounter() {
+  return useContext(AdCounterContext);
 }
 
 // Legacy exports for backward compatibility
@@ -327,17 +477,25 @@ interface AdPlacementProps {
 
 export function HeaderAd({ className = '' }: AdPlacementProps) {
   const settings = useAds();
+  const adCounter = useAdCounter();
   const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
   const isPageAllowed = useIsPageTypeAllowed(settings);
   
+  // Get effective provider for this page (may be overridden by page config)
+  const effectiveProvider = adCounter?.getEffectiveProvider() ?? settings?.activeProvider ?? 'none';
+  
   // Check placement settings
-  if (!settings || settings.activeProvider === 'none' || isExcluded || !isPageAllowed) return null;
+  if (!settings || effectiveProvider === 'none' || isExcluded || !isPageAllowed) return null;
   if (settings.showHeaderAd === false) return null;
+  
+  // Check page-specific settings
+  const pageConfig = adCounter?.getPageConfig();
+  if (pageConfig?.showHeader === false) return null;
 
   const containerStyle: React.CSSProperties = { minHeight: '50px' };
   const containerClass = `w-full max-w-4xl mx-auto flex justify-center ${className}`;
 
-  switch (settings.activeProvider) {
+  switch (effectiveProvider) {
     case 'adsense':
       if (settings.adsense?.headerSlot && settings.adsense?.publisherId) {
         return (
@@ -368,12 +526,20 @@ export function HeaderAd({ className = '' }: AdPlacementProps) {
 
 export function FooterAd({ className = '' }: AdPlacementProps) {
   const settings = useAds();
+  const adCounter = useAdCounter();
   const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
   const isPageAllowed = useIsPageTypeAllowed(settings);
   
+  // Get effective provider for this page (may be overridden by page config)
+  const effectiveProvider = adCounter?.getEffectiveProvider() ?? settings?.activeProvider ?? 'none';
+  
   // Check placement settings
-  if (!settings || settings.activeProvider === 'none' || isExcluded || !isPageAllowed) return null;
+  if (!settings || effectiveProvider === 'none' || isExcluded || !isPageAllowed) return null;
   if (settings.showFooterAd === false) return null;
+  
+  // Check page-specific settings
+  const pageConfig = adCounter?.getPageConfig();
+  if (pageConfig?.showFooter === false) return null;
 
   const containerStyle: React.CSSProperties = { minHeight: '90px' };
   const containerClass = `w-full max-w-4xl mx-auto my-1 flex justify-center ${className}`;
@@ -381,7 +547,7 @@ export function FooterAd({ className = '' }: AdPlacementProps) {
   let adCode: string | null | undefined = null;
   let fallbackCode: string | null | undefined = null;
 
-  switch (settings.activeProvider) {
+  switch (effectiveProvider) {
     case 'adsense':
       if (settings.adsense?.footerSlot && settings.adsense?.publisherId) {
         return (
@@ -428,12 +594,20 @@ export function FooterAd({ className = '' }: AdPlacementProps) {
 
 export function SidebarAd({ className = '' }: AdPlacementProps) {
   const settings = useAds();
+  const adCounter = useAdCounter();
   const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
   const isPageAllowed = useIsPageTypeAllowed(settings);
   
+  // Get effective provider for this page (may be overridden by page config)
+  const effectiveProvider = adCounter?.getEffectiveProvider() ?? settings?.activeProvider ?? 'none';
+  
   // Check placement settings
-  if (!settings || settings.activeProvider === 'none' || isExcluded || !isPageAllowed) return null;
+  if (!settings || effectiveProvider === 'none' || isExcluded || !isPageAllowed) return null;
   if (settings.showSidebarAd === false) return null;
+  
+  // Check page-specific settings
+  const pageConfig = adCounter?.getPageConfig();
+  if (pageConfig?.showSidebar === false) return null;
 
   const containerStyle: React.CSSProperties = { minHeight: '250px' };
   const containerClass = `w-full flex justify-center ${className}`;
@@ -441,7 +615,7 @@ export function SidebarAd({ className = '' }: AdPlacementProps) {
   let adCode: string | null | undefined = null;
   let fallbackCode: string | null | undefined = null;
 
-  switch (settings.activeProvider) {
+  switch (effectiveProvider) {
     case 'adsense':
       if (settings.adsense?.sidebarSlot && settings.adsense?.publisherId) {
         return (
@@ -488,12 +662,33 @@ export function SidebarAd({ className = '' }: AdPlacementProps) {
 
 export function InArticleAd({ className = '' }: AdPlacementProps) {
   const settings = useAds();
+  const adCounter = useAdCounter();
   const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
   const isPageAllowed = useIsPageTypeAllowed(settings);
+  const [canShow, setCanShow] = useState(false);
+  const checkedRef = useRef(false);
+  
+  // Get effective provider for this page (may be overridden by page config)
+  const effectiveProvider = adCounter?.getEffectiveProvider() ?? settings?.activeProvider ?? 'none';
+  
+  useEffect(() => {
+    if (checkedRef.current) return;
+    if (adCounter && adCounter.incrementInArticle()) {
+      setCanShow(true);
+    }
+    checkedRef.current = true;
+  }, [adCounter]);
   
   // Check placement settings
-  if (!settings || settings.activeProvider === 'none' || isExcluded || !isPageAllowed) return null;
+  if (!settings || effectiveProvider === 'none' || isExcluded || !isPageAllowed) return null;
   if (settings.showInArticleAd === false) return null;
+  
+  // Check per-page config
+  const pageConfig = adCounter?.getPageConfig();
+  if (pageConfig?.showInArticle === false) return null;
+  
+  // Check if we've exceeded the limit
+  if (!canShow && checkedRef.current) return null;
 
   const containerStyle: React.CSSProperties = { minHeight: '90px' };
   const containerClass = `w-full max-w-4xl mx-auto my-1 flex justify-center ${className}`;
@@ -501,7 +696,7 @@ export function InArticleAd({ className = '' }: AdPlacementProps) {
   let adCode: string | null | undefined = null;
   let fallbackCode: string | null | undefined = null;
 
-  switch (settings.activeProvider) {
+  switch (effectiveProvider) {
     case 'adsense':
       if (settings.adsense?.inArticleSlot && settings.adsense?.publisherId) {
         return (

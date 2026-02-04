@@ -14,6 +14,14 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { 
   DollarSign, 
   Save, 
@@ -33,6 +41,15 @@ import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
+interface PageAdConfig {
+  maxAds?: number;
+  showHeader?: boolean;
+  showFooter?: boolean;
+  showInArticle?: boolean;
+  showSidebar?: boolean;
+  adProvider?: string; // Override global provider for this page (e.g., 'adsense', 'custom', 'global')
+}
+
 interface AdSettings {
   id: string;
   activeProvider: string;
@@ -46,6 +63,11 @@ interface AdSettings {
   showCoursePageAd: boolean;
   showPortalAd: boolean;
   showBlogAd: boolean;
+  // Ad Limits
+  maxAdsPerPage: number;
+  maxInArticleAds: number;
+  // Per-page configuration
+  pageAdConfig: Record<string, PageAdConfig>;
   // AdSense
   adsenseEnabled: boolean;
   adsensePublisherId: string | null;
@@ -106,6 +128,11 @@ const defaultSettings: AdSettings = {
   showCoursePageAd: true,
   showPortalAd: true,
   showBlogAd: true,
+  // Ad Limits
+  maxAdsPerPage: 5,
+  maxInArticleAds: 3,
+  // Per-page configuration
+  pageAdConfig: {},
   // AdSense
   adsenseEnabled: false,
   adsensePublisherId: '',
@@ -171,6 +198,26 @@ export default function AdsManagementPage() {
   const [settings, setSettings] = useState<AdSettings>(defaultSettings);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  
+  // Page Rule Modal state
+  const [pageRuleModalOpen, setPageRuleModalOpen] = useState(false);
+  const [newPageRule, setNewPageRule] = useState<{
+    path: string;
+    maxAds: number;
+    showHeader: boolean;
+    showFooter: boolean;
+    showInArticle: boolean;
+    showSidebar: boolean;
+    adProvider: string;
+  }>({
+    path: '',
+    maxAds: 3,
+    showHeader: true,
+    showFooter: true,
+    showInArticle: true,
+    showSidebar: true,
+    adProvider: 'global',
+  });
 
   // Check if user is super admin
   const isSuperAdmin = session?.user?.role === 'super' || session?.user?.email === SUPER_ADMIN_EMAIL;
@@ -245,6 +292,11 @@ export default function AdsManagementPage() {
           customFooterCode: data.customFooterCode || '',
           customSidebarCode: data.customSidebarCode || '',
           customInArticleCode: data.customInArticleCode || '',
+          // Ad limits
+          maxAdsPerPage: data.maxAdsPerPage ?? 5,
+          maxInArticleAds: data.maxInArticleAds ?? 3,
+          // Per-page configuration
+          pageAdConfig: data.pageAdConfig ? (typeof data.pageAdConfig === 'string' ? JSON.parse(data.pageAdConfig) : data.pageAdConfig) : {},
         });
       } else {
         toast.error('Failed to fetch ad settings');
@@ -543,6 +595,206 @@ export default function AdsManagementPage() {
                   />
                 </div>
               </div>
+            </div>
+
+            <Separator />
+
+            {/* Ad Limits */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Ad Limits</Label>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="maxAdsPerPage">Max Ads Per Page</Label>
+                  <Input
+                    id="maxAdsPerPage"
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={settings.maxAdsPerPage}
+                    onChange={(e) => setSettings(prev => ({ ...prev, maxAdsPerPage: parseInt(e.target.value) || 5 }))}
+                  />
+                  <p className="text-xs text-muted-foreground">Maximum total ads allowed on a single page</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="maxInArticleAds">Max In-Article Ads</Label>
+                  <Input
+                    id="maxInArticleAds"
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={settings.maxInArticleAds}
+                    onChange={(e) => setSettings(prev => ({ ...prev, maxInArticleAds: parseInt(e.target.value) || 3 }))}
+                  />
+                  <p className="text-xs text-muted-foreground">Maximum in-article ads per page</p>
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Per-Page Configuration */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">Per-Page Ad Configuration</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setNewPageRule({
+                      path: '',
+                      maxAds: 3,
+                      showHeader: true,
+                      showFooter: true,
+                      showInArticle: true,
+                      showSidebar: true,
+                      adProvider: 'global',
+                    });
+                    setPageRuleModalOpen(true);
+                  }}
+                >
+                  + Add Page Rule
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">Configure ads for specific pages. Use * for wildcards (e.g., /courses/*)</p>
+              
+              {Object.keys(settings.pageAdConfig).length > 0 ? (
+                <div className="space-y-3">
+                  {Object.entries(settings.pageAdConfig).map(([path, config]) => (
+                    <div key={path} className="rounded-lg border p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <code className="text-sm font-mono bg-muted px-2 py-1 rounded">{path}</code>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => {
+                            const newConfig = { ...settings.pageAdConfig };
+                            delete newConfig[path];
+                            setSettings(prev => ({ ...prev, pageAdConfig: newConfig }));
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+                        <div className="space-y-1">
+                          <Label className="text-xs">Max Ads</Label>
+                          <Input
+                            type="number"
+                            min={0}
+                            max={10}
+                            value={config.maxAds ?? 3}
+                            onChange={(e) => {
+                              setSettings(prev => ({
+                                ...prev,
+                                pageAdConfig: {
+                                  ...prev.pageAdConfig,
+                                  [path]: { ...config, maxAds: parseInt(e.target.value) || 3 }
+                                }
+                              }));
+                            }}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Provider</Label>
+                          <Select
+                            value={config.adProvider ?? 'global'}
+                            onValueChange={(value) => {
+                              setSettings(prev => ({
+                                ...prev,
+                                pageAdConfig: {
+                                  ...prev.pageAdConfig,
+                                  [path]: { ...config, adProvider: value }
+                                }
+                              }));
+                            }}
+                          >
+                            <SelectTrigger className="h-9 text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="global">Global</SelectItem>
+                              <SelectItem value="adsense">AdSense</SelectItem>
+                              <SelectItem value="medianet">Media.net</SelectItem>
+                              <SelectItem value="amazon">Amazon</SelectItem>
+                              <SelectItem value="propeller">Propeller</SelectItem>
+                              <SelectItem value="adsterra">Adsterra</SelectItem>
+                              <SelectItem value="custom">Custom</SelectItem>
+                              <SelectItem value="none">Disabled</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={config.showHeader ?? true}
+                            onCheckedChange={(checked) => {
+                              setSettings(prev => ({
+                                ...prev,
+                                pageAdConfig: {
+                                  ...prev.pageAdConfig,
+                                  [path]: { ...config, showHeader: checked }
+                                }
+                              }));
+                            }}
+                          />
+                          <Label className="text-xs">Header</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={config.showFooter ?? true}
+                            onCheckedChange={(checked) => {
+                              setSettings(prev => ({
+                                ...prev,
+                                pageAdConfig: {
+                                  ...prev.pageAdConfig,
+                                  [path]: { ...config, showFooter: checked }
+                                }
+                              }));
+                            }}
+                          />
+                          <Label className="text-xs">Footer</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={config.showInArticle ?? true}
+                            onCheckedChange={(checked) => {
+                              setSettings(prev => ({
+                                ...prev,
+                                pageAdConfig: {
+                                  ...prev.pageAdConfig,
+                                  [path]: { ...config, showInArticle: checked }
+                                }
+                              }));
+                            }}
+                          />
+                          <Label className="text-xs">In-Article</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={config.showSidebar ?? true}
+                            onCheckedChange={(checked) => {
+                              setSettings(prev => ({
+                                ...prev,
+                                pageAdConfig: {
+                                  ...prev.pageAdConfig,
+                                  [path]: { ...config, showSidebar: checked }
+                                }
+                              }));
+                            }}
+                          />
+                          <Label className="text-xs">Sidebar</Label>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6 text-muted-foreground text-sm border rounded-lg">
+                  No page-specific rules configured. Click "Add Page Rule" to customize ads for specific pages.
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -1181,6 +1433,143 @@ export default function AdsManagementPage() {
           </Button>
         </div>
       </form>
+
+      {/* Page Rule Modal */}
+      <Dialog open={pageRuleModalOpen} onOpenChange={setPageRuleModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Page Rule</DialogTitle>
+            <DialogDescription>
+              Configure ad settings for a specific page. Use * for wildcards (e.g., /courses/*).
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="pagePath">Page Path</Label>
+              <Input
+                id="pagePath"
+                placeholder="/playground, /jisho, /courses/*"
+                value={newPageRule.path}
+                onChange={(e) => setNewPageRule(prev => ({ ...prev, path: e.target.value }))}
+              />
+              <p className="text-xs text-muted-foreground">
+                Examples: /playground, /jisho, /courses/*, /portal/*
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="maxAdsModal">Maximum Ads on Page</Label>
+              <Input
+                id="maxAdsModal"
+                type="number"
+                min={0}
+                max={10}
+                value={newPageRule.maxAds}
+                onChange={(e) => setNewPageRule(prev => ({ ...prev, maxAds: parseInt(e.target.value) || 3 }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="adProviderModal">Ad Provider for This Page</Label>
+              <Select
+                value={newPageRule.adProvider}
+                onValueChange={(value) => setNewPageRule(prev => ({ ...prev, adProvider: value }))}
+              >
+                <SelectTrigger id="adProviderModal">
+                  <SelectValue placeholder="Select ad provider" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="global">Use Global Setting</SelectItem>
+                  <SelectItem value="adsense">Google AdSense</SelectItem>
+                  <SelectItem value="medianet">Media.net</SelectItem>
+                  <SelectItem value="amazon">Amazon Native Ads</SelectItem>
+                  <SelectItem value="propeller">PropellerAds</SelectItem>
+                  <SelectItem value="adsterra">Adsterra</SelectItem>
+                  <SelectItem value="custom">Custom Provider</SelectItem>
+                  <SelectItem value="none">No Ads (Disabled)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">Override the global ad provider for this specific page</p>
+            </div>
+            <Separator />
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Ad Positions</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <Label htmlFor="showHeaderModal" className="text-sm cursor-pointer">Header Ad</Label>
+                  <Switch
+                    id="showHeaderModal"
+                    checked={newPageRule.showHeader}
+                    onCheckedChange={(checked) => setNewPageRule(prev => ({ ...prev, showHeader: checked }))}
+                  />
+                </div>
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <Label htmlFor="showFooterModal" className="text-sm cursor-pointer">Footer Ad</Label>
+                  <Switch
+                    id="showFooterModal"
+                    checked={newPageRule.showFooter}
+                    onCheckedChange={(checked) => setNewPageRule(prev => ({ ...prev, showFooter: checked }))}
+                  />
+                </div>
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <Label htmlFor="showInArticleModal" className="text-sm cursor-pointer">In-Article Ad</Label>
+                  <Switch
+                    id="showInArticleModal"
+                    checked={newPageRule.showInArticle}
+                    onCheckedChange={(checked) => setNewPageRule(prev => ({ ...prev, showInArticle: checked }))}
+                  />
+                </div>
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <Label htmlFor="showSidebarModal" className="text-sm cursor-pointer">Sidebar Ad</Label>
+                  <Switch
+                    id="showSidebarModal"
+                    checked={newPageRule.showSidebar}
+                    onCheckedChange={(checked) => setNewPageRule(prev => ({ ...prev, showSidebar: checked }))}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setPageRuleModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                if (!newPageRule.path.trim()) {
+                  toast.error('Please enter a page path');
+                  return;
+                }
+                if (!newPageRule.path.startsWith('/')) {
+                  toast.error('Page path must start with /');
+                  return;
+                }
+                setSettings(prev => ({
+                  ...prev,
+                  pageAdConfig: {
+                    ...prev.pageAdConfig,
+                    [newPageRule.path]: {
+                      maxAds: newPageRule.maxAds,
+                      showHeader: newPageRule.showHeader,
+                      showFooter: newPageRule.showFooter,
+                      showInArticle: newPageRule.showInArticle,
+                      showSidebar: newPageRule.showSidebar,
+                      adProvider: newPageRule.adProvider,
+                    }
+                  }
+                }));
+                setPageRuleModalOpen(false);
+                toast.success(`Page rule added for ${newPageRule.path}`);
+              }}
+            >
+              Add Rule
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

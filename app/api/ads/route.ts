@@ -14,6 +14,17 @@ interface PublicAdSettings {
   showCoursePageAd?: boolean;
   showPortalAd?: boolean;
   showBlogAd?: boolean;
+  // Ad limits
+  maxAdsPerPage?: number;
+  maxInArticleAds?: number;
+  // Per-page configuration
+  pageAdConfig?: Record<string, {
+    maxAds?: number;
+    showHeader?: boolean;
+    showFooter?: boolean;
+    showInArticle?: boolean;
+    showSidebar?: boolean;
+  }>;
   // Provider-specific settings based on active provider
   adsense?: {
     publisherId: string | null;
@@ -86,6 +97,11 @@ export async function GET() {
       showCoursePageAd: settings.showCoursePageAd ?? true,
       showPortalAd: settings.showPortalAd ?? true,
       showBlogAd: settings.showBlogAd ?? true,
+      // Ad limits
+      maxAdsPerPage: (settings as Record<string, unknown>).maxAdsPerPage as number ?? 5,
+      maxInArticleAds: (settings as Record<string, unknown>).maxInArticleAds as number ?? 3,
+      // Per-page configuration
+      pageAdConfig: (settings as Record<string, unknown>).pageAdConfig ? JSON.parse((settings as Record<string, unknown>).pageAdConfig as string) : undefined,
     };
 
     // Only include the active provider's settings

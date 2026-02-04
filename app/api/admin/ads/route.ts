@@ -164,6 +164,10 @@ export async function POST(request: Request) {
       customFooterCode: body.customFooterCode || null,
       customSidebarCode: body.customSidebarCode || null,
       customInArticleCode: body.customInArticleCode || null,
+      // Ad Limits & Per-Page Config
+      maxAdsPerPage: body.maxAdsPerPage ?? 5,
+      maxInArticleAds: body.maxInArticleAds ?? 3,
+      pageAdConfig: body.pageAdConfig ? JSON.stringify(body.pageAdConfig) : null,
     };
 
     let settings;
