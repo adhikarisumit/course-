@@ -446,13 +446,15 @@ export default function CodeEditor() {
     // Register custom completion providers for each language
     registerCompletionProviders(monaco)
 
-    // Add Format Document to context menu
+    // Register formatting providers for all languages
+    registerFormattingProviders(monaco)
+
+    // Add Format Document to context menu with keybinding (Shift+Alt+F like VS Code)
     editor.addAction({
       id: 'format-document',
       label: 'Format Document',
       keybindings: [
-        // Optionally add a keybinding, e.g. Shift+Alt+F
-        // monaco.KeyMod.Shift | monaco.KeyMod.Alt | monaco.KeyCode.KeyF
+        monaco.KeyMod.Shift | monaco.KeyMod.Alt | monaco.KeyCode.KeyF
       ],
       precondition: undefined,
       keybindingContext: undefined,
@@ -473,6 +475,140 @@ export default function CodeEditor() {
         handleSaveSnippet()
       }
     })
+  }
+
+  // Register formatting providers for languages that don't have built-in formatters
+  const registerFormattingProviders = (monaco: any) => {
+    // Languages that need custom formatters (JS/TS have built-in)
+    const languagesToFormat = ['java', 'python', 'cpp', 'c', 'csharp', 'go', 'rust', 'php', 'ruby', 'kotlin']
+
+    languagesToFormat.forEach(langId => {
+      monaco.languages.registerDocumentFormattingEditProvider(langId, {
+        provideDocumentFormattingEdits: (model: any) => {
+          const text = model.getValue()
+          const formatted = formatCode(text, langId)
+          return [{
+            range: model.getFullModelRange(),
+            text: formatted
+          }]
+        }
+      })
+    })
+  }
+
+  // Simple code formatter that handles indentation and basic formatting
+  const formatCode = (code: string, language: string): string => {
+    const lines = code.split('\n')
+    let indentLevel = 0
+    const indentStr = '    ' // 4 spaces
+    const formattedLines: string[] = []
+
+    // Language-specific bracket/block patterns
+    const openBrackets = /[{(\[]/g
+    const closeBrackets = /[})\]]/g
+
+    // Python uses colons for blocks
+    const isPython = language === 'python'
+    const pythonBlockStart = /:\s*$/
+
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i].trim()
+      
+      if (line === '') {
+        formattedLines.push('')
+        continue
+      }
+
+      // Count brackets to determine indent changes
+      const openCount = (line.match(openBrackets) || []).length
+      const closeCount = (line.match(closeBrackets) || []).length
+
+      // Decrease indent before lines starting with closing brackets
+      if (line.match(/^[}\])]/) && indentLevel > 0) {
+        indentLevel--
+      }
+
+      // Handle special cases for different languages
+      if (language === 'java' || language === 'csharp' || language === 'cpp' || language === 'c') {
+        // Handle case/default in switch statements
+        if (line.match(/^(case\s+.+:|default:)/)) {
+          // case statements get one less indent
+          formattedLines.push(indentStr.repeat(Math.max(0, indentLevel - 1)) + line)
+          continue
+        }
+      }
+
+      // Add proper indentation
+      formattedLines.push(indentStr.repeat(indentLevel) + line)
+
+      // Adjust indent level for next line
+      if (isPython) {
+        // Python: increase indent after colon
+        if (line.match(pythonBlockStart) && !line.startsWith('#')) {
+          indentLevel++
+        }
+        // Python: decrease indent for pass, return, break, continue, raise at end
+        if (line.match(/^(pass|return|break|continue|raise)\b/) && indentLevel > 0) {
+          // Don't decrease here, it's already at correct level
+        }
+      } else {
+        // C-style languages: adjust based on brackets
+        indentLevel += openCount - closeCount
+        
+        // Handle lines ending with opening bracket on same line as closing
+        // e.g., "} else {"
+        if (line.match(/}\s*(else|catch|finally|elif)\s*{?\s*$/)) {
+          // Already handled, no change needed
+        }
+      }
+
+      // Ensure indent level doesn't go negative
+      if (indentLevel < 0) indentLevel = 0
+    }
+
+    let result = formattedLines.join('\n')
+
+    // Language-specific post-processing
+    if (language === 'java' || language === 'csharp' || language === 'cpp' || language === 'c' || language === 'go' || language === 'rust' || language === 'kotlin') {
+      // Add space after keywords
+      result = result.replace(/\b(if|for|while|switch|catch)\(/g, '$1 (')
+      // Add space around operators
+      result = result.replace(/([^=!<>])=([^=])/g, '$1 = $2')
+      result = result.replace(/([^=!<>])==([^=])/g, '$1 == $2')
+      result = result.replace(/([^=])!=([^=])/g, '$1 != $2')
+      // Fix spacing around braces
+      result = result.replace(/\)\s*{/g, ') {')
+      result = result.replace(/}\s*else/g, '} else')
+      result = result.replace(/else\s*{/g, 'else {')
+      result = result.replace(/}\s*catch/g, '} catch')
+      result = result.replace(/}\s*finally/g, '} finally')
+    }
+
+    if (language === 'python') {
+      // Python-specific formatting
+      // Add spaces around operators
+      result = result.replace(/([^=!<>])=([^=])/g, '$1 = $2')
+      result = result.replace(/([^=!<>])==([^=])/g, '$1 == $2')
+      result = result.replace(/([^=])!=([^=])/g, '$1 != $2')
+      // Fix colon spacing in dicts/slices
+      result = result.replace(/\s*:\s*/g, ': ')
+      result = result.replace(/\[\s*:/g, '[:')
+      result = result.replace(/:\s*\]/g, ':]')
+    }
+
+    if (language === 'php') {
+      // PHP-specific formatting
+      result = result.replace(/\b(if|for|foreach|while|switch|catch)\(/g, '$1 (')
+      result = result.replace(/\)\s*{/g, ') {')
+    }
+
+    if (language === 'ruby') {
+      // Ruby-specific formatting
+      result = result.replace(/\bdo\s*\|/g, 'do |')
+      result = result.replace(/\|\s*$/gm, '|')
+    }
+
+    return result
   }
 
   // Register completion providers for all languages
@@ -1762,6 +1898,10 @@ export default function CodeEditor() {
                 },
                 contextmenu: true,
                 mouseWheelZoom: true,
+                // Enable formatting like VS Code
+                formatOnType: true,
+                formatOnPaste: true,
+                autoIndent: "full",
                 // Enable semantic highlighting for better code understanding
                 // semanticHighlighting: {
                 //   enabled: true
