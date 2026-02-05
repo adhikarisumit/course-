@@ -78,6 +78,10 @@ export async function GET() {
         customFooterCode: null,
         customSidebarCode: null,
         customInArticleCode: null,
+        // Ad limits
+        maxAdsPerPage: 5,
+        maxInArticleAds: 3,
+        pageAdConfig: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
