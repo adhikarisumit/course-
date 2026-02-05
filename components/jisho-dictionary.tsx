@@ -783,7 +783,7 @@ export default function JishoDictionary() {
                           {translatingNepali ? (
                             <span className="text-muted-foreground animate-pulse">अनुवाद हुँदैछ...</span>
                           ) : translateNepali ? (
-                            <p className="text-base">{translateNepali}</p>
+                            <p className="text-base select-text">{translateNepali}</p>
                           ) : (
                             <span className="text-muted-foreground/50">Translation will appear here</span>
                           )}
@@ -820,7 +820,7 @@ export default function JishoDictionary() {
                           {translatingVietnamese ? (
                             <span className="text-muted-foreground animate-pulse">Đang dịch...</span>
                           ) : translateVietnamese ? (
-                            <p className="text-base">{translateVietnamese}</p>
+                            <p className="text-base select-text">{translateVietnamese}</p>
                           ) : (
                             <span className="text-muted-foreground/50">Translation will appear here</span>
                           )}
@@ -1245,11 +1245,11 @@ function WordCard({
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 flex-wrap">
-                <h3 className="text-2xl font-bold tracking-tight">
+                <h3 className="text-2xl font-bold tracking-tight select-text">
                   {renderClickableKanji(mainWord)}
                 </h3>
                 {word.japanese[0]?.word && (
-                  <span className="text-lg text-muted-foreground">【{reading}】</span>
+                  <span className="text-lg text-muted-foreground select-text">【{reading}】</span>
                 )}
               </div>
               
@@ -1337,7 +1337,7 @@ function WordCard({
                 </Badge>
               ))}
             </div>
-            <p className="text-lg">
+            <p className="text-lg select-text">
               {word.senses[0]?.english_definitions.join("; ")}
             </p>
             {/* Nepali Translation */}
@@ -1349,7 +1349,7 @@ function WordCard({
                 {loadingNepali[0] ? (
                   <span className="text-sm text-muted-foreground animate-pulse">अनुवाद हुँदैछ...</span>
                 ) : nepaliTranslations[0] ? (
-                  <span className="text-base text-muted-foreground">{nepaliTranslations[0]}</span>
+                  <span className="text-base text-muted-foreground select-text">{nepaliTranslations[0]}</span>
                 ) : null}
               </div>
             )}
@@ -1362,7 +1362,7 @@ function WordCard({
                 {loadingVietnamese[0] ? (
                   <span className="text-sm text-muted-foreground animate-pulse">Đang dịch...</span>
                 ) : vietnameseTranslations[0] ? (
-                  <span className="text-base text-muted-foreground">{vietnameseTranslations[0]}</span>
+                  <span className="text-base text-muted-foreground select-text">{vietnameseTranslations[0]}</span>
                 ) : null}
               </div>
             )}
@@ -1414,7 +1414,7 @@ function WordCard({
                         </Badge>
                       ))}
                     </div>
-                    <p className="font-medium">
+                    <p className="font-medium select-text">
                       {idx + 1}. {sense.english_definitions.join("; ")}
                     </p>
                     {/* Nepali Translation for each meaning */}
@@ -1425,7 +1425,7 @@ function WordCard({
                         {loadingNepali[idx] ? (
                           <span className="text-sm text-muted-foreground animate-pulse">अनुवाद हुँदैछ...</span>
                         ) : nepaliTranslations[idx] ? (
-                          <span className="text-sm text-muted-foreground">{nepaliTranslations[idx]}</span>
+                          <span className="text-sm text-muted-foreground select-text">{nepaliTranslations[idx]}</span>
                         ) : null}
                       </div>
                     )}
@@ -1436,7 +1436,7 @@ function WordCard({
                         {loadingVietnamese[idx] ? (
                           <span className="text-sm text-muted-foreground animate-pulse">Đang dịch...</span>
                         ) : vietnameseTranslations[idx] ? (
-                          <span className="text-sm text-muted-foreground">{vietnameseTranslations[idx]}</span>
+                          <span className="text-sm text-muted-foreground select-text">{vietnameseTranslations[idx]}</span>
                         ) : null}
                       </div>
                     )}
@@ -1514,16 +1514,16 @@ function WordCard({
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 space-y-1">
-                          <p className="text-base font-medium leading-relaxed">
+                          <p className="text-base font-medium leading-relaxed select-text">
                             {highlightWord(sentence.japanese, mainWord)}
                           </p>
                           {sentence.reading && (
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-muted-foreground select-text">
                               {sentence.reading}
                             </p>
                           )}
                           {sentence.english && (
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-muted-foreground select-text">
                               <span className="font-medium text-blue-600 dark:text-blue-400">EN:</span> {sentence.english}
                             </p>
                           )}
@@ -1534,7 +1534,7 @@ function WordCard({
                               {loadingSentenceNepali[sentence.id] ? (
                                 <span className="text-sm text-muted-foreground animate-pulse">अनुवाद हुँदैछ...</span>
                               ) : sentenceNepaliTranslations[sentence.id] ? (
-                                <span className="text-sm text-muted-foreground">{sentenceNepaliTranslations[sentence.id]}</span>
+                                <span className="text-sm text-muted-foreground select-text">{sentenceNepaliTranslations[sentence.id]}</span>
                               ) : (
                                 <span className="text-sm text-muted-foreground/50 italic">अनुवाद उपलब्ध छैन</span>
                               )}
@@ -1547,7 +1547,7 @@ function WordCard({
                               {loadingSentenceVietnamese[sentence.id] ? (
                                 <span className="text-sm text-muted-foreground animate-pulse">Đang dịch...</span>
                               ) : sentenceVietnameseTranslations[sentence.id] ? (
-                                <span className="text-sm text-muted-foreground">{sentenceVietnameseTranslations[sentence.id]}</span>
+                                <span className="text-sm text-muted-foreground select-text">{sentenceVietnameseTranslations[sentence.id]}</span>
                               ) : (
                                 <span className="text-sm text-muted-foreground/50 italic">Bản dịch không có sẵn</span>
                               )}
