@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Send, Hash, Loader2, RefreshCw, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Send, Hash, Loader2, RefreshCw, MessageCircle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
 
@@ -71,6 +71,7 @@ export default function AdminChatRoomPage() {
   const [isLoadingRoom, setIsLoadingRoom] = useState(true);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const currentUserId = session?.user?.id;
@@ -159,6 +160,32 @@ export default function AdminChatRoomPage() {
     }
   };
 
+  // Delete message (admin can delete any message)
+  const deleteMessage = async (messageId: string) => {
+    if (deletingMessageId) return;
+    
+    setDeletingMessageId(messageId);
+    try {
+      const response = await fetch(
+        `/api/chat/rooms/${roomId}/messages?messageId=${messageId}`,
+        { method: 'DELETE' }
+      );
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete message');
+      }
+      
+      setMessages((prev) => prev.filter((m) => m.id !== messageId));
+      toast.success('Message deleted');
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to delete message');
+    } finally {
+      setDeletingMessageId(null);
+    }
+  };
+
   if (isLoadingRoom) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -225,7 +252,7 @@ export default function AdminChatRoomPage() {
                 return (
                   <div
                     key={message.id}
-                    className={`flex gap-3 ${isOwnMessage ? 'flex-row-reverse' : ''}`}
+                    className={`group flex gap-3 ${isOwnMessage ? 'flex-row-reverse' : ''}`}
                   >
                     <Avatar className="h-8 w-8 shrink-0">
                       <AvatarImage src={message.userImage || undefined} />
@@ -242,14 +269,46 @@ export default function AdminChatRoomPage() {
                           {formatTime(message.createdAt)}
                         </span>
                       </div>
-                      <div
-                        className={`px-3 py-2 rounded-lg text-sm ${
-                          isOwnMessage
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted'
-                        }`}
-                      >
-                        {message.content}
+                      <div className="flex items-center gap-1">
+                        {isOwnMessage && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => deleteMessage(message.id)}
+                            disabled={deletingMessageId === message.id}
+                          >
+                            {deletingMessageId === message.id ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-3.5 w-3.5" />
+                            )}
+                          </Button>
+                        )}
+                        <div
+                          className={`px-3 py-2 rounded-lg text-sm ${
+                            isOwnMessage
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted'
+                          }`}
+                        >
+                          {message.content}
+                        </div>
+                        {!isOwnMessage && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => deleteMessage(message.id)}
+                            disabled={deletingMessageId === message.id}
+                          >
+                            {deletingMessageId === message.id ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-3.5 w-3.5" />
+                            )}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>
