@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import Script from "next/script"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/components/auth-provider"
@@ -32,6 +33,13 @@ export default function RootLayout({
         <meta name="description" content="proteclink — learning resources and curated courses" />
         <meta property="og:title" content="proteclink" />
         <meta name="twitter:title" content="proteclink" />
+        <Script
+          id="adsense-script"
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2415483156090962"
+          crossOrigin="anonymous"
+          strategy="beforeInteractive"
+        />
       </head>
       <body className={`font-sans antialiased`} suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true} enableColorScheme={false}>
