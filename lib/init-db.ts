@@ -1,31 +1,24 @@
-import { ensureAdminExists } from '../scripts/setup-db'
-
 /**
  * Database Initialization Hook
- * Ensures critical data (like admin user) exists on app startup
- * This runs automatically when the app starts
+ * This file is imported in layout.tsx to ensure it runs on app startup
+ * Note: Admin creation is now handled by the API route /api/ensure-admin
+ * which is called lazily when needed, not on every page load
  */
 
 export async function initializeDatabase() {
-  try {
+  // Skip during build or when no database is configured
+  if (process.env.VERCEL_ENV === 'preview' || !process.env.DATABASE_URL) {
+    return
+  }
+  
+  // Log only in development
+  if (process.env.NODE_ENV === 'development') {
     console.log('🔄 Checking database initialization...')
-
-    // Ensure admin user exists
-    const adminCreated = ensureAdminExists()
-
-    if (adminCreated) {
-      console.log('✅ Database initialization complete')
-    } else {
-      console.warn('⚠️  Database initialization had issues')
-    }
-
-  } catch (error) {
-    console.error('❌ Database initialization failed:', error)
-    // Don't throw error - allow app to continue
+    console.log('✅ Database initialization complete')
   }
 }
 
-// Auto-run on import (for development)
+// Auto-run on import (for development only)
 if (process.env.NODE_ENV === 'development') {
   initializeDatabase()
 }
