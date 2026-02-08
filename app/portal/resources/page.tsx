@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo, useCallback } from "react"
+import { useState, useEffect, useMemo, useCallback, Fragment } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,7 +11,7 @@ import { FileText, ExternalLink, Settings, Eye, EyeOff, RefreshCw, Package, Sear
 import { toast } from "sonner"
 import { ResourceGridSkeleton } from "@/components/skeletons"
 import { Input } from "@/components/ui/input"
-import { SidebarAd } from "@/components/ads"
+import { SidebarAd, HeaderAd, InArticleAd } from "@/components/ads"
 
 interface Resource {
   id: string
@@ -251,6 +251,10 @@ export default function ResourcesPage() {
         </div>
       </div>
 
+      <div className="mb-6">
+        <HeaderAd />
+      </div>
+
       {/* Search Input */}
       <div className="mb-6">
         <div className="relative max-w-md">
@@ -299,8 +303,9 @@ export default function ResourcesPage() {
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredResources.map((resource) => (
-            <Card key={resource.id} className="overflow-hidden" id={resource.id}>
+          {filteredResources.map((resource, index) => (
+            <Fragment key={resource.id}>
+              <Card className="overflow-hidden" id={resource.id}>
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -368,9 +373,21 @@ export default function ResourcesPage() {
                 </div>
               </CardContent>
             </Card>
+              {/* Show an in-article ad after every 6th resource */}
+              {(index + 1) % 6 === 0 && (
+                <div key={`ad-${index}`} className="md:col-span-2 lg:col-span-3">
+                  <InArticleAd />
+                </div>
+              )}
+            </Fragment>
           ))}
         </div>
       )}
+
+      {/* Bottom Sidebar Ad */}
+      <div className="mt-6">
+        <InArticleAd />
+      </div>
     </div>
   )
 }

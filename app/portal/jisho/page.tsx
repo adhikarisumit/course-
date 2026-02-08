@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 import JishoDictionary from "@/components/jisho-dictionary"
 import { Book } from "lucide-react"
+import { InArticleAd, SidebarAd, HeaderAd } from "@/components/ads"
 
 export const metadata: Metadata = {
   title: "Japanese Dictionary | Jisho",
@@ -25,8 +26,21 @@ export default function JishoPage() {
         </div>
       </div>
 
-      {/* Dictionary Component */}
-      <JishoDictionary />
+      <HeaderAd />
+
+      {/* Dictionary with optional Sidebar Ad */}
+      <div className="flex gap-4 mt-4">
+        <div className="flex-1">
+          <JishoDictionary />
+        </div>
+        <div className="hidden xl:block w-[300px] shrink-0">
+          <SidebarAd />
+        </div>
+      </div>
+
+      <div className="mt-4">
+        <InArticleAd />
+      </div>
     </div>
   )
 }

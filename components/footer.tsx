@@ -135,7 +135,7 @@ export function Footer() {
 
         <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
           <FooterAd />
-          <p>© {currentYear} Proteclink. All rights reserved. Empowering education through innovative learning management solutions.</p>
+          <p className="mt-4">© {currentYear} Proteclink. All rights reserved. Empowering education through innovative learning management solutions.</p>
         </div>
       </div>
     </footer>

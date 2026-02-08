@@ -87,11 +87,14 @@ export function useAds() {
 // Helper to check if current page is excluded
 function useIsExcludedPage(excludedPages: string | null) {
   const pathname = usePathname();
+  const currentPath = pathname.toLowerCase();
+  
+  // Always exclude admin pages from ads
+  if (currentPath.startsWith('/admin')) return true;
   
   if (!excludedPages) return false;
   
   const excludedPaths = excludedPages.split(',').map((p) => p.trim().toLowerCase());
-  const currentPath = pathname.toLowerCase();
   
   return excludedPaths.some((excluded) => {
     if (excluded.endsWith('*')) {
@@ -105,9 +108,12 @@ function useIsExcludedPage(excludedPages: string | null) {
 function useIsPageTypeAllowed(settings: AdSettings | null) {
   const pathname = usePathname();
   
-  if (!settings) return true;
-  
   const currentPath = pathname.toLowerCase();
+  
+  // Never show ads on admin pages
+  if (currentPath.startsWith('/admin')) return false;
+  
+  if (!settings) return true;
   
   // Check page-specific settings
   if (currentPath === '/' && settings.showHomePageAd === false) return false;
@@ -174,7 +180,8 @@ function parseScriptCode(code: string): { type: 'inline' | 'external' | 'invalid
 // Provider component to fetch and share settings
 export function AdProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<AdSettings | null>(null);
-  const globalScriptInjected = useRef(false);
+  const pathname = usePathname();
+  const isAdminPage = pathname.toLowerCase().startsWith('/admin');
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -192,79 +199,12 @@ export function AdProvider({ children }: { children: React.ReactNode }) {
     fetchSettings();
   }, []);
 
-  // Inject global footer scripts (like Social Bar) directly into body
-  useEffect(() => {
-    if (!settings || settings.activeProvider === 'none' || globalScriptInjected.current) return;
-    
-    let footerCode: string | null | undefined = null;
-    
-    switch (settings.activeProvider) {
-      case 'adsterra':
-        footerCode = settings.adsterra?.footerCode;
-        break;
-      case 'propeller':
-        footerCode = settings.propeller?.footerCode;
-        break;
-      case 'custom':
-        footerCode = settings.custom?.footerCode;
-        break;
-    }
-    
-    if (footerCode && footerCode.trim()) {
-      try {
-        // Create a container and inject the script
-        const container = document.createElement('div');
-        container.id = 'global-ad-scripts';
-        container.innerHTML = footerCode;
-        
-        // Execute any scripts
-        const scripts = container.getElementsByTagName('script');
-        Array.from(scripts).forEach((oldScript) => {
-          try {
-            const newScript = document.createElement('script');
-            Array.from(oldScript.attributes).forEach(attr => {
-              newScript.setAttribute(attr.name, attr.value);
-            });
-            // Only set textContent for inline scripts (no src attribute)
-            // Scripts with src should load externally, not have inline content
-            if (!oldScript.hasAttribute('src') && oldScript.textContent) {
-              const content = oldScript.textContent.trim();
-              // Safety check: make sure content looks like JavaScript, not HTML
-              if (content && !content.startsWith('<')) {
-                newScript.textContent = content;
-              } else if (content.startsWith('<')) {
-                console.warn('Skipping script with HTML content');
-                return;
-              }
-            }
-            document.body.appendChild(newScript);
-          } catch (error) {
-            console.error('Error injecting ad script:', error);
-          }
-        });
-        
-        // Also append any non-script elements (like divs for ad containers)
-        try {
-          const nonScriptContent = container.innerHTML.replace(/<script[\s\S]*?<\/script>/gi, '').trim();
-          if (nonScriptContent) {
-            const wrapper = document.createElement('div');
-            wrapper.innerHTML = nonScriptContent;
-            document.body.appendChild(wrapper);
-          }
-        } catch (e) {
-          console.error('Error appending non-script ad content:', e);
-        }
-        
-        globalScriptInjected.current = true;
-      } catch (error) {
-        console.error('Error processing footer ad code:', error);
-      }
-    }
-  }, [settings]);
+  // Global footer scripts (like Social Bar) are NOT injected here.
+  // Footer ads are handled by the FooterAd component to avoid duplicate/floating ads.
 
   // Render provider-specific head scripts
   const renderHeadScripts = () => {
-    if (!settings || settings.activeProvider === 'none') return null;
+    if (!settings || settings.activeProvider === 'none' || isAdminPage) return null;
 
     switch (settings.activeProvider) {
       case 'adsense':
@@ -446,69 +386,59 @@ interface HtmlAdProps {
 }
 
 export function HtmlAd({ code, className = '', style }: HtmlAdProps) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
-  const [iframeHeight, setIframeHeight] = useState(90);
+  const scriptInjected = useRef(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    if (!mounted || !code || !iframeRef.current) return;
+    if (!mounted || !code || !containerRef.current || scriptInjected.current) return;
+    scriptInjected.current = true;
 
-    const iframe = iframeRef.current;
-    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    const container = containerRef.current;
     
-    if (!doc) return;
-
-    // Write the ad code into the iframe
-    doc.open();
-    doc.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <style>
-            html, body { 
-              margin: 0; 
-              padding: 0; 
-              overflow: hidden;
-              width: 100%;
-              height: auto;
-            }
-            body { 
-              display: flex; 
-              justify-content: center; 
-              align-items: center;
-            }
-          </style>
-        </head>
-        <body>
-          ${code}
-        </body>
-      </html>
-    `);
-    doc.close();
-
-    // Auto-resize iframe based on content
-    const resizeIframe = () => {
+    // Parse and inject the ad code
+    const temp = document.createElement('div');
+    temp.innerHTML = code;
+    
+    // Extract and execute scripts separately
+    const scripts = temp.querySelectorAll('script');
+    const nonScriptContent = code.replace(/<script[\s\S]*?<\/script>/gi, '').trim();
+    
+    // Insert non-script HTML first
+    if (nonScriptContent) {
+      container.innerHTML = nonScriptContent;
+    }
+    
+    // Then execute scripts
+    scripts.forEach((oldScript) => {
       try {
-        const body = iframe.contentDocument?.body;
-        if (body) {
-          const height = body.scrollHeight || body.offsetHeight;
-          if (height > 0) {
-            setIframeHeight(height);
+        const newScript = document.createElement('script');
+        Array.from(oldScript.attributes).forEach(attr => {
+          newScript.setAttribute(attr.name, attr.value);
+        });
+        if (!oldScript.hasAttribute('src') && oldScript.textContent) {
+          const content = oldScript.textContent.trim();
+          if (content && !content.startsWith('<')) {
+            newScript.textContent = content;
           }
         }
-      } catch (e) {
-        // Cross-origin error, use default height
+        container.appendChild(newScript);
+      } catch (error) {
+        console.error('Error executing ad script:', error);
       }
-    };
+    });
 
-    // Check height after scripts load
-    setTimeout(resizeIframe, 500);
-    setTimeout(resizeIframe, 1000);
-    setTimeout(resizeIframe, 2000);
+    return () => {
+      // Cleanup on unmount
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
+      }
+      scriptInjected.current = false;
+    };
   }, [mounted, code]);
 
   // Return empty div on server to avoid hydration mismatch
@@ -519,19 +449,17 @@ export function HtmlAd({ code, className = '', style }: HtmlAdProps) {
   if (!code) return null;
 
   return (
-    <iframe
-      ref={iframeRef}
+    <div
+      ref={containerRef}
       className={`ad-container ${className}`}
-      style={{ 
-        border: 'none', 
-        width: '100%', 
-        height: `${iframeHeight}px`,
-        overflow: 'hidden',
-        ...style 
+      style={{
+        width: '100%',
+        minHeight: '50px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        ...style,
       }}
-      scrolling="no"
-      title="Advertisement"
-      sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
     />
   );
 }
@@ -718,11 +646,11 @@ export function FooterAd({ className = '' }: AdPlacementProps) {
         return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
       }
       case 'adsterra': {
-        const code = settings.adsterra?.footerCode || settings.adsterra?.headerCode;
+        const code = settings.adsterra?.footerCode;
         return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
       }
       case 'custom': {
-        const code = settings.custom?.footerCode || settings.custom?.headerCode;
+        const code = settings.custom?.footerCode;
         return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
       }
       default:
