@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect, useRef } from "react"
-import { Search, Volume2, Book, Star, Copy, Check, Loader2, ChevronDown, ChevronUp, BookOpen, Languages, Tag, ExternalLink, History, X, Bookmark, BookmarkCheck, MessageSquareText, Pencil, Globe } from "lucide-react"
+import { Search, Volume2, Book, Star, Copy, Check, Loader2, ChevronDown, ChevronUp, BookOpen, Tag, ExternalLink, History, X, Bookmark, BookmarkCheck, MessageSquareText, Pencil, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -118,15 +118,6 @@ export default function JishoDictionary() {
   const [kanjiModalOpen, setKanjiModalOpen] = useState(false)
   const [showNepali, setShowNepali] = useState(true)
   const [showVietnamese, setShowVietnamese] = useState(false)
-  // Sentence translator state
-  const [translateText, setTranslateText] = useState("")
-  const [translateNepali, setTranslateNepali] = useState("")
-  const [translateVietnamese, setTranslateVietnamese] = useState("")
-  const [translatingNepali, setTranslatingNepali] = useState(false)
-  const [translatingVietnamese, setTranslatingVietnamese] = useState(false)
-  const [sourceLanguage, setSourceLanguage] = useState<"en" | "ja">("en")
-  const [translateToNepali, setTranslateToNepali] = useState(true)
-  const [translateToVietnamese, setTranslateToVietnamese] = useState(true)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const { toast } = useToast()
 
@@ -372,67 +363,6 @@ export default function JishoDictionary() {
     })
   }
 
-  // Translate sentence function
-  const translateSentence = async () => {
-    if (!translateText.trim()) {
-      toast({
-        variant: "destructive",
-        description: "Please enter text to translate",
-      })
-      return
-    }
-
-    if (!translateToNepali && !translateToVietnamese) {
-      toast({
-        variant: "destructive",
-        description: "Please select at least one target language",
-      })
-      return
-    }
-
-    // Reset previous translations
-    setTranslateNepali("")
-    setTranslateVietnamese("")
-    
-    // Translate to Nepali
-    if (translateToNepali) {
-      setTranslatingNepali(true)
-      try {
-        const nepaliResponse = await fetch(`/api/jisho/translate?text=${encodeURIComponent(translateText.trim())}&from=${sourceLanguage}&to=ne`)
-        if (nepaliResponse.ok) {
-          const data = await nepaliResponse.json()
-          setTranslateNepali(data.translated || "Translation not available")
-        } else {
-          setTranslateNepali("Translation failed")
-        }
-      } catch (error) {
-        console.error("Nepali translation error:", error)
-        setTranslateNepali("Translation failed")
-      } finally {
-        setTranslatingNepali(false)
-      }
-    }
-
-    // Translate to Vietnamese
-    if (translateToVietnamese) {
-      setTranslatingVietnamese(true)
-      try {
-        const vietnameseResponse = await fetch(`/api/jisho/translate?text=${encodeURIComponent(translateText.trim())}&from=${sourceLanguage}&to=vi`)
-        if (vietnameseResponse.ok) {
-          const data = await vietnameseResponse.json()
-          setTranslateVietnamese(data.translated || "Translation not available")
-        } else {
-          setTranslateVietnamese("Translation failed")
-        }
-      } catch (error) {
-        console.error("Vietnamese translation error:", error)
-        setTranslateVietnamese("Translation failed")
-      } finally {
-        setTranslatingVietnamese(false)
-      }
-    }
-  }
-
   return (
     <TooltipProvider>
       <div className="space-y-6">
@@ -444,14 +374,10 @@ export default function JishoDictionary() {
         />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full max-w-lg grid-cols-4">
+          <TabsList className="grid w-full max-w-lg grid-cols-3">
             <TabsTrigger value="search" className="gap-2">
               <Search className="h-4 w-4" />
               Search
-            </TabsTrigger>
-            <TabsTrigger value="translate" className="gap-2">
-              <Languages className="h-4 w-4" />
-              Translate
             </TabsTrigger>
             <TabsTrigger value="history" className="gap-2">
               <History className="h-4 w-4" />
@@ -653,195 +579,6 @@ export default function JishoDictionary() {
                 </div>
               </div>
             )}
-          </TabsContent>
-
-          <TabsContent value="translate" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Languages className="h-5 w-5" />
-                  Sentence Translator
-                </CardTitle>
-                <CardDescription>
-                  Translate sentences to Nepali and Vietnamese
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Language Selection */}
-                <div className="flex flex-col sm:flex-row gap-4 p-4 rounded-lg border bg-muted/30">
-                  {/* Source Language */}
-                  <div className="flex-1 space-y-2">
-                    <Label className="text-sm font-medium">From</Label>
-                    <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        variant={sourceLanguage === "en" ? "default" : "outline"}
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => setSourceLanguage("en")}
-                      >
-                        🇬🇧 English
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={sourceLanguage === "ja" ? "default" : "outline"}
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => setSourceLanguage("ja")}
-                      >
-                        🇯🇵 Japanese
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Target Languages */}
-                  <div className="flex-1 space-y-2">
-                    <Label className="text-sm font-medium">To</Label>
-                    <div className="flex gap-4">
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          id="translate-nepali"
-                          checked={translateToNepali}
-                          onCheckedChange={setTranslateToNepali}
-                        />
-                        <Label htmlFor="translate-nepali" className="text-sm cursor-pointer">
-                          🇳🇵 नेपाली
-                        </Label>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          id="translate-vietnamese"
-                          checked={translateToVietnamese}
-                          onCheckedChange={setTranslateToVietnamese}
-                        />
-                        <Label htmlFor="translate-vietnamese" className="text-sm cursor-pointer">
-                          🇻🇳 Tiếng Việt
-                        </Label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="translate-input">Enter text ({sourceLanguage === "en" ? "English" : "Japanese"})</Label>
-                  <textarea
-                    id="translate-input"
-                    placeholder={sourceLanguage === "en" ? "Type or paste any English sentence here..." : "日本語のテキストを入力してください..."}
-                    value={translateText}
-                    onChange={(e) => setTranslateText(e.target.value)}
-                    className="w-full min-h-[100px] p-3 rounded-md border bg-background text-base resize-y"
-                  />
-                </div>
-
-                <Button 
-                  onClick={translateSentence} 
-                  className="w-full h-11"
-                  disabled={translatingNepali || translatingVietnamese || !translateText.trim() || (!translateToNepali && !translateToVietnamese)}
-                >
-                  {(translatingNepali || translatingVietnamese) ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Translating...
-                    </>
-                  ) : (
-                    <>
-                      <Languages className="mr-2 h-4 w-4" />
-                      Translate
-                    </>
-                  )}
-                </Button>
-
-                {/* Translation Results */}
-                {(translateNepali || translateVietnamese || translatingNepali || translatingVietnamese) && (
-                  <div className="space-y-4 pt-4 border-t">
-                    {/* Nepali Translation */}
-                    {translateToNepali && (
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label className="flex items-center gap-2">
-                            <Badge variant="outline" className="bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20">
-                              🇳🇵 नेपाली
-                            </Badge>
-                            Nepali Translation
-                          </Label>
-                          {translateNepali && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8"
-                              onClick={() => copyToClipboard(translateNepali)}
-                            >
-                              {copiedText === translateNepali ? (
-                                <Check className="h-4 w-4 text-green-500" />
-                              ) : (
-                                <Copy className="h-4 w-4" />
-                              )}
-                            </Button>
-                          )}
-                        </div>
-                        <div className="p-3 rounded-md border bg-muted/30 min-h-[60px]">
-                          {translatingNepali ? (
-                            <span className="text-muted-foreground animate-pulse">अनुवाद हुँदैछ...</span>
-                          ) : translateNepali ? (
-                            <p className="text-base select-text">{translateNepali}</p>
-                          ) : (
-                            <span className="text-muted-foreground/50">Translation will appear here</span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Vietnamese Translation */}
-                    {translateToVietnamese && (
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label className="flex items-center gap-2">
-                            <Badge variant="outline" className="bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20">
-                              🇻🇳 Tiếng Việt
-                            </Badge>
-                            Vietnamese Translation
-                          </Label>
-                          {translateVietnamese && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8"
-                              onClick={() => copyToClipboard(translateVietnamese)}
-                            >
-                              {copiedText === translateVietnamese ? (
-                                <Check className="h-4 w-4 text-green-500" />
-                              ) : (
-                                <Copy className="h-4 w-4" />
-                              )}
-                            </Button>
-                          )}
-                        </div>
-                        <div className="p-3 rounded-md border bg-muted/30 min-h-[60px]">
-                          {translatingVietnamese ? (
-                            <span className="text-muted-foreground animate-pulse">Đang dịch...</span>
-                          ) : translateVietnamese ? (
-                            <p className="text-base select-text">{translateVietnamese}</p>
-                          ) : (
-                            <span className="text-muted-foreground/50">Translation will appear here</span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Tips */}
-                <div className="pt-4 border-t">
-                  <p className="text-sm text-muted-foreground mb-2">Translation tips:</p>
-                  <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
-                    <li>Select your source language (English or Japanese)</li>
-                    <li>Toggle target languages you want to translate to</li>
-                    <li>Simple sentences translate more accurately</li>
-                    <li>Click the copy button to copy translations</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           <TabsContent value="history" className="space-y-4">
@@ -1469,7 +1206,7 @@ function WordCard({
             {word.japanese.length > 1 && (
               <div>
                 <h4 className="font-semibold flex items-center gap-2 mb-3">
-                  <Languages className="h-4 w-4" />
+                  <Globe className="h-4 w-4" />
                   Other Forms
                 </h4>
                 <div className="flex flex-wrap gap-2">
