@@ -2,7 +2,6 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
-import Script from "next/script"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/components/auth-provider"
@@ -25,11 +24,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  // Use environment variables for AdSense (safe for static build)
-  const publisherId = process.env.ADSENSE_PUBLISHER_ID;
-  const adsenseEnabled = process.env.ADSENSE_ENABLED === 'true';
-  const showAdsense = adsenseEnabled && publisherId;
-
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -40,15 +34,6 @@ export default function RootLayout({
         <meta name="twitter:title" content="proteclink" />
       </head>
       <body className={`font-sans antialiased`} suppressHydrationWarning>
-        {showAdsense && (
-          <Script
-            id="adsense-script"
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisherId}`}
-            crossOrigin="anonymous"
-            strategy="afterInteractive"
-          />
-        )}
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true} enableColorScheme={false}>
           <AuthProvider>
             <AdProvider>
