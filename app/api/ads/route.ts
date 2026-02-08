@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+// Safe defaults when anything goes wrong
+const SAFE_DEFAULTS = {
+  activeProvider: 'none',
+  excludedPages: null,
+};
+
 // Public ad settings response type
 interface PublicAdSettings {
   activeProvider: string;
