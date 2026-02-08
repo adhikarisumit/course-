@@ -101,8 +101,17 @@ export async function GET() {
       // Ad limits
       maxAdsPerPage: (settings as Record<string, unknown>).maxAdsPerPage as number ?? 5,
       maxInArticleAds: (settings as Record<string, unknown>).maxInArticleAds as number ?? 3,
-      // Per-page configuration
-      pageAdConfig: (settings as Record<string, unknown>).pageAdConfig ? JSON.parse((settings as Record<string, unknown>).pageAdConfig as string) : undefined,
+      // Per-page configuration - safely parse JSON
+      pageAdConfig: (() => {
+        try {
+          const config = (settings as Record<string, unknown>).pageAdConfig;
+          if (!config) return undefined;
+          if (typeof config === 'string') return JSON.parse(config);
+          return config;
+        } catch {
+          return undefined;
+        }
+      })(),
     };
 
     // Include ALL provider settings so page-level overrides can use different providers
