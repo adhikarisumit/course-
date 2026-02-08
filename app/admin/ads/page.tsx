@@ -71,6 +71,7 @@ interface AdSettings {
   // AdSense
   adsenseEnabled: boolean;
   adsensePublisherId: string | null;
+  adsenseHeadScript: string | null;
   adsenseAutoAds: boolean;
   adsenseHeaderSlot: string | null;
   adsenseFooterSlot: string | null;
@@ -136,6 +137,7 @@ const defaultSettings: AdSettings = {
   // AdSense
   adsenseEnabled: false,
   adsensePublisherId: '',
+  adsenseHeadScript: '',
   adsenseAutoAds: false,
   adsenseHeaderSlot: '',
   adsenseFooterSlot: '',
@@ -284,6 +286,7 @@ export default function AdsManagementPage() {
           // String fields with fallback to empty string
           excludedPages: data.excludedPages || '',
           adsensePublisherId: data.adsensePublisherId || '',
+          adsenseHeadScript: data.adsenseHeadScript || '',
           adsenseHeaderSlot: data.adsenseHeaderSlot || '',
           adsenseFooterSlot: data.adsenseFooterSlot || '',
           adsenseSidebarSlot: data.adsenseSidebarSlot || '',
@@ -858,6 +861,26 @@ export default function AdsManagementPage() {
                       onCheckedChange={(checked) => handleChange('adsenseAutoAds', checked)}
                     />
                   </div>
+                </div>
+
+                {/* AdSense Head Script */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Code className="h-4 w-4 text-muted-foreground" />
+                    <Label htmlFor="adsenseHeadScript">AdSense Script (Optional)</Label>
+                  </div>
+                  <Textarea
+                    id="adsenseHeadScript"
+                    placeholder='<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>'
+                    value={settings.adsenseHeadScript || ''}
+                    onChange={(e) => handleChange('adsenseHeadScript', e.target.value)}
+                    rows={4}
+                    className="font-mono text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Paste the full AdSense script tag from Google here. This will be added to the head of your website.
+                    If left empty, the script will be generated automatically from your Publisher ID.
+                  </p>
                 </div>
 
                 <Separator />
