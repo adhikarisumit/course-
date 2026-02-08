@@ -360,6 +360,7 @@ model PurchaseRequest {
 model AdSenseSettings {
   id                String   @id @default(cuid())
   publisherId       String   // Google AdSense Publisher ID (ca-pub-XXXXXXXX)
+  headScript        String?  @db.Text // Full AdSense script to paste in head
   isEnabled         Boolean  @default(false)
   enableAutoAds     Boolean  @default(false)
   enableInArticle   Boolean  @default(false)

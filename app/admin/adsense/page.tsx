@@ -21,13 +21,15 @@ import {
   PanelTop,
   PanelBottom,
   PanelLeft,
-  FileText
+  FileText,
+  Code
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AdSenseSettings {
   id: string;
   publisherId: string;
+  headScript: string;
   isEnabled: boolean;
   enableAutoAds: boolean;
   enableInArticle: boolean;
@@ -44,6 +46,7 @@ interface AdSenseSettings {
 const defaultSettings: AdSenseSettings = {
   id: '',
   publisherId: '',
+  headScript: '',
   isEnabled: false,
   enableAutoAds: false,
   enableInArticle: false,
@@ -74,6 +77,7 @@ export default function AdSensePage() {
         setSettings({
           ...defaultSettings,
           ...data,
+          headScript: data.headScript || '',
           inArticleSlot: data.inArticleSlot || '',
           sidebarSlot: data.sidebarSlot || '',
           headerSlot: data.headerSlot || '',
@@ -103,6 +107,7 @@ export default function AdSensePage() {
         },
         body: JSON.stringify({
           publisherId: settings.publisherId,
+          headScript: settings.headScript || null,
           isEnabled: settings.isEnabled,
           enableAutoAds: settings.enableAutoAds,
           enableInArticle: settings.enableInArticle,
@@ -214,6 +219,26 @@ export default function AdSensePage() {
                   onCheckedChange={(checked) => handleChange('isEnabled', checked)}
                 />
               </div>
+            </div>
+
+            {/* AdSense Script */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Code className="h-4 w-4 text-muted-foreground" />
+                <Label htmlFor="headScript">AdSense Script (Optional)</Label>
+              </div>
+              <Textarea
+                id="headScript"
+                placeholder='<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>'
+                value={settings.headScript}
+                onChange={(e) => handleChange('headScript', e.target.value)}
+                rows={4}
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                Paste the full AdSense script tag from Google here. This will be added to the head of your website.
+                If left empty, the script will be generated automatically from your Publisher ID.
+              </p>
             </div>
 
             <Separator />

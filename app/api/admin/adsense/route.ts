@@ -18,6 +18,7 @@ export async function GET() {
       settings = {
         id: '',
         publisherId: '',
+        headScript: null,
         isEnabled: false,
         enableAutoAds: false,
         enableInArticle: false,
@@ -53,6 +54,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { 
       publisherId,
+      headScript,
       isEnabled,
       enableAutoAds,
       enableInArticle,
@@ -80,6 +82,7 @@ export async function POST(request: Request) {
         where: { id: existingSettings.id },
         data: {
           publisherId: publisherId || '',
+          headScript: headScript || null,
           isEnabled: isEnabled || false,
           enableAutoAds: enableAutoAds || false,
           enableInArticle: enableInArticle || false,
@@ -98,6 +101,7 @@ export async function POST(request: Request) {
       settings = await prisma.adSenseSettings.create({
         data: {
           publisherId: publisherId || '',
+          headScript: headScript || null,
           isEnabled: isEnabled || false,
           enableAutoAds: enableAutoAds || false,
           enableInArticle: enableInArticle || false,

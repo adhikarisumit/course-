@@ -6,6 +6,7 @@ import Script from 'next/script';
 
 interface AdSenseSettings {
   publisherId: string | null;
+  headScript: string | null;
   isEnabled: boolean;
   enableAutoAds: boolean;
   enableInArticle: boolean;
@@ -51,13 +52,17 @@ export function AdSenseProvider({ children }: { children: React.ReactNode }) {
   return (
     <AdSenseContext.Provider value={settings}>
       {settings?.isEnabled && settings?.publisherId && (
-        <Script
-          id="adsense-script"
-          async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${settings.publisherId}`}
-          crossOrigin="anonymous"
-          strategy="lazyOnload"
-        />
+        settings?.headScript ? (
+          <div dangerouslySetInnerHTML={{ __html: settings.headScript }} />
+        ) : (
+          <Script
+            id="adsense-script"
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${settings.publisherId}`}
+            crossOrigin="anonymous"
+            strategy="lazyOnload"
+          />
+        )
       )}
       {children}
     </AdSenseContext.Provider>

@@ -7,6 +7,7 @@ export async function GET() {
     const settings = await prisma.adSenseSettings.findFirst({
       select: {
         publisherId: true,
+        headScript: true,
         isEnabled: true,
         enableAutoAds: true,
         enableInArticle: true,
