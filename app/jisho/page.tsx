@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { InArticleAd, SidebarAd } from "@/components/ads"
+import { InArticleAd, SidebarAd, HeaderAd } from "@/components/ads"
 
 export const metadata: Metadata = {
   title: "Japanese Dictionary | Jisho",
@@ -16,6 +16,7 @@ export default function PublicJishoPage() {
   return (
     <>
       <Header />
+      <HeaderAd />
       <main className="min-h-screen bg-background">
         <div className="py-6 px-4 mx-auto w-full md:w-[85vw] lg:w-[85vw]">
           {/* Page Header */}

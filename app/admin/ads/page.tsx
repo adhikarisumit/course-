@@ -190,6 +190,29 @@ const providers = [
   { value: 'custom', label: 'Custom Provider', description: 'Use your own ad code' },
 ];
 
+// Available pages for ad placement
+const availablePages = [
+  { value: '/', label: 'Home Page', description: 'Main landing page' },
+  { value: '/about', label: 'About Page', description: 'About us page' },
+  { value: '/contact', label: 'Contact Page', description: 'Contact us page' },
+  { value: '/courses', label: 'Courses List', description: 'Course catalog' },
+  { value: '/courses/*', label: 'Course Details', description: 'Individual course pages' },
+  { value: '/jisho', label: 'Japanese Dictionary', description: 'Jisho tool page' },
+  { value: '/playground', label: 'Code Playground', description: 'Code editor page' },
+  { value: '/portal/*', label: 'Student Portal', description: 'User dashboard and portal' },
+  { value: '/terms', label: 'Terms of Service', description: 'Terms page' },
+  { value: '/privacy', label: 'Privacy Policy', description: 'Privacy page' },
+  { value: '/checkout/*', label: 'Checkout', description: 'Payment checkout pages' },
+];
+
+// Available ad positions
+const adPositions = [
+  { value: 'header', label: 'Header', description: 'Below the navigation bar', key: 'showHeaderAd' },
+  { value: 'footer', label: 'Footer', description: 'Above the footer section', key: 'showFooterAd' },
+  { value: 'sidebar', label: 'Sidebar', description: 'Side panels on applicable pages', key: 'showSidebarAd' },
+  { value: 'inArticle', label: 'In-Article', description: 'Within page content', key: 'showInArticleAd' },
+];
+
 const SUPER_ADMIN_EMAIL = process.env.NEXT_PUBLIC_SUPER_ADMIN_EMAIL || '';
 
 export default function AdsManagementPage() {
@@ -497,62 +520,36 @@ export default function AdsManagementPage() {
               Ad Placements
             </CardTitle>
             <CardDescription>
-              Control where ads appear on your website
+              Control where ads appear on your website. Configure global settings and per-page rules.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Position-based placements */}
+            {/* Global Position Settings */}
             <div className="space-y-3">
-              <Label className="text-sm font-medium">Ad Positions</Label>
+              <Label className="text-sm font-medium">Global Ad Positions</Label>
+              <p className="text-xs text-muted-foreground mb-2">Enable or disable ad positions across all pages (can be overridden per page)</p>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="flex items-center justify-between rounded-lg border p-3">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm">Header Ad</Label>
-                    <p className="text-xs text-muted-foreground">Top of page</p>
+                {adPositions.map((position) => (
+                  <div key={position.value} className="flex items-center justify-between rounded-lg border p-3">
+                    <div className="space-y-0.5">
+                      <Label className="text-sm">{position.label}</Label>
+                      <p className="text-xs text-muted-foreground">{position.description}</p>
+                    </div>
+                    <Switch
+                      checked={settings[position.key as keyof AdSettings] as boolean}
+                      onCheckedChange={(checked) => handleChange(position.key as keyof AdSettings, checked)}
+                    />
                   </div>
-                  <Switch
-                    checked={settings.showHeaderAd}
-                    onCheckedChange={(checked) => handleChange('showHeaderAd', checked)}
-                  />
-                </div>
-                <div className="flex items-center justify-between rounded-lg border p-3">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm">Footer Ad</Label>
-                    <p className="text-xs text-muted-foreground">Bottom of page</p>
-                  </div>
-                  <Switch
-                    checked={settings.showFooterAd}
-                    onCheckedChange={(checked) => handleChange('showFooterAd', checked)}
-                  />
-                </div>
-                <div className="flex items-center justify-between rounded-lg border p-3">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm">Sidebar Ad</Label>
-                    <p className="text-xs text-muted-foreground">Side panels</p>
-                  </div>
-                  <Switch
-                    checked={settings.showSidebarAd}
-                    onCheckedChange={(checked) => handleChange('showSidebarAd', checked)}
-                  />
-                </div>
-                <div className="flex items-center justify-between rounded-lg border p-3">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm">In-Article Ad</Label>
-                    <p className="text-xs text-muted-foreground">Within content</p>
-                  </div>
-                  <Switch
-                    checked={settings.showInArticleAd}
-                    onCheckedChange={(checked) => handleChange('showInArticleAd', checked)}
-                  />
-                </div>
+                ))}
               </div>
             </div>
 
             <Separator />
 
-            {/* Page-based placements */}
+            {/* Quick Page Toggle */}
             <div className="space-y-3">
-              <Label className="text-sm font-medium">Page Visibility</Label>
+              <Label className="text-sm font-medium">Quick Page Toggle</Label>
+              <p className="text-xs text-muted-foreground mb-2">Quickly enable/disable ads on page categories</p>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="flex items-center justify-between rounded-lg border p-3">
                   <div className="space-y-0.5">
@@ -660,10 +657,17 @@ export default function AdsManagementPage() {
               
               {Object.keys(settings.pageAdConfig).length > 0 ? (
                 <div className="space-y-3">
-                  {Object.entries(settings.pageAdConfig).map(([path, config]) => (
+                  {Object.entries(settings.pageAdConfig).map(([path, config]) => {
+                    const pageInfo = availablePages.find(p => p.value === path);
+                    return (
                     <div key={path} className="rounded-lg border p-4 space-y-3">
                       <div className="flex items-center justify-between">
-                        <code className="text-sm font-mono bg-muted px-2 py-1 rounded">{path}</code>
+                        <div className="flex items-center gap-2">
+                          {pageInfo ? (
+                            <span className="text-sm font-medium">{pageInfo.label}</span>
+                          ) : null}
+                          <code className="text-xs font-mono bg-muted px-2 py-1 rounded">{path}</code>
+                        </div>
                         <Button
                           type="button"
                           variant="ghost"
@@ -788,7 +792,7 @@ export default function AdsManagementPage() {
                         </div>
                       </div>
                     </div>
-                  ))}
+                  )})}
                 </div>
               ) : (
                 <div className="text-center py-6 text-muted-foreground text-sm border rounded-lg">
@@ -1440,20 +1444,46 @@ export default function AdsManagementPage() {
           <DialogHeader>
             <DialogTitle>Add Page Rule</DialogTitle>
             <DialogDescription>
-              Configure ad settings for a specific page. Use * for wildcards (e.g., /courses/*).
+              Configure ad settings for a specific page. Select from available pages or enter a custom path.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="pagePath">Page Path</Label>
-              <Input
-                id="pagePath"
-                placeholder="/playground, /jisho, /courses/*"
+              <Label htmlFor="pagePath">Select Page</Label>
+              <Select
                 value={newPageRule.path}
-                onChange={(e) => setNewPageRule(prev => ({ ...prev, path: e.target.value }))}
-              />
+                onValueChange={(value) => setNewPageRule(prev => ({ ...prev, path: value }))}
+              >
+                <SelectTrigger id="pagePath">
+                  <SelectValue placeholder="Choose a page..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {availablePages.map((page) => (
+                    <SelectItem key={page.value} value={page.value}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{page.label}</span>
+                        <span className="text-xs text-muted-foreground">{page.value}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="custom">
+                    <span className="font-medium">Custom Path...</span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              {newPageRule.path === 'custom' && (
+                <Input
+                  placeholder="/your-custom-path or /path/*"
+                  className="mt-2"
+                  onChange={(e) => {
+                    if (e.target.value.startsWith('/')) {
+                      setNewPageRule(prev => ({ ...prev, path: e.target.value }));
+                    }
+                  }}
+                />
+              )}
               <p className="text-xs text-muted-foreground">
-                Examples: /playground, /jisho, /courses/*, /portal/*
+                Use * for wildcards (e.g., /courses/* matches all course pages)
               </p>
             </div>
             <div className="space-y-2">
@@ -1491,7 +1521,7 @@ export default function AdsManagementPage() {
             </div>
             <Separator />
             <div className="space-y-3">
-              <Label className="text-sm font-medium">Ad Positions</Label>
+              <Label className="text-sm font-medium">Ad Positions for This Page</Label>
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex items-center justify-between rounded-lg border p-3">
                   <Label htmlFor="showHeaderModal" className="text-sm cursor-pointer">Header Ad</Label>
@@ -1539,8 +1569,8 @@ export default function AdsManagementPage() {
             <Button
               type="button"
               onClick={() => {
-                if (!newPageRule.path.trim()) {
-                  toast.error('Please enter a page path');
+                if (!newPageRule.path.trim() || newPageRule.path === 'custom') {
+                  toast.error('Please select a page or enter a custom path');
                   return;
                 }
                 if (!newPageRule.path.startsWith('/')) {

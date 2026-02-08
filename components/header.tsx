@@ -97,6 +97,86 @@ export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
     )
   }
 
+  // Mobile hamburger button - only shown when user is NOT logged in
+  function MobileHamburgerButton() {
+    const { data: session } = useSession()
+    
+    // If user is logged in, the profile avatar acts as menu toggle, so hide hamburger
+    if (session?.user) {
+      return null
+    }
+    
+    return (
+      <button
+        type="button"
+        aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+        aria-expanded={mobileOpen}
+        onClick={() => setMobileOpen((s) => !s)}
+        className="md:hidden p-2 rounded hover:bg-accent/10"
+      >
+        {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      </button>
+    )
+  }
+
+  // Mobile user profile section - shown in mobile nav for logged-in users
+  function MobileUserSection() {
+    const { data: session } = useSession()
+    
+    if (!session?.user) {
+      return null
+    }
+    
+    return (
+      <div className="w-full border-t border-border pt-3 mt-1">
+        <div className="flex items-center gap-3 mb-3 justify-end">
+          <div className="text-right">
+            <p className="text-sm font-medium">{session.user.name}</p>
+            <p className="text-xs text-muted-foreground">{session.user.email}</p>
+          </div>
+        </div>
+        <div className="flex flex-col gap-2 items-end">
+          <Link 
+            href="/portal/dashboard" 
+            className="text-sm font-medium hover:text-primary transition-colors py-1 flex items-center gap-2"
+            onClick={() => setMobileOpen(false)}
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            Dashboard
+          </Link>
+          <Link 
+            href="/portal/profile" 
+            className="text-sm font-medium hover:text-primary transition-colors py-1 flex items-center gap-2"
+            onClick={() => setMobileOpen(false)}
+          >
+            <User className="h-4 w-4" />
+            Profile
+          </Link>
+          {(session.user.role === "admin" || session.user.role === "super") && (
+            <Link 
+              href="/admin/courses" 
+              className="text-sm font-medium hover:text-primary transition-colors py-1 flex items-center gap-2"
+              onClick={() => setMobileOpen(false)}
+            >
+              <Settings className="h-4 w-4" />
+              Manage Courses
+            </Link>
+          )}
+          <button
+            className="text-sm font-medium text-destructive hover:text-destructive/80 transition-colors py-1 flex items-center gap-2"
+            onClick={() => {
+              setMobileOpen(false)
+              signOut({ callbackUrl: "/" })
+            }}
+          >
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   // User menu component
   function UserMenu() {
     const { data: session, status } = useSession()
@@ -105,8 +185,9 @@ export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
     if (status === "loading") {
       return (
         <div className="flex items-center gap-2">
-          <div className="h-9 w-20 bg-muted animate-pulse rounded-md" />
-          <div className="h-9 w-20 bg-muted animate-pulse rounded-md" />
+          <div className="h-9 w-20 bg-muted animate-pulse rounded-md hidden sm:block" />
+          <div className="h-9 w-20 bg-muted animate-pulse rounded-md hidden sm:block" />
+          <div className="h-8 w-8 bg-muted animate-pulse rounded-full md:hidden" />
         </div>
       )
     }
@@ -131,10 +212,27 @@ export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
       .join("")
       .toUpperCase() || "U"
 
-    return (
+    // Mobile: Avatar acts as menu toggle (replaces hamburger)
+    const MobileAvatar = (
+      <Button 
+        variant="ghost" 
+        className="relative h-8 w-8 rounded-full md:hidden"
+        onClick={() => setMobileOpen((s) => !s)}
+        aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+        aria-expanded={mobileOpen}
+      >
+        <Avatar className="h-8 w-8">
+          <AvatarImage src={session.user.image || undefined} alt={session.user.name || "User"} />
+          <AvatarFallback>{initials}</AvatarFallback>
+        </Avatar>
+      </Button>
+    )
+
+    // Desktop: Avatar with dropdown
+    const DesktopMenu = (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <Button variant="ghost" className="relative h-8 w-8 rounded-full hidden md:flex">
             <Avatar className="h-8 w-8">
               <AvatarImage src={session.user.image || undefined} alt={session.user.name || "User"} />
               <AvatarFallback>{initials}</AvatarFallback>
@@ -179,6 +277,13 @@ export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+    )
+
+    return (
+      <>
+        {MobileAvatar}
+        {DesktopMenu}
+      </>
     )
   }
 
@@ -254,16 +359,8 @@ export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
             <UserMenu />
             <MobileSignupButton />
             <ThemeToggle />
-            {/* mobile menu toggle */}
-            <button
-              type="button"
-              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-              aria-expanded={mobileOpen}
-              onClick={() => setMobileOpen((s) => !s)}
-              className="md:hidden p-2 rounded hover:bg-accent/10"
-            >
-              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
+            {/* mobile menu toggle - only for non-authenticated users */}
+            <MobileHamburgerButton />
           </nav>
         </div>
       </div>
@@ -321,6 +418,8 @@ export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
                   </Link>
                 </div>
               </div>
+              {/* Mobile user profile section for logged-in users */}
+              <MobileUserSection />
             </div>
             {/* Mobile auth buttons for non-authenticated users */}
             <div className="block sm:hidden">
@@ -329,10 +428,17 @@ export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
           </div>
         </div>
       )}
-
-      {/* Header Ad - displayed below the navigation */}
-      <HeaderAd />
     </header>
+  )
+}
+
+// Header Ad component - displayed below the navigation header
+export function HeaderWithAd({ searchQuery, setSearchQuery }: HeaderProps) {
+  return (
+    <>
+      <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      <HeaderAd />
+    </>
   )
 }
 

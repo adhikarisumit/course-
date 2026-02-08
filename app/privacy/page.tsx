@@ -1,4 +1,5 @@
 import { Header } from "@/components/header"
+import { HeaderAd } from "@/components/ads"
 
 export default function PrivacyPage() {
   const currentDate = new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })
@@ -6,6 +7,7 @@ export default function PrivacyPage() {
   return (
     <div className="min-h-screen">
       <Header />
+      <HeaderAd />
       <div className="container mx-auto px-4 py-12">
       <div className="max-w-4xl mx-auto prose prose-neutral dark:prose-invert">
         <h1 className="text-4xl font-bold mb-6">Privacy Policy</h1>

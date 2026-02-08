@@ -1,12 +1,13 @@
 import { Mail, MessageSquare } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Header } from "@/components/header"
-import { InArticleAd } from "@/components/ads"
+import { InArticleAd, HeaderAd } from "@/components/ads"
 
 export default function ContactPage() {
   return (
     <div className="min-h-screen">
       <Header />
+      <HeaderAd />
       <div className="container mx-auto px-4 py-12">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold mb-6">Contact Us</h1>

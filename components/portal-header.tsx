@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, BookOpen, User, Menu, X, GraduationCap, FolderOpen, Code2, Languages } from "lucide-react"
+import { Home, BookOpen, User, X, GraduationCap, FolderOpen, Code2, Languages } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -86,25 +86,41 @@ export default function PortalHeader() {
           {/* Theme Toggle */}
           <ThemeToggle />
 
-          {/* Mobile Menu - Only render after mount to avoid hydration mismatch */}
+          {/* Mobile Menu - Avatar acts as trigger on mobile */}
           {mounted ? (
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              {/* Mobile: Avatar as trigger */}
               <SheetTrigger asChild className="lg:hidden">
-                <Button variant="ghost" size="icon" className="h-9 w-9">
-                  <Menu className="h-5 w-5" />
+                <Button variant="ghost" className="relative h-9 w-9 rounded-full ring-2 ring-transparent hover:ring-muted transition-all">
+                  <Avatar className="h-9 w-9">
+                    <AvatarImage src={session?.user?.image || undefined} alt={session?.user?.name || "User"} />
+                    <AvatarFallback className="text-sm bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-semibold">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-72 p-0">
                 <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                 <div className="flex flex-col h-full">
+                  {/* User Profile Section at Top */}
                   <div className="p-4 border-b">
-                    <Link href="/portal/dashboard" className="flex items-center gap-2.5" onClick={() => setMobileMenuOpen(false)}>
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-primary-foreground">
-                        <GraduationCap className="h-5 w-5" />
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={session?.user?.image || undefined} alt={session?.user?.name || "User"} />
+                        <AvatarFallback className="text-sm bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-semibold">
+                          {initials}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col space-y-0.5 flex-1 min-w-0">
+                        <p className="text-sm font-semibold leading-none truncate">{session?.user?.name}</p>
+                        <p className="text-xs leading-none text-muted-foreground truncate">
+                          {session?.user?.email}
+                        </p>
                       </div>
-                      <span className="font-bold text-lg">{appName}</span>
-                    </Link>
+                    </div>
                   </div>
+                  {/* Navigation Links */}
                   <nav className="flex-1 p-4 space-y-1">
                     {navigation.map((item) => {
                       const isActive = pathname === item.href || (item.href !== "/portal/dashboard" && pathname.startsWith(item.href))
@@ -126,7 +142,16 @@ export default function PortalHeader() {
                       )
                     })}
                   </nav>
-                  <div className="p-4 border-t">
+                  {/* User Actions at Bottom */}
+                  <div className="p-4 border-t space-y-1">
+                    <Link
+                      href="/portal/profile"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors"
+                    >
+                      <User className="h-5 w-5" />
+                      My Profile
+                    </Link>
                     <Link
                       href="/"
                       onClick={() => setMobileMenuOpen(false)}
@@ -135,21 +160,28 @@ export default function PortalHeader() {
                       <Home className="h-5 w-5" />
                       Back to Home
                     </Link>
+                    <div className="pt-2">
+                      <SignOutButton />
+                    </div>
                   </div>
                 </div>
               </SheetContent>
             </Sheet>
           ) : (
-            <Button variant="ghost" size="icon" className="lg:hidden h-9 w-9">
-              <Menu className="h-5 w-5" />
+            <Button variant="ghost" className="lg:hidden relative h-9 w-9 rounded-full">
+              <Avatar className="h-9 w-9">
+                <AvatarFallback className="text-sm bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-semibold">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
             </Button>
           )}
 
-          {/* User Dropdown */}
+          {/* Desktop User Dropdown - Only visible on lg and up */}
           {mounted && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-9 w-9 rounded-full ring-2 ring-transparent hover:ring-muted transition-all">
+                <Button variant="ghost" className="relative h-9 w-9 rounded-full ring-2 ring-transparent hover:ring-muted transition-all hidden lg:flex">
                   <Avatar className="h-9 w-9">
                     <AvatarImage src={session?.user?.image || undefined} alt={session?.user?.name || "User"} />
                     <AvatarFallback className="text-sm bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-semibold">

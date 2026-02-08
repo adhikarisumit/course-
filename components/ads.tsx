@@ -493,35 +493,60 @@ export function HeaderAd({ className = '' }: AdPlacementProps) {
   if (pageConfig?.showHeader === false) return null;
 
   const containerStyle: React.CSSProperties = { minHeight: '50px' };
-  const containerClass = `w-full max-w-4xl mx-auto flex justify-center ${className}`;
+  const singleAdClass = `flex-1 max-w-md flex justify-center`;
 
-  switch (effectiveProvider) {
-    case 'adsense':
-      if (settings.adsense?.headerSlot && settings.adsense?.publisherId) {
-        return (
-          <AdSenseUnit
-            slot={settings.adsense.headerSlot}
-            publisherId={settings.adsense.publisherId}
-            format="horizontal"
-            className={containerClass}
-            style={containerStyle}
-          />
-        );
-      }
-      break;
-    case 'medianet':
-      return <HtmlAd code={settings.medianet?.headerCode} className={containerClass} style={containerStyle} />;
-    case 'amazon':
-      return <HtmlAd code={settings.amazon?.headerCode} className={containerClass} style={containerStyle} />;
-    case 'propeller':
-      return <HtmlAd code={settings.propeller?.headerCode} className={containerClass} style={containerStyle} />;
-    case 'adsterra':
-      return <HtmlAd code={settings.adsterra?.headerCode} className={containerClass} style={containerStyle} />;
-    case 'custom':
-      return <HtmlAd code={settings.custom?.headerCode} className={containerClass} style={containerStyle} />;
-  }
+  // Helper to render a single ad unit
+  const renderAdUnit = (key: string) => {
+    switch (effectiveProvider) {
+      case 'adsense':
+        if (settings.adsense?.headerSlot && settings.adsense?.publisherId) {
+          return (
+            <AdSenseUnit
+              key={key}
+              slot={settings.adsense.headerSlot}
+              publisherId={settings.adsense.publisherId}
+              format="horizontal"
+              className={singleAdClass}
+              style={containerStyle}
+            />
+          );
+        }
+        return null;
+      case 'medianet':
+        return <HtmlAd key={key} code={settings.medianet?.headerCode} className={singleAdClass} style={containerStyle} />;
+      case 'amazon':
+        return <HtmlAd key={key} code={settings.amazon?.headerCode} className={singleAdClass} style={containerStyle} />;
+      case 'propeller':
+        return <HtmlAd key={key} code={settings.propeller?.headerCode} className={singleAdClass} style={containerStyle} />;
+      case 'adsterra':
+        return <HtmlAd key={key} code={settings.adsterra?.headerCode} className={singleAdClass} style={containerStyle} />;
+      case 'custom':
+        return <HtmlAd key={key} code={settings.custom?.headerCode} className={singleAdClass} style={containerStyle} />;
+      default:
+        return null;
+    }
+  };
 
-  return null;
+  const adUnit1 = renderAdUnit('header-ad-1');
+  const adUnit2 = renderAdUnit('header-ad-2');
+  const adUnit3 = renderAdUnit('header-ad-3');
+
+  if (!adUnit1) return null;
+
+  return (
+    <div className={`w-full py-2 ${className}`}>
+      {/* Desktop: 3 ads side by side */}
+      <div className="hidden md:flex justify-center gap-4 max-w-7xl mx-auto px-4">
+        {adUnit1}
+        {adUnit2}
+        {adUnit3}
+      </div>
+      {/* Mobile: single ad */}
+      <div className="md:hidden flex justify-center px-4">
+        {adUnit1}
+      </div>
+    </div>
+  );
 }
 
 export function FooterAd({ className = '' }: AdPlacementProps) {
@@ -542,54 +567,70 @@ export function FooterAd({ className = '' }: AdPlacementProps) {
   if (pageConfig?.showFooter === false) return null;
 
   const containerStyle: React.CSSProperties = { minHeight: '90px' };
-  const containerClass = `w-full max-w-4xl mx-auto my-1 flex justify-center ${className}`;
+  const singleAdClass = `flex-1 max-w-md flex justify-center`;
 
-  let adCode: string | null | undefined = null;
-  let fallbackCode: string | null | undefined = null;
-
-  switch (effectiveProvider) {
-    case 'adsense':
-      if (settings.adsense?.footerSlot && settings.adsense?.publisherId) {
-        return (
-          <AdSenseUnit
-            slot={settings.adsense.footerSlot}
-            publisherId={settings.adsense.publisherId}
-            format="horizontal"
-            className={containerClass}
-            style={containerStyle}
-          />
-        );
+  // Helper to render a single ad unit
+  const renderAdUnit = (key: string) => {
+    switch (effectiveProvider) {
+      case 'adsense':
+        if (settings.adsense?.footerSlot && settings.adsense?.publisherId) {
+          return (
+            <AdSenseUnit
+              key={key}
+              slot={settings.adsense.footerSlot}
+              publisherId={settings.adsense.publisherId}
+              format="horizontal"
+              className={singleAdClass}
+              style={containerStyle}
+            />
+          );
+        }
+        return null;
+      case 'medianet': {
+        const code = settings.medianet?.footerCode || settings.medianet?.headerCode;
+        return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
       }
-      break;
-    case 'medianet':
-      adCode = settings.medianet?.footerCode;
-      fallbackCode = settings.medianet?.headerCode;
-      break;
-    case 'amazon':
-      adCode = settings.amazon?.footerCode;
-      fallbackCode = settings.amazon?.headerCode;
-      break;
-    case 'propeller':
-      adCode = settings.propeller?.footerCode;
-      fallbackCode = settings.propeller?.headerCode;
-      break;
-    case 'adsterra':
-      adCode = settings.adsterra?.footerCode;
-      fallbackCode = settings.adsterra?.headerCode;
-      break;
-    case 'custom':
-      adCode = settings.custom?.footerCode;
-      fallbackCode = settings.custom?.headerCode;
-      break;
-  }
+      case 'amazon': {
+        const code = settings.amazon?.footerCode || settings.amazon?.headerCode;
+        return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
+      }
+      case 'propeller': {
+        const code = settings.propeller?.footerCode || settings.propeller?.headerCode;
+        return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
+      }
+      case 'adsterra': {
+        const code = settings.adsterra?.footerCode || settings.adsterra?.headerCode;
+        return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
+      }
+      case 'custom': {
+        const code = settings.custom?.footerCode || settings.custom?.headerCode;
+        return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
+      }
+      default:
+        return null;
+    }
+  };
 
-  // Return HtmlAd if we have code, fallback to header code if not
-  const finalCode = (adCode && adCode.trim()) ? adCode : fallbackCode;
-  if (finalCode && finalCode.trim()) {
-    return <HtmlAd code={finalCode} className={containerClass} style={containerStyle} />;
-  }
+  const adUnit1 = renderAdUnit('footer-ad-1');
+  const adUnit2 = renderAdUnit('footer-ad-2');
+  const adUnit3 = renderAdUnit('footer-ad-3');
 
-  return null;
+  if (!adUnit1) return null;
+
+  return (
+    <div className={`w-full py-2 ${className}`}>
+      {/* Desktop: 3 ads side by side */}
+      <div className="hidden md:flex justify-center gap-4 max-w-7xl mx-auto px-4">
+        {adUnit1}
+        {adUnit2}
+        {adUnit3}
+      </div>
+      {/* Mobile: single ad */}
+      <div className="md:hidden flex justify-center px-4">
+        {adUnit1}
+      </div>
+    </div>
+  );
 }
 
 export function SidebarAd({ className = '' }: AdPlacementProps) {
@@ -691,54 +732,70 @@ export function InArticleAd({ className = '' }: AdPlacementProps) {
   if (!canShow && checkedRef.current) return null;
 
   const containerStyle: React.CSSProperties = { minHeight: '90px' };
-  const containerClass = `w-full max-w-4xl mx-auto my-1 flex justify-center ${className}`;
+  const singleAdClass = `flex-1 max-w-md flex justify-center`;
 
-  let adCode: string | null | undefined = null;
-  let fallbackCode: string | null | undefined = null;
-
-  switch (effectiveProvider) {
-    case 'adsense':
-      if (settings.adsense?.inArticleSlot && settings.adsense?.publisherId) {
-        return (
-          <AdSenseUnit
-            slot={settings.adsense.inArticleSlot}
-            publisherId={settings.adsense.publisherId}
-            format="auto"
-            className={containerClass}
-            style={containerStyle}
-          />
-        );
+  // Helper to render a single ad unit
+  const renderAdUnit = (key: string) => {
+    switch (effectiveProvider) {
+      case 'adsense':
+        if (settings.adsense?.inArticleSlot && settings.adsense?.publisherId) {
+          return (
+            <AdSenseUnit
+              key={key}
+              slot={settings.adsense.inArticleSlot}
+              publisherId={settings.adsense.publisherId}
+              format="auto"
+              className={singleAdClass}
+              style={containerStyle}
+            />
+          );
+        }
+        return null;
+      case 'medianet': {
+        const code = settings.medianet?.inArticleCode || settings.medianet?.headerCode;
+        return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
       }
-      break;
-    case 'medianet':
-      adCode = settings.medianet?.inArticleCode;
-      fallbackCode = settings.medianet?.headerCode;
-      break;
-    case 'amazon':
-      adCode = settings.amazon?.inArticleCode;
-      fallbackCode = settings.amazon?.headerCode;
-      break;
-    case 'propeller':
-      adCode = settings.propeller?.inArticleCode;
-      fallbackCode = settings.propeller?.headerCode;
-      break;
-    case 'adsterra':
-      adCode = settings.adsterra?.inArticleCode;
-      fallbackCode = settings.adsterra?.headerCode;
-      break;
-    case 'custom':
-      adCode = settings.custom?.inArticleCode;
-      fallbackCode = settings.custom?.headerCode;
-      break;
-  }
+      case 'amazon': {
+        const code = settings.amazon?.inArticleCode || settings.amazon?.headerCode;
+        return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
+      }
+      case 'propeller': {
+        const code = settings.propeller?.inArticleCode || settings.propeller?.headerCode;
+        return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
+      }
+      case 'adsterra': {
+        const code = settings.adsterra?.inArticleCode || settings.adsterra?.headerCode;
+        return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
+      }
+      case 'custom': {
+        const code = settings.custom?.inArticleCode || settings.custom?.headerCode;
+        return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
+      }
+      default:
+        return null;
+    }
+  };
 
-  // Return HtmlAd if we have code, fallback to header code if not
-  const finalCode = (adCode && adCode.trim()) ? adCode : fallbackCode;
-  if (finalCode && finalCode.trim()) {
-    return <HtmlAd code={finalCode} className={containerClass} style={containerStyle} />;
-  }
+  const adUnit1 = renderAdUnit('inarticle-ad-1');
+  const adUnit2 = renderAdUnit('inarticle-ad-2');
+  const adUnit3 = renderAdUnit('inarticle-ad-3');
 
-  return null;
+  if (!adUnit1) return null;
+
+  return (
+    <div className={`w-full py-2 ${className}`}>
+      {/* Desktop: 3 ads side by side */}
+      <div className="hidden md:flex justify-center gap-4 max-w-7xl mx-auto px-4">
+        {adUnit1}
+        {adUnit2}
+        {adUnit3}
+      </div>
+      {/* Mobile: single ad */}
+      <div className="md:hidden flex justify-center px-4">
+        {adUnit1}
+      </div>
+    </div>
+  );
 }
 
 // ============================================
