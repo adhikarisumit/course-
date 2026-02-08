@@ -4,6 +4,54 @@ import { useEffect, useState, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import Script from 'next/script';
 
+// Helper to extract script content or src from HTML that may contain script tags
+function parseScriptCode(code: string): { type: 'inline' | 'external' | 'invalid'; content?: string; src?: string; attrs?: Record<string, string> } {
+  if (!code || !code.trim()) {
+    return { type: 'invalid' };
+  }
+  
+  const trimmed = code.trim();
+  
+  // Check if the code contains script tags
+  const scriptMatch = trimmed.match(/<script([^>]*)>([\s\S]*?)<\/script>/i);
+  
+  if (scriptMatch) {
+    const attrs = scriptMatch[1] || '';
+    const inner = scriptMatch[2] || '';
+    
+    // Extract src attribute if present
+    const srcMatch = attrs.match(/src\s*=\s*["']([^"']+)["']/i);
+    
+    if (srcMatch) {
+      // External script
+      const attrObj: Record<string, string> = {};
+      const asyncMatch = attrs.match(/\basync\b/i);
+      const deferMatch = attrs.match(/\bdefer\b/i);
+      const crossOriginMatch = attrs.match(/crossorigin\s*=\s*["']([^"']+)["']/i);
+      
+      if (asyncMatch) attrObj.async = 'true';
+      if (deferMatch) attrObj.defer = 'true';
+      if (crossOriginMatch) attrObj.crossOrigin = crossOriginMatch[1];
+      
+      return { type: 'external', src: srcMatch[1], attrs: attrObj };
+    } else if (inner.trim()) {
+      // Inline script
+      return { type: 'inline', content: inner.trim() };
+    }
+  }
+  
+  // No script tags found - treat as raw inline JavaScript
+  // But first check if it starts with < (likely HTML, not JS)
+  if (trimmed.startsWith('<')) {
+    // This looks like HTML but not a valid script tag - unsafe to execute as JS
+    console.warn('Ad script code appears to be HTML but not a valid script tag:', trimmed.substring(0, 50));
+    return { type: 'invalid' };
+  }
+  
+  // Raw JavaScript code
+  return { type: 'inline', content: trimmed };
+}
+
 interface AdSenseSettings {
   publisherId: string | null;
   headScript: string | null;
@@ -49,21 +97,48 @@ export function AdSenseProvider({ children }: { children: React.ReactNode }) {
     fetchSettings();
   }, []);
 
+  // Render the appropriate script based on settings
+  const renderScript = () => {
+    if (!settings?.isEnabled || !settings?.publisherId) return null;
+    
+    if (settings?.headScript) {
+      const parsed = parseScriptCode(settings.headScript);
+      if (parsed.type === 'external' && parsed.src) {
+        return (
+          <Script
+            id="adsense-custom-script"
+            src={parsed.src}
+            strategy="lazyOnload"
+            {...(parsed.attrs?.async && { async: true })}
+            {...(parsed.attrs?.crossOrigin && { crossOrigin: parsed.attrs.crossOrigin as 'anonymous' | 'use-credentials' })}
+          />
+        );
+      } else if (parsed.type === 'inline' && parsed.content) {
+        return (
+          <Script
+            id="adsense-custom-script"
+            strategy="lazyOnload"
+            dangerouslySetInnerHTML={{ __html: parsed.content }}
+          />
+        );
+      }
+    }
+    
+    // Default: use the publisherId to generate standard script
+    return (
+      <Script
+        id="adsense-script"
+        async
+        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${settings.publisherId}`}
+        crossOrigin="anonymous"
+        strategy="lazyOnload"
+      />
+    );
+  };
+
   return (
     <AdSenseContext.Provider value={settings}>
-      {settings?.isEnabled && settings?.publisherId && (
-        settings?.headScript ? (
-          <div dangerouslySetInnerHTML={{ __html: settings.headScript }} />
-        ) : (
-          <Script
-            id="adsense-script"
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${settings.publisherId}`}
-            crossOrigin="anonymous"
-            strategy="lazyOnload"
-          />
-        )
-      )}
+      {renderScript()}
       {children}
     </AdSenseContext.Provider>
   );

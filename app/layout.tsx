@@ -8,7 +8,6 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/components/auth-provider"
 import { AdProvider } from "@/components/ads"
 import { Toaster } from "@/components/ui/sonner"
-import prisma from "@/lib/prisma"
 // Import database initialization to ensure admin user exists
 import "@/lib/init-db"
 
@@ -21,33 +20,15 @@ export const metadata: Metadata = {
   generator: "v0.app",
 }
 
-// Fetch AdSense settings from database
-async function getAdSenseSettings() {
-  try {
-    const settings = await prisma.adSenseSettings.findFirst({
-      select: {
-        publisherId: true,
-        isEnabled: true,
-      },
-    });
-    return settings;
-  } catch {
-    return null;
-  }
-}
-
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const adsenseSettings = await getAdSenseSettings();
-  const showAdsense = adsenseSettings?.isEnabled && adsenseSettings?.publisherId;
-  
-  // Ensure publisher ID has ca- prefix
-  const publisherId = adsenseSettings?.publisherId?.startsWith('ca-') 
-    ? adsenseSettings.publisherId 
-    : `ca-${adsenseSettings?.publisherId || ''}`;
+  // Use environment variables for AdSense (safe for static build)
+  const publisherId = process.env.ADSENSE_PUBLISHER_ID;
+  const adsenseEnabled = process.env.ADSENSE_ENABLED === 'true';
+  const showAdsense = adsenseEnabled && publisherId;
 
   return (
     <html lang="en" suppressHydrationWarning>

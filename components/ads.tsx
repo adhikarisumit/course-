@@ -118,6 +118,54 @@ function useIsPageTypeAllowed(settings: AdSettings | null) {
   return true;
 }
 
+// Helper to extract script content or src from HTML that may contain script tags
+function parseScriptCode(code: string): { type: 'inline' | 'external' | 'invalid'; content?: string; src?: string; attrs?: Record<string, string> } {
+  if (!code || !code.trim()) {
+    return { type: 'invalid' };
+  }
+  
+  const trimmed = code.trim();
+  
+  // Check if the code contains script tags
+  const scriptMatch = trimmed.match(/<script([^>]*)>([\s\S]*?)<\/script>/i);
+  
+  if (scriptMatch) {
+    const attrs = scriptMatch[1] || '';
+    const inner = scriptMatch[2] || '';
+    
+    // Extract src attribute if present
+    const srcMatch = attrs.match(/src\s*=\s*["']([^"']+)["']/i);
+    
+    if (srcMatch) {
+      // External script
+      const attrObj: Record<string, string> = {};
+      const asyncMatch = attrs.match(/\basync\b/i);
+      const deferMatch = attrs.match(/\bdefer\b/i);
+      const crossOriginMatch = attrs.match(/crossorigin\s*=\s*["']([^"']+)["']/i);
+      
+      if (asyncMatch) attrObj.async = 'true';
+      if (deferMatch) attrObj.defer = 'true';
+      if (crossOriginMatch) attrObj.crossOrigin = crossOriginMatch[1];
+      
+      return { type: 'external', src: srcMatch[1], attrs: attrObj };
+    } else if (inner.trim()) {
+      // Inline script
+      return { type: 'inline', content: inner.trim() };
+    }
+  }
+  
+  // No script tags found - treat as raw inline JavaScript
+  // But first check if it starts with < (likely HTML, not JS)
+  if (trimmed.startsWith('<')) {
+    // This looks like HTML but not a valid script tag - unsafe to execute as JS
+    console.warn('Ad script code appears to be HTML but not a valid script tag:', trimmed.substring(0, 50));
+    return { type: 'invalid' };
+  }
+  
+  // Raw JavaScript code
+  return { type: 'inline', content: trimmed };
+}
+
 // Provider component to fetch and share settings
 export function AdProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<AdSettings | null>(null);
@@ -166,15 +214,36 @@ export function AdProvider({ children }: { children: React.ReactNode }) {
       // Execute any scripts
       const scripts = container.getElementsByTagName('script');
       Array.from(scripts).forEach((oldScript) => {
-        const newScript = document.createElement('script');
-        Array.from(oldScript.attributes).forEach(attr => {
-          newScript.setAttribute(attr.name, attr.value);
-        });
-        if (oldScript.textContent) {
-          newScript.textContent = oldScript.textContent;
+        try {
+          const newScript = document.createElement('script');
+          Array.from(oldScript.attributes).forEach(attr => {
+            newScript.setAttribute(attr.name, attr.value);
+          });
+          // Only set textContent for inline scripts (no src attribute)
+          // Scripts with src should load externally, not have inline content
+          if (!oldScript.hasAttribute('src') && oldScript.textContent) {
+            const content = oldScript.textContent.trim();
+            // Safety check: make sure content looks like JavaScript, not HTML
+            if (content && !content.startsWith('<')) {
+              newScript.textContent = content;
+            } else if (content.startsWith('<')) {
+              console.warn('Skipping script with HTML content:', content.substring(0, 50));
+              return;
+            }
+          }
+          document.body.appendChild(newScript);
+        } catch (error) {
+          console.error('Error injecting ad script:', error);
         }
-        document.body.appendChild(newScript);
       });
+      
+      // Also append any non-script elements (like divs for ad containers)
+      const nonScriptContent = container.innerHTML.replace(/<script[\s\S]*?<\/script>/gi, '').trim();
+      if (nonScriptContent) {
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = nonScriptContent;
+        document.body.appendChild(wrapper);
+      }
       
       globalScriptInjected.current = true;
     }
@@ -189,13 +258,26 @@ export function AdProvider({ children }: { children: React.ReactNode }) {
         if (settings.adsense?.publisherId) {
           // Use custom headScript if provided, otherwise auto-generate from publisherId
           if (settings.adsense.headScript) {
-            return (
-              <Script
-                id="adsense-script"
-                strategy="lazyOnload"
-                dangerouslySetInnerHTML={{ __html: settings.adsense.headScript }}
-              />
-            );
+            const parsed = parseScriptCode(settings.adsense.headScript);
+            if (parsed.type === 'external' && parsed.src) {
+              return (
+                <Script
+                  id="adsense-script"
+                  src={parsed.src}
+                  strategy="lazyOnload"
+                  {...(parsed.attrs?.async && { async: true })}
+                  {...(parsed.attrs?.crossOrigin && { crossOrigin: parsed.attrs.crossOrigin as 'anonymous' | 'use-credentials' })}
+                />
+              );
+            } else if (parsed.type === 'inline' && parsed.content) {
+              return (
+                <Script
+                  id="adsense-script"
+                  strategy="lazyOnload"
+                  dangerouslySetInnerHTML={{ __html: parsed.content }}
+                />
+              );
+            }
           }
           return (
             <Script
@@ -222,13 +304,26 @@ export function AdProvider({ children }: { children: React.ReactNode }) {
         break;
       case 'custom':
         if (settings.custom?.headScript) {
-          return (
-            <Script
-              id="custom-ad-script"
-              strategy="lazyOnload"
-              dangerouslySetInnerHTML={{ __html: settings.custom.headScript }}
-            />
-          );
+          const parsed = parseScriptCode(settings.custom.headScript);
+          if (parsed.type === 'external' && parsed.src) {
+            return (
+              <Script
+                id="custom-ad-script"
+                src={parsed.src}
+                strategy="lazyOnload"
+                {...(parsed.attrs?.async && { async: true })}
+                {...(parsed.attrs?.crossOrigin && { crossOrigin: parsed.attrs.crossOrigin as 'anonymous' | 'use-credentials' })}
+              />
+            );
+          } else if (parsed.type === 'inline' && parsed.content) {
+            return (
+              <Script
+                id="custom-ad-script"
+                strategy="lazyOnload"
+                dangerouslySetInnerHTML={{ __html: parsed.content }}
+              />
+            );
+          }
         }
         break;
     }
