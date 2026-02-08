@@ -36,6 +36,7 @@ export async function GET() {
         // AdSense
         adsenseEnabled: false,
         adsensePublisherId: null,
+        adsenseHeadScript: null,
         adsenseAutoAds: false,
         adsenseHeaderSlot: null,
         adsenseFooterSlot: null,
@@ -126,6 +127,7 @@ export async function POST(request: Request) {
       // AdSense
       adsenseEnabled: body.adsenseEnabled || false,
       adsensePublisherId: body.adsensePublisherId || null,
+      adsenseHeadScript: body.adsenseHeadScript || null,
       adsenseAutoAds: body.adsenseAutoAds || false,
       adsenseHeaderSlot: body.adsenseHeaderSlot || null,
       adsenseFooterSlot: body.adsenseFooterSlot || null,

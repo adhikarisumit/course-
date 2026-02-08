@@ -28,6 +28,7 @@ interface PublicAdSettings {
   // Provider-specific settings based on active provider
   adsense?: {
     publisherId: string | null;
+    headScript: string | null;
     autoAds: boolean;
     headerSlot: string | null;
     footerSlot: string | null;
@@ -107,6 +108,7 @@ export async function GET() {
     // Include ALL provider settings so page-level overrides can use different providers
     response.adsense = {
       publisherId: settings.adsensePublisherId,
+      headScript: settings.adsenseHeadScript,
       autoAds: settings.adsenseAutoAds,
       headerSlot: settings.adsenseHeaderSlot,
       footerSlot: settings.adsenseFooterSlot,

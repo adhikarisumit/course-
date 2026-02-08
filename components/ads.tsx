@@ -7,6 +7,7 @@ import Script from 'next/script';
 // Types for ad settings
 interface AdSenseConfig {
   publisherId: string | null;
+  headScript?: string | null;
   autoAds: boolean;
   headerSlot: string | null;
   footerSlot: string | null;
@@ -186,6 +187,16 @@ export function AdProvider({ children }: { children: React.ReactNode }) {
     switch (settings.activeProvider) {
       case 'adsense':
         if (settings.adsense?.publisherId) {
+          // Use custom headScript if provided, otherwise auto-generate from publisherId
+          if (settings.adsense.headScript) {
+            return (
+              <Script
+                id="adsense-script"
+                strategy="lazyOnload"
+                dangerouslySetInnerHTML={{ __html: settings.adsense.headScript }}
+              />
+            );
+          }
           return (
             <Script
               id="adsense-script"

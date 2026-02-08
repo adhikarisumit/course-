@@ -395,6 +395,7 @@ model AdSettings {
   // Google AdSense Settings
   adsenseEnabled      Boolean  @default(false)
   adsensePublisherId  String?  // ca-pub-XXXXXXXX
+  adsenseHeadScript   String?  @db.Text // Full AdSense script to paste in head
   adsenseAutoAds      Boolean  @default(false)
   adsenseHeaderSlot   String?
   adsenseFooterSlot   String?
