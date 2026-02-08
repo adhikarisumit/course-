@@ -22,7 +22,19 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
-import { MessageCircle, LayoutDashboard, Menu, User, LogOut, Megaphone } from "lucide-react"
+import { 
+  MessageCircle, 
+  LayoutDashboard, 
+  Menu, 
+  User, 
+  LogOut, 
+  Megaphone,
+  ChevronDown,
+  BookOpen,
+  Users,
+  Settings,
+  Shield
+} from "lucide-react"
 import { useSession, signOut } from "next-auth/react"
 import { ThemeToggle } from "@/components/theme-toggle"
 
@@ -95,6 +107,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Link href="/admin/resources" className={linkClass} onClick={handleClick}>
           Resources
         </Link>
+        <Link href="/admin/chat-rooms" className={linkClass} onClick={handleClick}>
+          Chat Rooms
+        </Link>
         <Link href="/admin/promo-banner" className={linkClass} onClick={handleClick}>
           Promo Banner
         </Link>
@@ -118,6 +133,102 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     )
   }
 
+  // Desktop navigation with dropdown menus
+  const DesktopNav = () => {
+    const linkClass = "text-sm font-medium transition-colors hover:text-primary"
+    const dropdownItemClass = "cursor-pointer"
+
+    return (
+      <>
+        <Link href="/" className={linkClass}>
+          Home
+        </Link>
+        <Link href="/admin" className={linkClass}>
+          Dashboard
+        </Link>
+
+        {/* Content Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger className={`${linkClass} flex items-center gap-1`}>
+            <BookOpen className="h-4 w-4" />
+            Content
+            <ChevronDown className="h-3 w-3" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem asChild className={dropdownItemClass}>
+              <Link href="/admin/courses">Courses</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className={dropdownItemClass}>
+              <Link href="/admin/resources">Resources</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className={dropdownItemClass}>
+              <Link href="/admin/chat-rooms">Chat Rooms</Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Users Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger className={`${linkClass} flex items-center gap-1`}>
+            <Users className="h-4 w-4" />
+            Users
+            <ChevronDown className="h-3 w-3" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem asChild className={dropdownItemClass}>
+              <Link href="/admin/users">All Users</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className={dropdownItemClass}>
+              <Link href="/admin/enrollments">Enrollments</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className={dropdownItemClass}>
+              <Link href="/admin/mentors">Mentors</Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Settings Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger className={`${linkClass} flex items-center gap-1`}>
+            <Settings className="h-4 w-4" />
+            Settings
+            <ChevronDown className="h-3 w-3" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem asChild className={dropdownItemClass}>
+              <Link href="/admin/promo-banner">Promo Banner</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className={dropdownItemClass}>
+              <Link href="/admin/analytics">Analytics</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className={dropdownItemClass}>
+              <Link href="/admin/export">Export Data</Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Super Admin Dropdown */}
+        {isSuperAdmin && (
+          <DropdownMenu>
+            <DropdownMenuTrigger className={`${linkClass} flex items-center gap-1`}>
+              <Shield className="h-4 w-4" />
+              Admin
+              <ChevronDown className="h-3 w-3" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem asChild className={dropdownItemClass}>
+                <Link href="/admin/ads">Ads</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className={dropdownItemClass}>
+                <Link href="/admin/manage-admins">Manage Admins</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Admin Header */}
@@ -128,8 +239,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <LayoutDashboard className="h-5 w-5 md:h-6 md:w-6" />
               <span className="font-bold text-base md:text-lg">Admin Panel</span>
             </Link>
-            <nav className="hidden sm:flex items-center gap-2 md:gap-4">
-              <NavLinks />
+            <nav className="hidden md:flex items-center gap-4">
+              <DesktopNav />
             </nav>
           </div>
 
@@ -137,15 +248,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {/* Theme Toggle */}
             <ThemeToggle />
 
-            {/* Mobile Menu - only show on very small screens */}
+            {/* Mobile Menu - show on small/medium screens */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="sm:hidden">
+                <Button variant="ghost" size="icon" className="md:hidden">
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Toggle menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[40vw] sm:w-[250px]">
+              <SheetContent side="right" className="w-[70vw] sm:w-[300px]">
                 <SheetHeader>
                   <SheetTitle>Admin Menu</SheetTitle>
                   <SheetDescription>Navigate admin panel</SheetDescription>

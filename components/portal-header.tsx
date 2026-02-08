@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, BookOpen, User, X, GraduationCap, FolderOpen, Code2, Languages } from "lucide-react"
+import { Home, BookOpen, User, X, GraduationCap, FolderOpen, Code2, Languages, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -23,6 +23,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 const navigation = [
   { name: "Dashboard", href: "/portal/dashboard", icon: Home },
   { name: "Courses", href: "/courses", icon: GraduationCap },
+  { name: "Community", href: "/portal/community", icon: Users },
   { name: "Resources", href: "/portal/resources", icon: FolderOpen },
   { name: "Playground", href: "/portal/playground", icon: Code2 },
   { name: "Jisho", href: "/portal/jisho", icon: Languages },

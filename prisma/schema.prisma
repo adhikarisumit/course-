@@ -101,6 +101,7 @@ model Course {
   enrollments          Enrollment[]
   lessons              Lesson[]
   payments             Payment[]
+  chatRooms            ChatRoom[]
 
   @@index([isPublished])
   @@index([category])
@@ -451,4 +452,37 @@ model AdSettings {
   
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+}
+
+// Community Chat System for Student Portal
+model ChatRoom {
+  id          String        @id @default(cuid())
+  name        String        // Room name (e.g., "General", "Course Discussion")
+  description String?       // Room description
+  type        String        @default("general") // general, course-specific, etc.
+  courseId    String?       // Optional: link to a specific course
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  messages    ChatMessage[]
+  course      Course?       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([type])
+  @@index([courseId])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  roomId    String
+  userId    String
+  userName  String   // Cached user name for display
+  userImage String?  // Cached user image
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  room      ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([roomId])
+  @@index([userId])
+  @@index([createdAt])
 }
