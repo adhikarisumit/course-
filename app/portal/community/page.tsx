@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import { useSession } from "next-auth/react"
-import { Send, Users, MessageCircle, Loader2, Hash, RefreshCw } from "lucide-react"
+import { Send, Users, MessageCircle, Loader2, Hash, RefreshCw, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -73,8 +73,17 @@ export default function CommunityPage() {
   const [isLoadingRooms, setIsLoadingRooms] = useState(true)
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
   const [isSending, setIsSending] = useState(false)
+  const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null)
+  const [userRole, setUserRole] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast()
+
+  // Fetch user role
+  useEffect(() => {
+    if (session?.user) {
+      setUserRole((session.user as { role?: string }).role || null)
+    }
+  }, [session])
 
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -177,6 +186,38 @@ export default function CommunityPage() {
       })
     } finally {
       setIsSending(false)
+    }
+  }
+
+  // Delete message
+  const deleteMessage = async (messageId: string) => {
+    if (!selectedRoom || deletingMessageId) return
+    
+    setDeletingMessageId(messageId)
+    try {
+      const response = await fetch(
+        `/api/chat/rooms/${selectedRoom.id}/messages?messageId=${messageId}`,
+        { method: "DELETE" }
+      )
+      
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || "Failed to delete message")
+      }
+      
+      setMessages((prev) => prev.filter((m) => m.id !== messageId))
+      toast({
+        description: "Message deleted",
+      })
+    } catch (error) {
+      console.error("Error deleting message:", error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete message",
+        variant: "destructive"
+      })
+    } finally {
+      setDeletingMessageId(null)
     }
   }
 
@@ -291,10 +332,12 @@ export default function CommunityPage() {
                     <div className="space-y-4">
                       {messages.map((message) => {
                         const isOwnMessage = message.userId === session?.user?.id
+                        const isAdmin = userRole === "admin" || userRole === "super"
+                        const canDelete = isOwnMessage || isAdmin
                         return (
                           <div
                             key={message.id}
-                            className={`flex gap-3 ${isOwnMessage ? "flex-row-reverse" : ""}`}
+                            className={`group flex gap-3 ${isOwnMessage ? "flex-row-reverse" : ""}`}
                           >
                             <Avatar className="h-8 w-8 shrink-0">
                               <AvatarImage src={message.userImage || undefined} />
@@ -311,14 +354,46 @@ export default function CommunityPage() {
                                   {formatTime(message.createdAt)}
                                 </span>
                               </div>
-                              <div
-                                className={`px-3 py-2 rounded-lg text-sm ${
-                                  isOwnMessage
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted"
-                                }`}
-                              >
-                                {message.content}
+                              <div className="flex items-center gap-1">
+                                {isOwnMessage && canDelete && (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
+                                    onClick={() => deleteMessage(message.id)}
+                                    disabled={deletingMessageId === message.id}
+                                  >
+                                    {deletingMessageId === message.id ? (
+                                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    ) : (
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    )}
+                                  </Button>
+                                )}
+                                <div
+                                  className={`px-3 py-2 rounded-lg text-sm ${
+                                    isOwnMessage
+                                      ? "bg-primary text-primary-foreground"
+                                      : "bg-muted"
+                                  }`}
+                                >
+                                  {message.content}
+                                </div>
+                                {!isOwnMessage && canDelete && (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
+                                    onClick={() => deleteMessage(message.id)}
+                                    disabled={deletingMessageId === message.id}
+                                  >
+                                    {deletingMessageId === message.id ? (
+                                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    ) : (
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    )}
+                                  </Button>
+                                )}
                               </div>
                             </div>
                           </div>

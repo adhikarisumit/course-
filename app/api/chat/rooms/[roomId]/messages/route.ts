@@ -106,3 +106,59 @@ export async function POST(
     return NextResponse.json({ error: "Failed to send message" }, { status: 500 })
   }
 }
+
+// DELETE - Delete a message (own message or admin)
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ roomId: string }> }
+) {
+  try {
+    const session = await auth()
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const { roomId } = await params
+    const { searchParams } = new URL(request.url)
+    const messageId = searchParams.get("messageId")
+
+    if (!messageId) {
+      return NextResponse.json({ error: "Message ID is required" }, { status: 400 })
+    }
+
+    // Find the message
+    const message = await prisma.chatMessage.findUnique({
+      where: { id: messageId }
+    })
+
+    if (!message) {
+      return NextResponse.json({ error: "Message not found" }, { status: 404 })
+    }
+
+    if (message.roomId !== roomId) {
+      return NextResponse.json({ error: "Message does not belong to this room" }, { status: 400 })
+    }
+
+    // Check if user is the message owner or an admin
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { role: true }
+    })
+
+    const isOwner = message.userId === session.user.id
+    const isAdmin = user?.role === "admin" || user?.role === "super"
+
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json({ error: "You can only delete your own messages" }, { status: 403 })
+    }
+
+    await prisma.chatMessage.delete({
+      where: { id: messageId }
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("Error deleting message:", error)
+    return NextResponse.json({ error: "Failed to delete message" }, { status: 500 })
+  }
+}
