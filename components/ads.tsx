@@ -120,50 +120,55 @@ function useIsPageTypeAllowed(settings: AdSettings | null) {
 
 // Helper to extract script content or src from HTML that may contain script tags
 function parseScriptCode(code: string): { type: 'inline' | 'external' | 'invalid'; content?: string; src?: string; attrs?: Record<string, string> } {
-  if (!code || !code.trim()) {
-    return { type: 'invalid' };
-  }
-  
-  const trimmed = code.trim();
-  
-  // Check if the code contains script tags
-  const scriptMatch = trimmed.match(/<script([^>]*)>([\s\S]*?)<\/script>/i);
-  
-  if (scriptMatch) {
-    const attrs = scriptMatch[1] || '';
-    const inner = scriptMatch[2] || '';
-    
-    // Extract src attribute if present
-    const srcMatch = attrs.match(/src\s*=\s*["']([^"']+)["']/i);
-    
-    if (srcMatch) {
-      // External script
-      const attrObj: Record<string, string> = {};
-      const asyncMatch = attrs.match(/\basync\b/i);
-      const deferMatch = attrs.match(/\bdefer\b/i);
-      const crossOriginMatch = attrs.match(/crossorigin\s*=\s*["']([^"']+)["']/i);
-      
-      if (asyncMatch) attrObj.async = 'true';
-      if (deferMatch) attrObj.defer = 'true';
-      if (crossOriginMatch) attrObj.crossOrigin = crossOriginMatch[1];
-      
-      return { type: 'external', src: srcMatch[1], attrs: attrObj };
-    } else if (inner.trim()) {
-      // Inline script
-      return { type: 'inline', content: inner.trim() };
+  try {
+    if (!code || !code.trim()) {
+      return { type: 'invalid' };
     }
-  }
-  
-  // No script tags found - treat as raw inline JavaScript
-  // But first check if it starts with < (likely HTML, not JS)
-  if (trimmed.startsWith('<')) {
-    // This looks like HTML but not a valid script tag - unsafe to execute as JS
-    console.warn('Ad script code appears to be HTML but not a valid script tag:', trimmed.substring(0, 50));
+    
+    const trimmed = code.trim();
+    
+    // Check if the code contains script tags
+    const scriptMatch = trimmed.match(/<script([^>]*)>([\s\S]*?)<\/script>/i);
+    
+    if (scriptMatch) {
+      const attrs = scriptMatch[1] || '';
+      const inner = scriptMatch[2] || '';
+      
+      // Extract src attribute if present
+      const srcMatch = attrs.match(/src\s*=\s*["']([^"']+)["']/i);
+      
+      if (srcMatch) {
+        // External script
+        const attrObj: Record<string, string> = {};
+        const asyncMatch = attrs.match(/\basync\b/i);
+        const deferMatch = attrs.match(/\bdefer\b/i);
+        const crossOriginMatch = attrs.match(/crossorigin\s*=\s*["']([^"']+)["']/i);
+        
+        if (asyncMatch) attrObj.async = 'true';
+        if (deferMatch) attrObj.defer = 'true';
+        if (crossOriginMatch) attrObj.crossOrigin = crossOriginMatch[1];
+        
+        return { type: 'external', src: srcMatch[1], attrs: attrObj };
+      } else if (inner.trim()) {
+        // Inline script
+        return { type: 'inline', content: inner.trim() };
+      }
+    }
+    
+    // No script tags found - treat as raw inline JavaScript
+    // But first check if it starts with < (likely HTML, not JS)
+    if (trimmed.startsWith('<')) {
+      // This looks like HTML but not a valid script tag - unsafe to execute as JS
+      console.warn('Ad script code appears to be HTML but not a valid script tag');
+      return { type: 'invalid' };
+    }
+    
+    // Raw JavaScript code
+    return { type: 'inline', content: trimmed };
+  } catch (error) {
+    console.error('Error parsing script code:', error);
     return { type: 'invalid' };
   }
-  
-  // Raw JavaScript code
-  return { type: 'inline', content: trimmed };
 }
 
 // Provider component to fetch and share settings
@@ -206,46 +211,54 @@ export function AdProvider({ children }: { children: React.ReactNode }) {
     }
     
     if (footerCode && footerCode.trim()) {
-      // Create a container and inject the script
-      const container = document.createElement('div');
-      container.id = 'global-ad-scripts';
-      container.innerHTML = footerCode;
-      
-      // Execute any scripts
-      const scripts = container.getElementsByTagName('script');
-      Array.from(scripts).forEach((oldScript) => {
-        try {
-          const newScript = document.createElement('script');
-          Array.from(oldScript.attributes).forEach(attr => {
-            newScript.setAttribute(attr.name, attr.value);
-          });
-          // Only set textContent for inline scripts (no src attribute)
-          // Scripts with src should load externally, not have inline content
-          if (!oldScript.hasAttribute('src') && oldScript.textContent) {
-            const content = oldScript.textContent.trim();
-            // Safety check: make sure content looks like JavaScript, not HTML
-            if (content && !content.startsWith('<')) {
-              newScript.textContent = content;
-            } else if (content.startsWith('<')) {
-              console.warn('Skipping script with HTML content:', content.substring(0, 50));
-              return;
+      try {
+        // Create a container and inject the script
+        const container = document.createElement('div');
+        container.id = 'global-ad-scripts';
+        container.innerHTML = footerCode;
+        
+        // Execute any scripts
+        const scripts = container.getElementsByTagName('script');
+        Array.from(scripts).forEach((oldScript) => {
+          try {
+            const newScript = document.createElement('script');
+            Array.from(oldScript.attributes).forEach(attr => {
+              newScript.setAttribute(attr.name, attr.value);
+            });
+            // Only set textContent for inline scripts (no src attribute)
+            // Scripts with src should load externally, not have inline content
+            if (!oldScript.hasAttribute('src') && oldScript.textContent) {
+              const content = oldScript.textContent.trim();
+              // Safety check: make sure content looks like JavaScript, not HTML
+              if (content && !content.startsWith('<')) {
+                newScript.textContent = content;
+              } else if (content.startsWith('<')) {
+                console.warn('Skipping script with HTML content');
+                return;
+              }
             }
+            document.body.appendChild(newScript);
+          } catch (error) {
+            console.error('Error injecting ad script:', error);
           }
-          document.body.appendChild(newScript);
-        } catch (error) {
-          console.error('Error injecting ad script:', error);
+        });
+        
+        // Also append any non-script elements (like divs for ad containers)
+        try {
+          const nonScriptContent = container.innerHTML.replace(/<script[\s\S]*?<\/script>/gi, '').trim();
+          if (nonScriptContent) {
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = nonScriptContent;
+            document.body.appendChild(wrapper);
+          }
+        } catch (e) {
+          console.error('Error appending non-script ad content:', e);
         }
-      });
-      
-      // Also append any non-script elements (like divs for ad containers)
-      const nonScriptContent = container.innerHTML.replace(/<script[\s\S]*?<\/script>/gi, '').trim();
-      if (nonScriptContent) {
-        const wrapper = document.createElement('div');
-        wrapper.innerHTML = nonScriptContent;
-        document.body.appendChild(wrapper);
+        
+        globalScriptInjected.current = true;
+      } catch (error) {
+        console.error('Error processing footer ad code:', error);
       }
-      
-      globalScriptInjected.current = true;
     }
   }, [settings]);
 
