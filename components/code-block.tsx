@@ -325,10 +325,8 @@ export default function CodeBlock({
                     hover:bg-muted/60 focus:ring-0 focus:ring-offset-0
                     data-[state=open]:bg-muted/60 transition-colors"
                 >
-                  <div className="flex items-center gap-1.5">
-                    <Terminal className="h-3 w-3 text-muted-foreground" />
-                    <SelectValue />
-                  </div>
+                  <Terminal className="h-3 w-3 shrink-0 text-muted-foreground" />
+                  <span className="truncate">{getLanguageLabel(language)}</span>
                 </SelectTrigger>
                 <SelectContent
                   className="max-h-[320px]"
