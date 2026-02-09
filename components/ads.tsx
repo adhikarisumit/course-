@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, createContext, useContext, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import Script from 'next/script';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Types for ad settings
 interface AdSenseConfig {
@@ -51,6 +52,11 @@ interface AdSettings {
   showCoursePageAd?: boolean;
   showPortalAd?: boolean;
   showBlogAd?: boolean;
+  // Mobile placement controls
+  showHeaderAdMobile?: boolean;
+  showFooterAdMobile?: boolean;
+  showSidebarAdMobile?: boolean;
+  showInArticleAdMobile?: boolean;
   // Global ad limits
   maxAdsPerPage?: number;
   maxInArticleAds?: number;
@@ -527,13 +533,38 @@ export function HeaderAd({ className = '' }: AdPlacementProps) {
   const adCounter = useAdCounter();
   const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
   const isPageAllowed = useIsPageTypeAllowed(settings);
+  const isMobile = useIsMobile();
   
   // Get effective provider for this page (may be overridden by page config)
   const effectiveProvider = adCounter?.getEffectiveProvider() ?? settings?.activeProvider ?? 'none';
   
-  // Check placement settings
-  if (!settings || effectiveProvider === 'none' || isExcluded || !isPageAllowed) return null;
-  if (settings.showHeaderAd === false) return null;
+  // Debug logging
+  console.log('HeaderAd Debug:', {
+    settings: !!settings,
+    effectiveProvider,
+    isExcluded,
+    isPageAllowed,
+    showHeaderAd: settings?.showHeaderAd,
+    showHeaderAdMobile: settings?.showHeaderAdMobile,
+    isMobile,
+    pathname: window.location.pathname
+  });
+  
+  // Check placement settings (use mobile settings if on mobile)
+  if (!settings || effectiveProvider === 'none' || isExcluded || !isPageAllowed) {
+    console.log('HeaderAd returning null due to:', {
+      noSettings: !settings,
+      providerNone: effectiveProvider === 'none',
+      isExcluded,
+      notPageAllowed: !isPageAllowed
+    });
+    return null;
+  }
+  const showHeaderAd = isMobile ? settings.showHeaderAdMobile : settings.showHeaderAd;
+  if (showHeaderAd === false) {
+    console.log('HeaderAd returning null because showHeaderAd is false');
+    return null;
+  }
   
   // Check page-specific settings
   const pageConfig = adCounter?.getPageConfig();
@@ -544,9 +575,11 @@ export function HeaderAd({ className = '' }: AdPlacementProps) {
 
   // Helper to render a single ad unit
   const renderAdUnit = (key: string) => {
+    console.log('HeaderAd renderAdUnit:', { key, effectiveProvider, settings });
     switch (effectiveProvider) {
       case 'adsense':
         if (settings.adsense?.headerSlot && settings.adsense?.publisherId) {
+          console.log('HeaderAd rendering AdSense ad');
           return (
             <AdSenseUnit
               key={key}
@@ -558,18 +591,25 @@ export function HeaderAd({ className = '' }: AdPlacementProps) {
             />
           );
         }
+        console.log('HeaderAd: AdSense not configured', { headerSlot: settings.adsense?.headerSlot, publisherId: settings.adsense?.publisherId });
         return null;
       case 'medianet':
+        console.log('HeaderAd rendering Media.net ad', { code: !!settings.medianet?.headerCode });
         return <HtmlAd key={key} code={settings.medianet?.headerCode} className={singleAdClass} style={containerStyle} />;
       case 'amazon':
+        console.log('HeaderAd rendering Amazon ad', { code: !!settings.amazon?.headerCode });
         return <HtmlAd key={key} code={settings.amazon?.headerCode} className={singleAdClass} style={containerStyle} />;
       case 'propeller':
+        console.log('HeaderAd rendering Propeller ad', { code: !!settings.propeller?.headerCode });
         return <HtmlAd key={key} code={settings.propeller?.headerCode} className={singleAdClass} style={containerStyle} />;
       case 'adsterra':
+        console.log('HeaderAd rendering Adsterra ad', { code: !!settings.adsterra?.headerCode });
         return <HtmlAd key={key} code={settings.adsterra?.headerCode} className={singleAdClass} style={containerStyle} />;
       case 'custom':
+        console.log('HeaderAd rendering Custom ad', { code: !!settings.custom?.headerCode });
         return <HtmlAd key={key} code={settings.custom?.headerCode} className={singleAdClass} style={containerStyle} />;
       default:
+        console.log('HeaderAd: Unknown provider', effectiveProvider);
         return null;
     }
   };
@@ -601,13 +641,15 @@ export function FooterAd({ className = '' }: AdPlacementProps) {
   const adCounter = useAdCounter();
   const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
   const isPageAllowed = useIsPageTypeAllowed(settings);
+  const isMobile = useIsMobile();
   
   // Get effective provider for this page (may be overridden by page config)
   const effectiveProvider = adCounter?.getEffectiveProvider() ?? settings?.activeProvider ?? 'none';
   
-  // Check placement settings
+  // Check placement settings (use mobile settings if on mobile)
   if (!settings || effectiveProvider === 'none' || isExcluded || !isPageAllowed) return null;
-  if (settings.showFooterAd === false) return null;
+  const showFooterAd = isMobile ? settings.showFooterAdMobile : settings.showFooterAd;
+  if (showFooterAd === false) return null;
   
   // Check page-specific settings
   const pageConfig = adCounter?.getPageConfig();
@@ -685,13 +727,15 @@ export function SidebarAd({ className = '' }: AdPlacementProps) {
   const adCounter = useAdCounter();
   const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
   const isPageAllowed = useIsPageTypeAllowed(settings);
+  const isMobile = useIsMobile();
   
   // Get effective provider for this page (may be overridden by page config)
   const effectiveProvider = adCounter?.getEffectiveProvider() ?? settings?.activeProvider ?? 'none';
   
-  // Check placement settings
+  // Check placement settings (use mobile settings if on mobile)
   if (!settings || effectiveProvider === 'none' || isExcluded || !isPageAllowed) return null;
-  if (settings.showSidebarAd === false) return null;
+  const showSidebarAd = isMobile ? settings.showSidebarAdMobile : settings.showSidebarAd;
+  if (showSidebarAd === false) return null;
   
   // Check page-specific settings
   const pageConfig = adCounter?.getPageConfig();
@@ -753,6 +797,7 @@ export function InArticleAd({ className = '' }: AdPlacementProps) {
   const adCounter = useAdCounter();
   const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
   const isPageAllowed = useIsPageTypeAllowed(settings);
+  const isMobile = useIsMobile();
   const [canShow, setCanShow] = useState(false);
   const checkedRef = useRef(false);
   
@@ -767,9 +812,10 @@ export function InArticleAd({ className = '' }: AdPlacementProps) {
     checkedRef.current = true;
   }, [adCounter]);
   
-  // Check placement settings
+  // Check placement settings (use mobile settings if on mobile)
   if (!settings || effectiveProvider === 'none' || isExcluded || !isPageAllowed) return null;
-  if (settings.showInArticleAd === false) return null;
+  const showInArticleAd = isMobile ? settings.showInArticleAdMobile : settings.showInArticleAd;
+  if (showInArticleAd === false) return null;
   
   // Check per-page config
   const pageConfig = adCounter?.getPageConfig();

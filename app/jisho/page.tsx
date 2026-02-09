@@ -56,11 +56,11 @@ export default function PublicJishoPage() {
           </div>
 
           {/* Dictionary with optional Sidebar Ad */}
-          <div className="flex gap-4">
+          <div className="flex flex-col xl:flex-row gap-4">
             <div className="flex-1">
               <JishoDictionary />
             </div>
-            <div className="hidden xl:block w-[300px] shrink-0">
+            <div className="w-full xl:w-[300px] xl:shrink-0">
               <SidebarAd />
             </div>
           </div>

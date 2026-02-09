@@ -33,6 +33,11 @@ export async function GET() {
         showCoursePageAd: true,
         showPortalAd: true,
         showBlogAd: true,
+        // Mobile Ad Placement Controls
+        showHeaderAdMobile: true,
+        showFooterAdMobile: true,
+        showSidebarAdMobile: false,
+        showInArticleAdMobile: true,
         // AdSense
         adsenseEnabled: false,
         adsensePublisherId: null,
@@ -124,6 +129,11 @@ export async function POST(request: Request) {
       showCoursePageAd: body.showCoursePageAd ?? true,
       showPortalAd: body.showPortalAd ?? true,
       showBlogAd: body.showBlogAd ?? true,
+      // Mobile Ad Placement Controls
+      showHeaderAdMobile: body.showHeaderAdMobile ?? true,
+      showFooterAdMobile: body.showFooterAdMobile ?? true,
+      showSidebarAdMobile: body.showSidebarAdMobile ?? false,
+      showInArticleAdMobile: body.showInArticleAdMobile ?? true,
       // AdSense
       adsenseEnabled: body.adsenseEnabled || false,
       adsensePublisherId: body.adsensePublisherId || null,

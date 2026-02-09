@@ -1,87 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
-import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism"
-import { useTheme } from "next-themes"
-import { Copy, Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import CodeBlock from "@/components/code-block"
 
 interface ContentRendererProps {
   content: string
   className?: string
-}
-
-// Code block with copy button
-function CodeBlock({ code, language }: { code: string; language: string }) {
-  const { resolvedTheme } = useTheme()
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(code)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  // Map common language aliases
-  const languageMap: Record<string, string> = {
-    'js': 'javascript',
-    'ts': 'typescript',
-    'py': 'python',
-    'rb': 'ruby',
-    'sh': 'bash',
-    'yml': 'yaml',
-    'md': 'markdown',
-  }
-
-  const mappedLanguage = languageMap[language.toLowerCase()] || language.toLowerCase()
-
-  return (
-    <div className="relative group rounded-lg overflow-hidden border my-4">
-      <div className="flex items-center justify-between px-4 py-2 border-b bg-muted/50">
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          {language || 'code'}
-        </span>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={handleCopy}
-        >
-          {copied ? (
-            <>
-              <Check className="h-3 w-3 mr-1" />
-              Copied
-            </>
-          ) : (
-            <>
-              <Copy className="h-3 w-3 mr-1" />
-              Copy
-            </>
-          )}
-        </Button>
-      </div>
-      <SyntaxHighlighter
-        language={mappedLanguage}
-        style={resolvedTheme === 'dark' ? oneDark : oneLight}
-        customStyle={{
-          margin: 0,
-          padding: '1rem',
-          background: resolvedTheme === 'dark' ? '#1e1e1e' : '#f8f8f8',
-          fontSize: '0.875rem',
-        }}
-        showLineNumbers={code.split('\n').length > 3}
-        lineNumberStyle={{
-          minWidth: '2.5em',
-          paddingRight: '1em',
-          color: resolvedTheme === 'dark' ? '#636d83' : '#999',
-          userSelect: 'none',
-        }}
-      >
-        {code}
-      </SyntaxHighlighter>
-    </div>
-  )
 }
 
 // Format inline text (bold, italic, code, links, underline)
@@ -321,7 +245,7 @@ export function ContentRenderer({ content, className = "" }: ContentRendererProp
               </p>
             )
           case 'code':
-            return <CodeBlock key={i} code={el.content} language={el.language || 'text'} />
+            return <CodeBlock key={i} code={el.content} language={el.language || 'text'} showLanguageSelector={true} className="my-4" />
           case 'blockquote':
             return (
               <blockquote key={i} className="border-l-4 border-primary pl-4 my-4 italic text-muted-foreground">

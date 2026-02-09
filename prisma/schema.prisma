@@ -392,6 +392,12 @@ model AdSettings {
   showPortalAd      Boolean  @default(true)
   showBlogAd        Boolean  @default(true)
   
+  // Mobile Ad Placement Controls
+  showHeaderAdMobile      Boolean  @default(true)
+  showFooterAdMobile      Boolean  @default(true)
+  showSidebarAdMobile     Boolean  @default(false) // Sidebars often hidden on mobile
+  showInArticleAdMobile   Boolean  @default(true)
+  
   // Google AdSense Settings
   adsenseEnabled      Boolean  @default(false)
   adsensePublisherId  String?  // ca-pub-XXXXXXXX

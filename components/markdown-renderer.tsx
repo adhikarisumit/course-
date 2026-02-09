@@ -1,11 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
-import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism"
 import { useTheme } from "next-themes"
-import { Copy, Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import CodeBlock from "@/components/code-block"
 
 interface MarkdownRendererProps {
   content: string
@@ -213,83 +210,7 @@ function formatInlineMarkdown(text: string): React.ReactNode {
   return parts.length === 1 ? parts[0] : <>{parts}</>
 }
 
-// Code block component with copy functionality
-function CodeBlock({ code, language }: { code: string; language: string }) {
-  const { resolvedTheme } = useTheme()
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(code)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  // Map common language aliases
-  const languageMap: Record<string, string> = {
-    'js': 'javascript',
-    'ts': 'typescript',
-    'py': 'python',
-    'rb': 'ruby',
-    'sh': 'bash',
-    'yml': 'yaml',
-    'md': 'markdown',
-    'html': 'markup',
-    'xml': 'markup',
-    'svg': 'markup',
-  }
-
-  const mappedLanguage = languageMap[language.toLowerCase()] || language.toLowerCase()
-
-  return (
-    <div className="relative group rounded-lg overflow-hidden border bg-muted/30">
-      {/* Language badge and copy button */}
-      <div className="flex items-center justify-between px-4 py-2 border-b bg-muted/50">
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          {language || 'code'}
-        </span>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={handleCopy}
-        >
-          {copied ? (
-            <>
-              <Check className="h-3 w-3 mr-1" />
-              Copied
-            </>
-          ) : (
-            <>
-              <Copy className="h-3 w-3 mr-1" />
-              Copy
-            </>
-          )}
-        </Button>
-      </div>
-
-      {/* Code content */}
-      <SyntaxHighlighter
-        language={mappedLanguage}
-        style={resolvedTheme === 'dark' ? oneDark : oneLight}
-        customStyle={{
-          margin: 0,
-          padding: '1rem',
-          background: 'transparent',
-          fontSize: '0.875rem',
-        }}
-        showLineNumbers={code.split('\n').length > 3}
-        lineNumberStyle={{
-          minWidth: '2.5em',
-          paddingRight: '1em',
-          color: resolvedTheme === 'dark' ? '#636d83' : '#999',
-          userSelect: 'none',
-        }}
-      >
-        {code}
-      </SyntaxHighlighter>
-    </div>
-  )
-}
+// CodeBlock is now imported from @/components/code-block
 
 export function MarkdownRenderer({ content, className = "" }: MarkdownRendererProps) {
   const [mounted, setMounted] = useState(false)
@@ -343,7 +264,7 @@ export function MarkdownRenderer({ content, className = "" }: MarkdownRendererPr
           case 'code':
             return (
               <div key={index} className="not-prose my-4">
-                <CodeBlock code={element.content} language={element.language || 'text'} />
+                <CodeBlock code={element.content} language={element.language || 'text'} showLanguageSelector={true} />
               </div>
             )
 

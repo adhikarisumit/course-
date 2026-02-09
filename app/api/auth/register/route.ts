@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
     )
 
     if (!emailResult.success) {
-      console.error("Failed to send verification email:", emailResult.error)
+      console.error("Failed to send verification email:", (emailResult as any).error)
       // Delete the user since they won't be able to verify without the email
       await prisma.user.delete({
         where: { id: user.id }

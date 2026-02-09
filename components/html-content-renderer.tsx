@@ -1,82 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/button";
-import { Check, Copy } from "lucide-react";
+import CodeBlock from "@/components/code-block";
 import { InArticleAd, HtmlAd } from "@/components/ads";
-
-interface CodeBlockWithCopyProps {
-  code: string;
-  language: string;
-}
-
-function CodeBlockWithCopy({ code, language }: CodeBlockWithCopyProps) {
-  const [copied, setCopied] = useState(false);
-  const { resolvedTheme } = useTheme();
-
-  const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
-    }
-  };
-
-  // Map common language names to prism language identifiers
-  const languageMap: Record<string, string> = {
-    js: "javascript",
-    ts: "typescript",
-    py: "python",
-    rb: "ruby",
-    yml: "yaml",
-    sh: "bash",
-    shell: "bash",
-    plaintext: "text",
-  };
-
-  const normalizedLanguage = languageMap[language?.toLowerCase()] || language?.toLowerCase() || "text";
-
-  return (
-    <div className="relative group my-3 sm:my-4 -mx-2 sm:mx-0">
-      <div className="absolute right-1 sm:right-2 top-1 sm:top-2 z-10">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={copyToClipboard}
-          className="h-6 w-6 sm:h-8 sm:w-8 bg-gray-800/50 hover:bg-gray-700 text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
-        >
-          {copied ? <Check className="h-3 w-3 sm:h-4 sm:w-4" /> : <Copy className="h-3 w-3 sm:h-4 sm:w-4" />}
-        </Button>
-      </div>
-      <div className="absolute left-1 sm:left-2 top-1 sm:top-2 z-10">
-        <span className="text-[10px] sm:text-xs text-gray-400 bg-gray-800/50 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
-          {language || "code"}
-        </span>
-      </div>
-      <SyntaxHighlighter
-        language={normalizedLanguage}
-        style={resolvedTheme === "dark" ? oneDark : oneLight}
-        customStyle={{
-          margin: 0,
-          borderRadius: "0.5rem",
-          paddingTop: "2rem",
-          fontSize: "0.75rem",
-          lineHeight: "1.5",
-        }}
-        showLineNumbers={code.split("\n").length > 3}
-        wrapLines={true}
-        wrapLongLines={true}
-      >
-        {code}
-      </SyntaxHighlighter>
-    </div>
-  );
-}
 
 interface HtmlContentRendererProps {
   content: string;
@@ -177,10 +104,12 @@ export function HtmlContentRenderer({ content, className = "" }: HtmlContentRend
           const codeText = codeElement.textContent || "";
           
           elements.push(
-            <CodeBlockWithCopy
+            <CodeBlock
               key={elementKey++}
               code={codeText}
               language={language}
+              showLanguageSelector={true}
+              className="my-3 sm:my-4"
             />
           );
           return;
