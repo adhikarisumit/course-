@@ -5,13 +5,15 @@ import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Send, Hash, Loader2, RefreshCw, MessageCircle, Trash2 } from 'lucide-react';
+import { ArrowLeft, Send, Hash, Loader2, RefreshCw, MessageCircle, Trash2, Code, Bold, Italic, Braces, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { ContentRenderer } from '@/components/content-renderer';
 
 interface ChatRoom {
   id: string;
@@ -72,9 +74,44 @@ export default function AdminChatRoomPage() {
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const currentUserId = session?.user?.id;
+
+  // Insert formatting around selection or at cursor
+  const insertFormatting = (prefix: string, suffix: string, placeholder: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    const start = textarea.selectionStart || 0;
+    const end = textarea.selectionEnd || 0;
+    const selectedText = newMessage.substring(start, end);
+    const before = newMessage.substring(0, start);
+    const after = newMessage.substring(end);
+    const insertText = selectedText || placeholder;
+    const newText = `${before}${prefix}${insertText}${suffix}${after}`;
+    setNewMessage(newText);
+    setTimeout(() => {
+      textarea.focus();
+      if (selectedText) {
+        textarea.setSelectionRange(start + prefix.length, start + prefix.length + selectedText.length);
+      } else {
+        textarea.setSelectionRange(start + prefix.length, start + prefix.length + placeholder.length);
+      }
+    }, 0);
+  };
+
+  // Copy message content to clipboard
+  const copyMessage = async (messageId: string, content: string) => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopiedMessageId(messageId);
+      setTimeout(() => setCopiedMessageId(null), 2000);
+    } catch {
+      toast.error('Failed to copy message');
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -285,15 +322,43 @@ export default function AdminChatRoomPage() {
                             )}
                           </Button>
                         )}
+                        {isOwnMessage && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+                            onClick={() => copyMessage(message.id, message.content)}
+                          >
+                            {copiedMessageId === message.id ? (
+                              <Check className="h-3.5 w-3.5 text-green-500" />
+                            ) : (
+                              <Copy className="h-3.5 w-3.5" />
+                            )}
+                          </Button>
+                        )}
                         <div
-                          className={`px-3 py-2 rounded-lg text-sm ${
+                          className={`px-3 py-2 rounded-lg text-sm select-text ${
                             isOwnMessage
                               ? 'bg-primary text-primary-foreground'
                               : 'bg-muted'
                           }`}
                         >
-                          {message.content}
+                          <ContentRenderer content={message.content} />
                         </div>
+                        {!isOwnMessage && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+                            onClick={() => copyMessage(message.id, message.content)}
+                          >
+                            {copiedMessageId === message.id ? (
+                              <Check className="h-3.5 w-3.5 text-green-500" />
+                            ) : (
+                              <Copy className="h-3.5 w-3.5" />
+                            )}
+                          </Button>
+                        )}
                         {!isOwnMessage && (
                           <Button
                             variant="ghost"
@@ -320,16 +385,94 @@ export default function AdminChatRoomPage() {
         </ScrollArea>
 
         {/* Message Input */}
-        <div className="p-4 border-t">
-          <form onSubmit={sendMessage} className="flex gap-2">
-            <Input
-              placeholder={`Message #${room.name}`}
+        <div className="p-3 border-t space-y-2">
+          {/* Formatting Toolbar */}
+          <TooltipProvider delayDuration={300}>
+            <div className="flex items-center gap-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => insertFormatting('**', '**', 'bold text')}
+                  >
+                    <Bold className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top"><p>Bold (Ctrl+B)</p></TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => insertFormatting('*', '*', 'italic text')}
+                  >
+                    <Italic className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top"><p>Italic (Ctrl+I)</p></TooltipContent>
+              </Tooltip>
+              <div className="w-px h-4 bg-border mx-1" />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => insertFormatting('`', '`', 'code')}
+                  >
+                    <Code className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top"><p>Inline Code</p></TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => insertFormatting('```\n', '\n```', 'code here')}
+                  >
+                    <Braces className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top"><p>Code Block</p></TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
+
+          {/* Input + Send */}
+          <form onSubmit={sendMessage} className="flex gap-2 items-end">
+            <Textarea
+              ref={textareaRef}
+              placeholder={`Message #${room.name} — Ctrl+Enter to send`}
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                  e.preventDefault();
+                  sendMessage(e);
+                }
+                // Keyboard shortcuts for formatting
+                if (e.ctrlKey || e.metaKey) {
+                  if (e.key === 'b') { e.preventDefault(); insertFormatting('**', '**', 'bold text'); }
+                  if (e.key === 'i') { e.preventDefault(); insertFormatting('*', '*', 'italic text'); }
+                  if (e.key === 'e') { e.preventDefault(); insertFormatting('`', '`', 'code'); }
+                }
+              }}
               disabled={isSending || !room.isActive}
-              className="flex-1"
+              className="flex-1 min-h-[60px] max-h-[200px] resize-none"
+              rows={2}
             />
-            <Button type="submit" disabled={!newMessage.trim() || isSending || !room.isActive}>
+            <Button type="submit" size="icon" className="h-10 w-10 shrink-0" disabled={!newMessage.trim() || isSending || !room.isActive}>
               {isSending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (

@@ -137,12 +137,12 @@ export default function CodeBlock({
 
   return (
     <div
-      className={cn("rounded-lg overflow-hidden my-4", className)}
+      className={cn("rounded-lg overflow-hidden my-4 max-w-[calc(100vw-2rem)]", className)}
       style={{ border: `1px solid ${borderColor}` }}
     >
       {/* Header */}
       <div
-        className="flex items-center justify-between px-3 py-1.5"
+        className="flex items-center justify-between px-2 sm:px-3 py-1.5 gap-1"
         style={{
           backgroundColor: headerBg,
           borderBottom: `1px solid ${borderColor}`,
@@ -152,12 +152,12 @@ export default function CodeBlock({
         {showLanguageSelector ? (
           <Select value={language} onValueChange={handleLanguageChange}>
             <SelectTrigger
-              className="h-6 w-auto gap-1.5 text-[11px] font-medium border-none bg-transparent
-                px-1.5 hover:bg-muted/60 focus:ring-0 focus:ring-offset-0
-                data-[state=open]:bg-muted/60 transition-colors text-muted-foreground"
+              className="h-6 w-auto gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-medium border-none bg-transparent
+                px-1 sm:px-1.5 hover:bg-muted/60 focus:ring-0 focus:ring-offset-0
+                data-[state=open]:bg-muted/60 transition-colors text-muted-foreground min-w-0"
             >
               <Code2 className="h-3 w-3 shrink-0" />
-              <span className="truncate">{getLanguageLabel(language)}</span>
+              <span className="truncate max-w-[80px] sm:max-w-none">{getLanguageLabel(language)}</span>
             </SelectTrigger>
             <SelectContent className="max-h-[320px]" align="start">
               {Object.entries(CATEGORY_LABELS).map(([cat, label]) => {
@@ -179,7 +179,7 @@ export default function CodeBlock({
             </SelectContent>
           </Select>
         ) : (
-          <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
+          <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground uppercase tracking-wide truncate">
             {getLanguageLabel(language)}
           </span>
         )}
@@ -188,18 +188,18 @@ export default function CodeBlock({
         <Button
           variant="ghost"
           size="sm"
-          className="h-6 px-2 text-[11px] gap-1 text-muted-foreground hover:text-foreground transition-colors"
+          className="h-6 px-1.5 sm:px-2 text-[10px] sm:text-[11px] gap-1 text-muted-foreground hover:text-foreground transition-colors shrink-0"
           onClick={handleCopy}
         >
           {copied ? (
             <>
               <Check className="h-3 w-3 text-green-500" />
-              <span className="text-green-500">Copied</span>
+              <span className="text-green-500 hidden xs:inline">Copied</span>
             </>
           ) : (
             <>
               <Copy className="h-3 w-3" />
-              <span>Copy</span>
+              <span className="hidden xs:inline">Copy</span>
             </>
           )}
         </Button>
@@ -215,19 +215,19 @@ export default function CodeBlock({
           wrapLongLines={false}
           customStyle={{
             margin: 0,
-            padding: "1rem",
+            padding: "0.75rem",
             background: "transparent",
-            fontSize: "0.8125rem",
+            fontSize: "clamp(0.7rem, 2.5vw, 0.8125rem)",
             lineHeight: "1.6",
             fontFamily:
               '"JetBrains Mono", "Fira Code", "Cascadia Code", "Source Code Pro", ui-monospace, monospace',
           }}
           lineNumberStyle={{
-            minWidth: "2.5em",
-            paddingRight: "1em",
+            minWidth: "2em",
+            paddingRight: "0.75em",
             color: isDark ? "#484f58" : "#babbbd",
             userSelect: "none",
-            fontSize: "0.75rem",
+            fontSize: "clamp(0.65rem, 2vw, 0.75rem)",
           }}
           codeTagProps={{ style: { fontFamily: "inherit" } }}
         >

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import { useSession } from "next-auth/react"
-import { Send, Users, MessageCircle, Loader2, Hash, RefreshCw, Trash2, Code, Bold, Italic, Braces } from "lucide-react"
+import { Send, Users, MessageCircle, Loader2, Hash, RefreshCw, Trash2, Code, Bold, Italic, Braces, Copy, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -77,9 +77,21 @@ export default function CommunityPage() {
   const [isSending, setIsSending] = useState(false)
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null)
   const [userRole, setUserRole] = useState<string | null>(null)
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const { toast } = useToast()
+
+  // Copy message content to clipboard
+  const copyMessage = async (messageId: string, content: string) => {
+    try {
+      await navigator.clipboard.writeText(content)
+      setCopiedMessageId(messageId)
+      setTimeout(() => setCopiedMessageId(null), 2000)
+    } catch {
+      toast({ title: "Error", description: "Failed to copy message", variant: "destructive" })
+    }
+  }
 
   // Insert formatting around selection or at cursor
   const insertFormatting = (prefix: string, suffix: string, placeholder: string) => {
@@ -395,8 +407,22 @@ export default function CommunityPage() {
                                     )}
                                   </Button>
                                 )}
+                                {isOwnMessage && (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+                                    onClick={() => copyMessage(message.id, message.content)}
+                                  >
+                                    {copiedMessageId === message.id ? (
+                                      <Check className="h-3.5 w-3.5 text-green-500" />
+                                    ) : (
+                                      <Copy className="h-3.5 w-3.5" />
+                                    )}
+                                  </Button>
+                                )}
                                 <div
-                                  className={`px-3 py-2 rounded-lg text-sm ${
+                                  className={`px-3 py-2 rounded-lg text-sm select-text ${
                                     isOwnMessage
                                       ? "bg-primary text-primary-foreground"
                                       : "bg-muted"
@@ -404,6 +430,20 @@ export default function CommunityPage() {
                                 >
                                   <ContentRenderer content={message.content} />
                                 </div>
+                                {!isOwnMessage && (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+                                    onClick={() => copyMessage(message.id, message.content)}
+                                  >
+                                    {copiedMessageId === message.id ? (
+                                      <Check className="h-3.5 w-3.5 text-green-500" />
+                                    ) : (
+                                      <Copy className="h-3.5 w-3.5" />
+                                    )}
+                                  </Button>
+                                )}
                                 {!isOwnMessage && canDelete && (
                                   <Button
                                     variant="ghost"

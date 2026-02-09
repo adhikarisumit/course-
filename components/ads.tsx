@@ -534,6 +534,7 @@ export function HeaderAd({ className = '' }: AdPlacementProps) {
   const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
   const isPageAllowed = useIsPageTypeAllowed(settings);
   const isMobile = useIsMobile();
+  const pathname = usePathname();
   
   // Get effective provider for this page (may be overridden by page config)
   const effectiveProvider = adCounter?.getEffectiveProvider() ?? settings?.activeProvider ?? 'none';
@@ -547,7 +548,7 @@ export function HeaderAd({ className = '' }: AdPlacementProps) {
     showHeaderAd: settings?.showHeaderAd,
     showHeaderAdMobile: settings?.showHeaderAdMobile,
     isMobile,
-    pathname: window.location.pathname
+    pathname
   });
   
   // Check placement settings (use mobile settings if on mobile)
