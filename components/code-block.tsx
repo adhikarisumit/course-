@@ -212,7 +212,7 @@ export default function CodeBlock({
           style={isDark ? oneDark : oneLight}
           showLineNumbers={code.split("\n").length > 3}
           wrapLines={true}
-          wrapLongLines={false}
+          wrapLongLines={true}
           customStyle={{
             margin: 0,
             padding: "0.75rem",

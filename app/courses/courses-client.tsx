@@ -8,7 +8,9 @@ import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import Image from "next/image"
 import { Clock, BookOpen, Lock, CheckCircle, Search, X } from "lucide-react"
-import { SidebarAd, InArticleAd } from "@/components/ads"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
+import { SidebarAd, InArticleAd, HeaderAd } from "@/components/ads"
 
 interface Course {
   id: string
@@ -58,7 +60,10 @@ export function CoursesClient({ courses, initialSearch }: CoursesClientProps) {
   }, [courses])
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <HeaderAd />
+      <div className="flex-1 bg-gradient-to-b from-muted/30 to-background">
       <div className="container mx-auto px-4 py-8 md:py-12">
         {/* Header */}
         <div className="text-center mb-8 md:mb-12">
@@ -272,6 +277,8 @@ export function CoursesClient({ courses, initialSearch }: CoursesClientProps) {
           </div>
         )}
       </div>
+      </div>
+      <Footer />
     </div>
   )
 }

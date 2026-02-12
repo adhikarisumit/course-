@@ -10,7 +10,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Send, Hash, Loader2, RefreshCw, MessageCircle, Trash2, Code, Bold, Italic, Braces, Copy, Check } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowLeft, Send, Hash, Loader2, RefreshCw, MessageCircle, Trash2, Code, Bold, Italic, Braces } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { ContentRenderer } from '@/components/content-renderer';
@@ -61,6 +62,31 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
+const CODE_LANGUAGES = [
+  { value: 'javascript', label: 'JavaScript' },
+  { value: 'typescript', label: 'TypeScript' },
+  { value: 'jsx', label: 'JSX' },
+  { value: 'tsx', label: 'TSX' },
+  { value: 'python', label: 'Python' },
+  { value: 'java', label: 'Java' },
+  { value: 'html', label: 'HTML' },
+  { value: 'css', label: 'CSS' },
+  { value: 'json', label: 'JSON' },
+  { value: 'sql', label: 'SQL' },
+  { value: 'bash', label: 'Bash' },
+  { value: 'c', label: 'C' },
+  { value: 'cpp', label: 'C++' },
+  { value: 'csharp', label: 'C#' },
+  { value: 'go', label: 'Go' },
+  { value: 'rust', label: 'Rust' },
+  { value: 'php', label: 'PHP' },
+  { value: 'ruby', label: 'Ruby' },
+  { value: 'swift', label: 'Swift' },
+  { value: 'kotlin', label: 'Kotlin' },
+  { value: 'yaml', label: 'YAML' },
+  { value: 'text', label: 'Plain Text' },
+];
+
 export default function AdminChatRoomPage() {
   const params = useParams();
   const router = useRouter();
@@ -74,7 +100,7 @@ export default function AdminChatRoomPage() {
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
-  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+  const [selectedCodeLanguage, setSelectedCodeLanguage] = useState('javascript');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -100,17 +126,6 @@ export default function AdminChatRoomPage() {
         textarea.setSelectionRange(start + prefix.length, start + prefix.length + placeholder.length);
       }
     }, 0);
-  };
-
-  // Copy message content to clipboard
-  const copyMessage = async (messageId: string, content: string) => {
-    try {
-      await navigator.clipboard.writeText(content);
-      setCopiedMessageId(messageId);
-      setTimeout(() => setCopiedMessageId(null), 2000);
-    } catch {
-      toast.error('Failed to copy message');
-    }
   };
 
   const scrollToBottom = () => {
@@ -322,20 +337,6 @@ export default function AdminChatRoomPage() {
                             )}
                           </Button>
                         )}
-                        {isOwnMessage && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
-                            onClick={() => copyMessage(message.id, message.content)}
-                          >
-                            {copiedMessageId === message.id ? (
-                              <Check className="h-3.5 w-3.5 text-green-500" />
-                            ) : (
-                              <Copy className="h-3.5 w-3.5" />
-                            )}
-                          </Button>
-                        )}
                         <div
                           className={`px-3 py-2 rounded-lg text-sm select-text ${
                             isOwnMessage
@@ -345,20 +346,6 @@ export default function AdminChatRoomPage() {
                         >
                           <ContentRenderer content={message.content} />
                         </div>
-                        {!isOwnMessage && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
-                            onClick={() => copyMessage(message.id, message.content)}
-                          >
-                            {copiedMessageId === message.id ? (
-                              <Check className="h-3.5 w-3.5 text-green-500" />
-                            ) : (
-                              <Copy className="h-3.5 w-3.5" />
-                            )}
-                          </Button>
-                        )}
                         {!isOwnMessage && (
                           <Button
                             variant="ghost"
@@ -388,7 +375,7 @@ export default function AdminChatRoomPage() {
         <div className="p-3 border-t space-y-2">
           {/* Formatting Toolbar */}
           <TooltipProvider delayDuration={300}>
-            <div className="flex items-center gap-1">
+            <div className="flex flex-wrap items-center gap-1">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -432,6 +419,18 @@ export default function AdminChatRoomPage() {
                 </TooltipTrigger>
                 <TooltipContent side="top"><p>Inline Code</p></TooltipContent>
               </Tooltip>
+              <Select value={selectedCodeLanguage} onValueChange={setSelectedCodeLanguage}>
+                <SelectTrigger className="h-7 w-auto gap-1 text-[11px] font-medium border-none bg-transparent px-1.5 hover:bg-muted/60 focus:ring-0 focus:ring-offset-0 text-muted-foreground">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="max-h-[280px]">
+                  {CODE_LANGUAGES.map((lang) => (
+                    <SelectItem key={lang.value} value={lang.value} className="text-xs">
+                      {lang.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -439,12 +438,12 @@ export default function AdminChatRoomPage() {
                     variant="ghost"
                     size="icon"
                     className="h-7 w-7"
-                    onClick={() => insertFormatting('```\n', '\n```', 'code here')}
+                    onClick={() => insertFormatting(`\`\`\`${selectedCodeLanguage}\n`, '\n```', 'code here')}
                   >
                     <Braces className="h-3.5 w-3.5" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent side="top"><p>Code Block</p></TooltipContent>
+                <TooltipContent side="top"><p>Code Block ({selectedCodeLanguage})</p></TooltipContent>
               </Tooltip>
             </div>
           </TooltipProvider>

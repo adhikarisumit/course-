@@ -1,6 +1,7 @@
 import { Mail, MessageSquare } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import { InArticleAd, HeaderAd } from "@/components/ads"
 
 export default function ContactPage() {
@@ -53,6 +54,7 @@ export default function ContactPage() {
         </div>
       </div>
     </div>
+    <Footer />
     </div>
   )
 }

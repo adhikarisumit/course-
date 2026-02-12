@@ -30,20 +30,18 @@ interface GenericAdConfig {
   inArticleCode: string | null;
 }
 
-// Per-page ad configuration
 interface PageAdConfig {
   maxAds?: number;
   showHeader?: boolean;
   showFooter?: boolean;
   showInArticle?: boolean;
   showSidebar?: boolean;
-  adProvider?: string; // Override global provider for this page
+  adProvider?: string;
 }
 
 interface AdSettings {
   activeProvider: string;
   excludedPages: string | null;
-  // Placement controls
   showHeaderAd?: boolean;
   showFooterAd?: boolean;
   showSidebarAd?: boolean;
@@ -52,17 +50,13 @@ interface AdSettings {
   showCoursePageAd?: boolean;
   showPortalAd?: boolean;
   showBlogAd?: boolean;
-  // Mobile placement controls
   showHeaderAdMobile?: boolean;
   showFooterAdMobile?: boolean;
   showSidebarAdMobile?: boolean;
   showInArticleAdMobile?: boolean;
-  // Global ad limits
   maxAdsPerPage?: number;
   maxInArticleAds?: number;
-  // Per-page configuration
   pageAdConfig?: Record<string, PageAdConfig>;
-  // Provider configs
   adsense?: AdSenseConfig;
   medianet?: GenericAdConfig;
   amazon?: GenericAdConfig;
@@ -71,119 +65,76 @@ interface AdSettings {
   custom?: GenericAdConfig;
 }
 
-// Ad counter context for tracking rendered ads
 interface AdCounterContextType {
   inArticleCount: number;
   totalCount: number;
   incrementInArticle: () => boolean;
   incrementTotal: () => boolean;
   getPageConfig: () => PageAdConfig | null;
-  getEffectiveProvider: () => string; // Get the provider for current page (considering page overrides)
+  getEffectiveProvider: () => string;
 }
 
 const AdCounterContext = createContext<AdCounterContextType | null>(null);
-
-// Context to share ad settings across components
 const AdContext = createContext<AdSettings | null>(null);
 
 export function useAds() {
   return useContext(AdContext);
 }
 
-// Helper to check if current page is excluded
 function useIsExcludedPage(excludedPages: string | null) {
   const pathname = usePathname();
   const currentPath = pathname.toLowerCase();
-  
-  // Always exclude admin pages from ads
   if (currentPath.startsWith('/admin')) return true;
-  
   if (!excludedPages) return false;
-  
   const excludedPaths = excludedPages.split(',').map((p) => p.trim().toLowerCase());
-  
   return excludedPaths.some((excluded) => {
-    if (excluded.endsWith('*')) {
-      return currentPath.startsWith(excluded.slice(0, -1));
-    }
+    if (excluded.endsWith('*')) return currentPath.startsWith(excluded.slice(0, -1));
     return currentPath === excluded || currentPath.startsWith(excluded + '/');
   });
 }
 
-// Helper to check if ads should show on current page type
 function useIsPageTypeAllowed(settings: AdSettings | null) {
   const pathname = usePathname();
-  
   const currentPath = pathname.toLowerCase();
-  
-  // Never show ads on admin pages
   if (currentPath.startsWith('/admin')) return false;
-  
   if (!settings) return true;
-  
-  // Check page-specific settings
   if (currentPath === '/' && settings.showHomePageAd === false) return false;
   if (currentPath.startsWith('/courses') && settings.showCoursePageAd === false) return false;
   if (currentPath.startsWith('/portal') && settings.showPortalAd === false) return false;
   if ((currentPath.startsWith('/blog') || currentPath.startsWith('/articles')) && settings.showBlogAd === false) return false;
-  
   return true;
 }
 
-// Helper to extract script content or src from HTML that may contain script tags
 function parseScriptCode(code: string): { type: 'inline' | 'external' | 'invalid'; content?: string; src?: string; attrs?: Record<string, string> } {
   try {
-    if (!code || !code.trim()) {
-      return { type: 'invalid' };
-    }
-    
+    if (!code || !code.trim()) return { type: 'invalid' };
     const trimmed = code.trim();
-    
-    // Check if the code contains script tags
     const scriptMatch = trimmed.match(/<script([^>]*)>([\s\S]*?)<\/script>/i);
-    
     if (scriptMatch) {
       const attrs = scriptMatch[1] || '';
       const inner = scriptMatch[2] || '';
-      
-      // Extract src attribute if present
       const srcMatch = attrs.match(/src\s*=\s*["']([^"']+)["']/i);
-      
       if (srcMatch) {
-        // External script
         const attrObj: Record<string, string> = {};
-        const asyncMatch = attrs.match(/\basync\b/i);
-        const deferMatch = attrs.match(/\bdefer\b/i);
+        if (attrs.match(/\basync\b/i)) attrObj.async = 'true';
+        if (attrs.match(/\bdefer\b/i)) attrObj.defer = 'true';
         const crossOriginMatch = attrs.match(/crossorigin\s*=\s*["']([^"']+)["']/i);
-        
-        if (asyncMatch) attrObj.async = 'true';
-        if (deferMatch) attrObj.defer = 'true';
         if (crossOriginMatch) attrObj.crossOrigin = crossOriginMatch[1];
-        
         return { type: 'external', src: srcMatch[1], attrs: attrObj };
       } else if (inner.trim()) {
-        // Inline script
         return { type: 'inline', content: inner.trim() };
       }
     }
-    
-    // No script tags found - treat as raw inline JavaScript
-    // But first check if it starts with < (likely HTML, not JS)
-    if (trimmed.startsWith('<')) {
-      // This looks like HTML but not a valid script tag - unsafe to execute as JS
-      console.warn('Ad script code appears to be HTML but not a valid script tag');
-      return { type: 'invalid' };
-    }
-    
-    // Raw JavaScript code
+    if (trimmed.startsWith('<')) return { type: 'invalid' };
     return { type: 'inline', content: trimmed };
-  } catch (error) {
-    console.error('Error parsing script code:', error);
+  } catch {
     return { type: 'invalid' };
   }
 }
 
-// Provider component to fetch and share settings
+// ============================================
+// Provider Component
+// ============================================
 export function AdProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<AdSettings | null>(null);
   const pathname = usePathname();
@@ -201,87 +152,37 @@ export function AdProvider({ children }: { children: React.ReactNode }) {
         console.error('Error fetching ad settings:', error);
       }
     };
-
     fetchSettings();
   }, []);
 
-  // Global footer scripts (like Social Bar) are NOT injected here.
-  // Footer ads are handled by the FooterAd component to avoid duplicate/floating ads.
-
-  // Render provider-specific head scripts
   const renderHeadScripts = () => {
     if (!settings || settings.activeProvider === 'none' || isAdminPage) return null;
-
     switch (settings.activeProvider) {
       case 'adsense':
         if (settings.adsense?.publisherId) {
-          // Use custom headScript if provided, otherwise auto-generate from publisherId
           if (settings.adsense.headScript) {
             const parsed = parseScriptCode(settings.adsense.headScript);
             if (parsed.type === 'external' && parsed.src) {
-              return (
-                <Script
-                  id="adsense-script"
-                  src={parsed.src}
-                  strategy="lazyOnload"
-                  {...(parsed.attrs?.async && { async: true })}
-                  {...(parsed.attrs?.crossOrigin && { crossOrigin: parsed.attrs.crossOrigin as 'anonymous' | 'use-credentials' })}
-                />
-              );
+              return <Script id="adsense-script" src={parsed.src} strategy="lazyOnload" {...(parsed.attrs?.async && { async: true })} {...(parsed.attrs?.crossOrigin && { crossOrigin: parsed.attrs.crossOrigin as 'anonymous' | 'use-credentials' })} />;
             } else if (parsed.type === 'inline' && parsed.content) {
-              return (
-                <Script
-                  id="adsense-script"
-                  strategy="lazyOnload"
-                  dangerouslySetInnerHTML={{ __html: parsed.content }}
-                />
-              );
+              return <Script id="adsense-script" strategy="lazyOnload" dangerouslySetInnerHTML={{ __html: parsed.content }} />;
             }
           }
-          return (
-            <Script
-              id="adsense-script"
-              async
-              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${settings.adsense.publisherId}`}
-              crossOrigin="anonymous"
-              strategy="lazyOnload"
-            />
-          );
+          return <Script id="adsense-script" async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${settings.adsense.publisherId}`} crossOrigin="anonymous" strategy="lazyOnload" />;
         }
         break;
       case 'medianet':
         if (settings.medianet?.customerId) {
-          return (
-            <Script
-              id="medianet-script"
-              async
-              src={`https://contextual.media.net/dmedianet.js?cid=${settings.medianet.customerId}`}
-              strategy="lazyOnload"
-            />
-          );
+          return <Script id="medianet-script" async src={`https://contextual.media.net/dmedianet.js?cid=${settings.medianet.customerId}`} strategy="lazyOnload" />;
         }
         break;
       case 'custom':
         if (settings.custom?.headScript) {
           const parsed = parseScriptCode(settings.custom.headScript);
           if (parsed.type === 'external' && parsed.src) {
-            return (
-              <Script
-                id="custom-ad-script"
-                src={parsed.src}
-                strategy="lazyOnload"
-                {...(parsed.attrs?.async && { async: true })}
-                {...(parsed.attrs?.crossOrigin && { crossOrigin: parsed.attrs.crossOrigin as 'anonymous' | 'use-credentials' })}
-              />
-            );
+            return <Script id="custom-ad-script" src={parsed.src} strategy="lazyOnload" {...(parsed.attrs?.async && { async: true })} {...(parsed.attrs?.crossOrigin && { crossOrigin: parsed.attrs.crossOrigin as 'anonymous' | 'use-credentials' })} />;
           } else if (parsed.type === 'inline' && parsed.content) {
-            return (
-              <Script
-                id="custom-ad-script"
-                strategy="lazyOnload"
-                dangerouslySetInnerHTML={{ __html: parsed.content }}
-              />
-            );
+            return <Script id="custom-ad-script" strategy="lazyOnload" dangerouslySetInnerHTML={{ __html: parsed.content }} />;
           }
         }
         break;
@@ -292,81 +193,50 @@ export function AdProvider({ children }: { children: React.ReactNode }) {
   return (
     <AdContext.Provider value={settings}>
       {renderHeadScripts()}
-      <AdCounterProvider settings={settings}>
-        {children}
-      </AdCounterProvider>
+      <AdCounterProvider settings={settings}>{children}</AdCounterProvider>
     </AdContext.Provider>
   );
 }
 
-// Ad Counter Provider - tracks ad counts per page
 function AdCounterProvider({ children, settings }: { children: React.ReactNode; settings: AdSettings | null }) {
   const pathname = usePathname();
   const [inArticleCount, setInArticleCount] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
-  
-  // Reset counts when pathname changes
-  useEffect(() => {
-    setInArticleCount(0);
-    setTotalCount(0);
-  }, [pathname]);
-  
+
+  useEffect(() => { setInArticleCount(0); setTotalCount(0); }, [pathname]);
+
   const getPageConfig = useCallback((): PageAdConfig | null => {
     if (!settings?.pageAdConfig) return null;
-    
-    // Check for exact match first
-    if (settings.pageAdConfig[pathname]) {
-      return settings.pageAdConfig[pathname];
-    }
-    
-    // Check for prefix matches (e.g., /courses/* matches /courses/123)
+    if (settings.pageAdConfig[pathname]) return settings.pageAdConfig[pathname];
     for (const path of Object.keys(settings.pageAdConfig)) {
-      if (path.endsWith('*') && pathname.startsWith(path.slice(0, -1))) {
-        return settings.pageAdConfig[path];
-      }
+      if (path.endsWith('*') && pathname.startsWith(path.slice(0, -1))) return settings.pageAdConfig[path];
     }
-    
     return null;
   }, [settings?.pageAdConfig, pathname]);
-  
+
   const incrementInArticle = useCallback(() => {
     const pageConfig = getPageConfig();
     const maxInArticle = pageConfig?.maxAds ?? settings?.maxInArticleAds ?? 3;
     const maxTotal = settings?.maxAdsPerPage ?? 5;
-    
-    if (inArticleCount >= maxInArticle || totalCount >= maxTotal) {
-      return false;
-    }
-    
+    if (inArticleCount >= maxInArticle || totalCount >= maxTotal) return false;
     setInArticleCount(prev => prev + 1);
     setTotalCount(prev => prev + 1);
     return true;
   }, [inArticleCount, totalCount, settings, getPageConfig]);
-  
+
   const incrementTotal = useCallback(() => {
     const maxTotal = settings?.maxAdsPerPage ?? 5;
-    
-    if (totalCount >= maxTotal) {
-      return false;
-    }
-    
+    if (totalCount >= maxTotal) return false;
     setTotalCount(prev => prev + 1);
     return true;
   }, [totalCount, settings]);
-  
-  // Get the effective ad provider for current page (considering page-specific overrides)
+
   const getEffectiveProvider = useCallback(() => {
     const pageConfig = getPageConfig();
-    
-    // If page has a specific provider set and it's not 'global', use it
-    if (pageConfig?.adProvider && pageConfig.adProvider !== 'global') {
-      return pageConfig.adProvider;
-    }
-    
-    // Otherwise, use the global provider
+    if (pageConfig?.adProvider && pageConfig.adProvider !== 'global') return pageConfig.adProvider;
     return settings?.activeProvider ?? 'none';
   }, [getPageConfig, settings?.activeProvider]);
-  
+
   return (
     <AdCounterContext.Provider value={{ inArticleCount, totalCount, incrementInArticle, incrementTotal, getPageConfig, getEffectiveProvider }}>
       {children}
@@ -374,16 +244,13 @@ function AdCounterProvider({ children, settings }: { children: React.ReactNode; 
   );
 }
 
-export function useAdCounter() {
-  return useContext(AdCounterContext);
-}
+export function useAdCounter() { return useContext(AdCounterContext); }
 
-// Legacy exports for backward compatibility
 export { AdProvider as AdSenseProvider };
 export { useAds as useAdSense };
 
 // ============================================
-// Generic HTML Ad Component (for non-AdSense providers)
+// Generic HTML Ad Component (direct injection per instance)
 // ============================================
 interface HtmlAdProps {
   code: string | null | undefined;
@@ -391,87 +258,99 @@ interface HtmlAdProps {
   style?: React.CSSProperties;
 }
 
+// Global counter for unique ad container IDs
+let adContainerCounter = 0;
+
 export function HtmlAd({ code, className = '', style }: HtmlAdProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
-  const scriptInjected = useRef(false);
+  const [containerId] = useState(() => `ad-container-${++adContainerCounter}-${Date.now()}`);
+  const injectedRef = useRef(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted || !code || !containerRef.current || scriptInjected.current) return;
-    scriptInjected.current = true;
-
+    if (!mounted || !code || !containerRef.current || injectedRef.current) return;
+    injectedRef.current = true;
+    
     const container = containerRef.current;
     
-    // Parse and inject the ad code
+    // Parse the code and extract scripts
     const temp = document.createElement('div');
     temp.innerHTML = code;
     
-    // Extract and execute scripts separately
-    const scripts = temp.querySelectorAll('script');
-    const nonScriptContent = code.replace(/<script[\s\S]*?<\/script>/gi, '').trim();
+    // Get all scripts
+    const scripts = Array.from(temp.querySelectorAll('script'));
     
-    // Insert non-script HTML first
+    // Get non-script content
+    const nonScriptContent = code.replace(/<script[\s\S]*?<\/script>/gi, '').trim();
     if (nonScriptContent) {
       container.innerHTML = nonScriptContent;
     }
     
-    // Then execute scripts
-    scripts.forEach((oldScript) => {
-      try {
+    // Execute scripts sequentially with delays to prevent race conditions
+    const executeScripts = async () => {
+      for (let i = 0; i < scripts.length; i++) {
+        const oldScript = scripts[i];
         const newScript = document.createElement('script');
+        
+        // Copy attributes
         Array.from(oldScript.attributes).forEach(attr => {
           newScript.setAttribute(attr.name, attr.value);
         });
+        
+        // Copy inline content
         if (!oldScript.hasAttribute('src') && oldScript.textContent) {
           const content = oldScript.textContent.trim();
           if (content && !content.startsWith('<')) {
             newScript.textContent = content;
           }
         }
-        container.appendChild(newScript);
-      } catch (error) {
-        console.error('Error executing ad script:', error);
+        
+        // Append and wait for external scripts to load
+        if (oldScript.hasAttribute('src')) {
+          await new Promise<void>((resolve) => {
+            newScript.onload = () => resolve();
+            newScript.onerror = () => resolve();
+            container.appendChild(newScript);
+            // Timeout fallback
+            setTimeout(resolve, 2000);
+          });
+        } else {
+          container.appendChild(newScript);
+          // Small delay between inline scripts
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
       }
-    });
-
+    };
+    
+    executeScripts();
+    
     return () => {
-      // Cleanup on unmount
       if (containerRef.current) {
         containerRef.current.innerHTML = '';
       }
-      scriptInjected.current = false;
+      injectedRef.current = false;
     };
-  }, [mounted, code]);
+  }, [mounted, code, containerId]);
 
-  // Return empty div on server to avoid hydration mismatch
-  if (!mounted) {
-    return <div className={`ad-container ${className}`} />;
-  }
-
-  if (!code) return null;
+  // Don't render anything if no code is provided
+  if (!code || !code.trim()) return null;
+  // Return null during SSR, will render on client
+  if (!mounted) return null;
 
   return (
-    <div
-      ref={containerRef}
+    <div 
+      id={containerId}
+      ref={containerRef} 
       className={`ad-container ${className}`}
-      style={{
-        width: '100%',
-        minHeight: '50px',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        ...style,
-      }}
+      style={{ width: '100%', minHeight: '50px', display: 'flex', justifyContent: 'center', alignItems: 'center', ...style }} 
     />
   );
 }
 
 // ============================================
-// AdSense Ad Unit Component
+// AdSense Ad Unit
 // ============================================
 interface AdSenseUnitProps {
   slot: string;
@@ -484,7 +363,10 @@ interface AdSenseUnitProps {
 
 function AdSenseUnit({ slot, publisherId, format = 'auto', responsive = true, className = '', style }: AdSenseUnitProps) {
   const [adLoaded, setAdLoaded] = useState(false);
-
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => { setMounted(true); }, []);
+  
   const loadAd = useCallback(() => {
     if (!adLoaded && publisherId && slot) {
       try {
@@ -497,31 +379,145 @@ function AdSenseUnit({ slot, publisherId, format = 'auto', responsive = true, cl
   }, [adLoaded, publisherId, slot]);
 
   useEffect(() => {
+    if (!mounted) return;
     const timer = setTimeout(loadAd, 100);
     return () => clearTimeout(timer);
-  }, [loadAd]);
+  }, [loadAd, mounted]);
 
+  // Don't render anything if missing required config
   if (!publisherId || !slot) return null;
-
+  // Return null during SSR
+  if (!mounted) return null;
+  
   return (
     <div className={`adsense-container ${className}`} style={style}>
-      <ins
-        className="adsbygoogle"
-        style={{
-          display: 'block',
-          ...style,
-        }}
-        data-ad-client={publisherId}
-        data-ad-slot={slot}
-        data-ad-format={format}
-        data-full-width-responsive={responsive ? 'true' : 'false'}
-      />
+      <ins className="adsbygoogle" style={{ display: 'block', ...style }}
+        data-ad-client={publisherId} data-ad-slot={slot} data-ad-format={format}
+        data-full-width-responsive={responsive ? 'true' : 'false'} />
     </div>
   );
 }
 
 // ============================================
-// Universal Ad Components
+// Shared Ad Rendering
+// ============================================
+type AdSlot = 'header' | 'footer' | 'sidebar' | 'inArticle';
+
+// Check if provider config exists in settings
+function hasProviderConfig(settings: AdSettings, provider: string): boolean {
+  switch (provider) {
+    case 'adsense': return !!settings.adsense;
+    case 'medianet': return !!settings.medianet;
+    case 'amazon': return !!settings.amazon;
+    case 'propeller': return !!settings.propeller;
+    case 'adsterra': return !!settings.adsterra;
+    case 'custom': return !!settings.custom;
+    default: return false;
+  }
+}
+
+function useAdVisibility(slot: AdSlot) {
+  const settings = useAds();
+  const adCounter = useAdCounter();
+  const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
+  const isPageAllowed = useIsPageTypeAllowed(settings);
+  const isMobile = useIsMobile();
+  const effectiveProvider = adCounter?.getEffectiveProvider() ?? settings?.activeProvider ?? 'none';
+
+  const noRender = { visible: false as const, settings, effectiveProvider, isMobile, adCounter };
+  
+  // Early exit conditions
+  if (!settings || effectiveProvider === 'none' || isExcluded || !isPageAllowed) return noRender;
+  
+  // Check if provider config exists (API only returns configs with real content)
+  if (!hasProviderConfig(settings, effectiveProvider)) return noRender;
+
+  const slotCap = slot === 'inArticle' ? 'InArticle' : slot.charAt(0).toUpperCase() + slot.slice(1);
+  const desktopKey = `show${slotCap}Ad` as keyof AdSettings;
+  const mobileKey = `show${slotCap}AdMobile` as keyof AdSettings;
+  if ((isMobile ? settings[mobileKey] : settings[desktopKey]) === false) return noRender;
+
+  const pageConfig = adCounter?.getPageConfig();
+  const pageKey = slot === 'inArticle' ? 'showInArticle' : `show${slotCap}`;
+  if (pageConfig && (pageConfig as Record<string, unknown>)[pageKey] === false) return noRender;
+
+  return { visible: true as const, settings, effectiveProvider, isMobile, adCounter };
+}
+
+// Helper to check if a string has real content
+function hasContent(str: string | null | undefined): boolean {
+  return typeof str === 'string' && str.trim().length > 0;
+}
+
+function hasValidAdCode(settings: AdSettings, provider: string, slotType: AdSlot): boolean {
+  if (!settings || !provider || provider === 'none') return false;
+  
+  // Get the specific slot code - NO fallback to other slots
+  const getSlotCode = (cfg: GenericAdConfig | undefined | null): string | null => {
+    if (!cfg) return null;
+    const slotMap: Record<AdSlot, string | null | undefined> = {
+      header: cfg.headerCode,
+      footer: cfg.footerCode,
+      sidebar: cfg.sidebarCode,
+      inArticle: cfg.inArticleCode,
+    };
+    const code = slotMap[slotType];
+    return hasContent(code) ? code! : null;
+  };
+
+  switch (provider) {
+    case 'adsense': {
+      const a = settings.adsense;
+      if (!a || !hasContent(a.publisherId)) return false;
+      const slotId = slotType === 'header' ? a.headerSlot : slotType === 'footer' ? a.footerSlot : slotType === 'sidebar' ? a.sidebarSlot : a.inArticleSlot;
+      return hasContent(slotId);
+    }
+    case 'medianet': return getSlotCode(settings.medianet) !== null;
+    case 'amazon': return getSlotCode(settings.amazon) !== null;
+    case 'propeller': return getSlotCode(settings.propeller) !== null;
+    case 'adsterra': return getSlotCode(settings.adsterra) !== null;
+    case 'custom': return getSlotCode(settings.custom) !== null;
+    default: return false;
+  }
+}
+
+function renderProviderAd(settings: AdSettings, provider: string, slotType: AdSlot, cls: string, style: React.CSSProperties) {
+  // Get the specific slot code - NO fallback to other slots
+  const getCode = (cfg: GenericAdConfig | undefined): string | null => {
+    if (!cfg) return null;
+    const slotMap: Record<AdSlot, string | null | undefined> = {
+      header: cfg.headerCode,
+      footer: cfg.footerCode,
+      sidebar: cfg.sidebarCode,
+      inArticle: cfg.inArticleCode,
+    };
+    const code = slotMap[slotType];
+    return hasContent(code) ? code! : null;
+  };
+
+  // First check if there's valid ad code
+  if (!hasValidAdCode(settings, provider, slotType)) return null;
+
+  switch (provider) {
+    case 'adsense': {
+      const a = settings.adsense;
+      if (!a?.publisherId) return null;
+      const slotId = slotType === 'header' ? a.headerSlot : slotType === 'footer' ? a.footerSlot : slotType === 'sidebar' ? a.sidebarSlot : a.inArticleSlot;
+      if (!slotId) return null;
+      const fmt = slotType === 'sidebar' ? 'vertical' : slotType === 'header' || slotType === 'footer' ? 'horizontal' : 'auto';
+      return <AdSenseUnit slot={slotId} publisherId={a.publisherId} format={fmt} className={cls} style={style} />;
+    }
+    case 'medianet': { const c = getCode(settings.medianet); return c ? <HtmlAd code={c} className={cls} style={style} /> : null; }
+    case 'amazon': { const c = getCode(settings.amazon); return c ? <HtmlAd code={c} className={cls} style={style} /> : null; }
+    case 'propeller': { const c = getCode(settings.propeller); return c ? <HtmlAd code={c} className={cls} style={style} /> : null; }
+    case 'adsterra': { const c = getCode(settings.adsterra); return c ? <HtmlAd code={c} className={cls} style={style} /> : null; }
+    case 'custom': { const c = getCode(settings.custom); return c ? <HtmlAd code={c} className={cls} style={style} /> : null; }
+    default: return null;
+  }
+}
+
+// ============================================
+// Ad Placement Components
 // ============================================
 interface AdPlacementProps {
   className?: string;
@@ -529,371 +525,132 @@ interface AdPlacementProps {
 }
 
 export function HeaderAd({ className = '' }: AdPlacementProps) {
-  const settings = useAds();
-  const adCounter = useAdCounter();
-  const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
-  const isPageAllowed = useIsPageTypeAllowed(settings);
-  const isMobile = useIsMobile();
-  const pathname = usePathname();
+  const { visible, settings, effectiveProvider } = useAdVisibility('header');
+  const [mounted, setMounted] = useState(false);
   
-  // Get effective provider for this page (may be overridden by page config)
-  const effectiveProvider = adCounter?.getEffectiveProvider() ?? settings?.activeProvider ?? 'none';
+  useEffect(() => { setMounted(true); }, []);
   
-  // Debug logging
-  console.log('HeaderAd Debug:', {
-    settings: !!settings,
-    effectiveProvider,
-    isExcluded,
-    isPageAllowed,
-    showHeaderAd: settings?.showHeaderAd,
-    showHeaderAdMobile: settings?.showHeaderAdMobile,
-    isMobile,
-    pathname
-  });
+  if (!visible || !settings) return null;
+  // Check if ad code exists before rendering container
+  if (!hasValidAdCode(settings, effectiveProvider!, 'header')) return null;
+  // Avoid hydration mismatch
+  if (!mounted) return null;
   
-  // Check placement settings (use mobile settings if on mobile)
-  if (!settings || effectiveProvider === 'none' || isExcluded || !isPageAllowed) {
-    console.log('HeaderAd returning null due to:', {
-      noSettings: !settings,
-      providerNone: effectiveProvider === 'none',
-      isExcluded,
-      notPageAllowed: !isPageAllowed
-    });
-    return null;
-  }
-  const showHeaderAd = isMobile ? settings.showHeaderAdMobile : settings.showHeaderAd;
-  if (showHeaderAd === false) {
-    console.log('HeaderAd returning null because showHeaderAd is false');
-    return null;
-  }
-  
-  // Check page-specific settings
-  const pageConfig = adCounter?.getPageConfig();
-  if (pageConfig?.showHeader === false) return null;
-
-  const containerStyle: React.CSSProperties = { minHeight: '50px' };
-  const singleAdClass = `flex-1 max-w-md flex justify-center`;
-
-  // Helper to render a single ad unit
-  const renderAdUnit = (key: string) => {
-    console.log('HeaderAd renderAdUnit:', { key, effectiveProvider, settings });
-    switch (effectiveProvider) {
-      case 'adsense':
-        if (settings.adsense?.headerSlot && settings.adsense?.publisherId) {
-          console.log('HeaderAd rendering AdSense ad');
-          return (
-            <AdSenseUnit
-              key={key}
-              slot={settings.adsense.headerSlot}
-              publisherId={settings.adsense.publisherId}
-              format="horizontal"
-              className={singleAdClass}
-              style={containerStyle}
-            />
-          );
-        }
-        console.log('HeaderAd: AdSense not configured', { headerSlot: settings.adsense?.headerSlot, publisherId: settings.adsense?.publisherId });
-        return null;
-      case 'medianet':
-        console.log('HeaderAd rendering Media.net ad', { code: !!settings.medianet?.headerCode });
-        return <HtmlAd key={key} code={settings.medianet?.headerCode} className={singleAdClass} style={containerStyle} />;
-      case 'amazon':
-        console.log('HeaderAd rendering Amazon ad', { code: !!settings.amazon?.headerCode });
-        return <HtmlAd key={key} code={settings.amazon?.headerCode} className={singleAdClass} style={containerStyle} />;
-      case 'propeller':
-        console.log('HeaderAd rendering Propeller ad', { code: !!settings.propeller?.headerCode });
-        return <HtmlAd key={key} code={settings.propeller?.headerCode} className={singleAdClass} style={containerStyle} />;
-      case 'adsterra':
-        console.log('HeaderAd rendering Adsterra ad', { code: !!settings.adsterra?.headerCode });
-        return <HtmlAd key={key} code={settings.adsterra?.headerCode} className={singleAdClass} style={containerStyle} />;
-      case 'custom':
-        console.log('HeaderAd rendering Custom ad', { code: !!settings.custom?.headerCode });
-        return <HtmlAd key={key} code={settings.custom?.headerCode} className={singleAdClass} style={containerStyle} />;
-      default:
-        console.log('HeaderAd: Unknown provider', effectiveProvider);
-        return null;
-    }
-  };
-
-  const adUnit1 = renderAdUnit('header-ad-1');
-  const adUnit2 = renderAdUnit('header-ad-2');
-  const adUnit3 = renderAdUnit('header-ad-3');
-
-  if (!adUnit1) return null;
-
+  const ad = renderProviderAd(settings, effectiveProvider!, 'header', 'w-full flex justify-center', { minHeight: '90px' });
+  if (!ad) return null;
   return (
-    <div className={`w-full py-2 ${className}`}>
-      {/* Desktop: 3 ads side by side */}
-      <div className="hidden md:flex justify-center gap-4 max-w-7xl mx-auto px-4">
-        {adUnit1}
-        {adUnit2}
-        {adUnit3}
-      </div>
-      {/* Mobile: single ad */}
-      <div className="md:hidden flex justify-center px-4">
-        {adUnit1}
+    <div className={`w-full animate-in fade-in duration-500 ${className}`}>
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 py-2">
+        <div className="relative rounded-xl overflow-hidden bg-gradient-to-r from-muted/40 via-muted/20 to-muted/40 border border-border/40 backdrop-blur-sm">
+          <div className="absolute top-1 right-2 z-10">
+            <span className="text-[9px] uppercase tracking-widest text-muted-foreground/40 font-medium select-none">Ad</span>
+          </div>
+          {ad}
+        </div>
       </div>
     </div>
   );
 }
 
 export function FooterAd({ className = '' }: AdPlacementProps) {
-  const settings = useAds();
-  const adCounter = useAdCounter();
-  const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
-  const isPageAllowed = useIsPageTypeAllowed(settings);
-  const isMobile = useIsMobile();
+  const { visible, settings, effectiveProvider } = useAdVisibility('footer');
+  const [mounted, setMounted] = useState(false);
   
-  // Get effective provider for this page (may be overridden by page config)
-  const effectiveProvider = adCounter?.getEffectiveProvider() ?? settings?.activeProvider ?? 'none';
+  useEffect(() => { setMounted(true); }, []);
   
-  // Check placement settings (use mobile settings if on mobile)
-  if (!settings || effectiveProvider === 'none' || isExcluded || !isPageAllowed) return null;
-  const showFooterAd = isMobile ? settings.showFooterAdMobile : settings.showFooterAd;
-  if (showFooterAd === false) return null;
+  if (!visible || !settings) return null;
+  // Check if ad code exists before rendering container
+  if (!hasValidAdCode(settings, effectiveProvider!, 'footer')) return null;
+  // Avoid hydration mismatch
+  if (!mounted) return null;
   
-  // Check page-specific settings
-  const pageConfig = adCounter?.getPageConfig();
-  if (pageConfig?.showFooter === false) return null;
-
-  const containerStyle: React.CSSProperties = { minHeight: '90px' };
-  const singleAdClass = `flex-1 max-w-md flex justify-center`;
-
-  // Helper to render a single ad unit
-  const renderAdUnit = (key: string) => {
-    switch (effectiveProvider) {
-      case 'adsense':
-        if (settings.adsense?.footerSlot && settings.adsense?.publisherId) {
-          return (
-            <AdSenseUnit
-              key={key}
-              slot={settings.adsense.footerSlot}
-              publisherId={settings.adsense.publisherId}
-              format="horizontal"
-              className={singleAdClass}
-              style={containerStyle}
-            />
-          );
-        }
-        return null;
-      case 'medianet': {
-        const code = settings.medianet?.footerCode || settings.medianet?.headerCode;
-        return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
-      }
-      case 'amazon': {
-        const code = settings.amazon?.footerCode || settings.amazon?.headerCode;
-        return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
-      }
-      case 'propeller': {
-        const code = settings.propeller?.footerCode || settings.propeller?.headerCode;
-        return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
-      }
-      case 'adsterra': {
-        const code = settings.adsterra?.footerCode;
-        return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
-      }
-      case 'custom': {
-        const code = settings.custom?.footerCode;
-        return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
-      }
-      default:
-        return null;
-    }
-  };
-
-  const adUnit1 = renderAdUnit('footer-ad-1');
-  const adUnit2 = renderAdUnit('footer-ad-2');
-  const adUnit3 = renderAdUnit('footer-ad-3');
-
-  if (!adUnit1) return null;
-
+  const ad = renderProviderAd(settings, effectiveProvider!, 'footer', 'w-full flex justify-center', { minHeight: '90px' });
+  if (!ad) return null;
   return (
-    <div className={`w-full py-2 ${className}`}>
-      {/* Desktop: 3 ads side by side */}
-      <div className="hidden md:flex justify-center gap-4 max-w-7xl mx-auto px-4">
-        {adUnit1}
-        {adUnit2}
-        {adUnit3}
-      </div>
-      {/* Mobile: single ad */}
-      <div className="md:hidden flex justify-center px-4">
-        {adUnit1}
+    <div className={`w-full animate-in fade-in duration-500 ${className}`}>
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 py-2">
+        <div className="relative rounded-xl overflow-hidden bg-gradient-to-r from-muted/40 via-muted/20 to-muted/40 border border-border/40 backdrop-blur-sm">
+          <div className="absolute top-1 right-2 z-10">
+            <span className="text-[9px] uppercase tracking-widest text-muted-foreground/40 font-medium select-none">Ad</span>
+          </div>
+          {ad}
+        </div>
       </div>
     </div>
   );
 }
 
 export function SidebarAd({ className = '' }: AdPlacementProps) {
-  const settings = useAds();
-  const adCounter = useAdCounter();
-  const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
-  const isPageAllowed = useIsPageTypeAllowed(settings);
-  const isMobile = useIsMobile();
+  const { visible, settings, effectiveProvider } = useAdVisibility('sidebar');
+  const [mounted, setMounted] = useState(false);
   
-  // Get effective provider for this page (may be overridden by page config)
-  const effectiveProvider = adCounter?.getEffectiveProvider() ?? settings?.activeProvider ?? 'none';
+  useEffect(() => { setMounted(true); }, []);
   
-  // Check placement settings (use mobile settings if on mobile)
-  if (!settings || effectiveProvider === 'none' || isExcluded || !isPageAllowed) return null;
-  const showSidebarAd = isMobile ? settings.showSidebarAdMobile : settings.showSidebarAd;
-  if (showSidebarAd === false) return null;
+  if (!visible || !settings) return null;
+  // Check if ad code exists before rendering container
+  if (!hasValidAdCode(settings, effectiveProvider!, 'sidebar')) return null;
+  // Avoid hydration mismatch
+  if (!mounted) return null;
   
-  // Check page-specific settings
-  const pageConfig = adCounter?.getPageConfig();
-  if (pageConfig?.showSidebar === false) return null;
-
-  const containerStyle: React.CSSProperties = { minHeight: '250px' };
-  const containerClass = `w-full flex justify-center ${className}`;
-
-  let adCode: string | null | undefined = null;
-  let fallbackCode: string | null | undefined = null;
-
-  switch (effectiveProvider) {
-    case 'adsense':
-      if (settings.adsense?.sidebarSlot && settings.adsense?.publisherId) {
-        return (
-          <AdSenseUnit
-            slot={settings.adsense.sidebarSlot}
-            publisherId={settings.adsense.publisherId}
-            format="vertical"
-            className={containerClass}
-            style={containerStyle}
-          />
-        );
-      }
-      break;
-    case 'medianet':
-      adCode = settings.medianet?.sidebarCode;
-      fallbackCode = settings.medianet?.headerCode;
-      break;
-    case 'amazon':
-      adCode = settings.amazon?.sidebarCode;
-      fallbackCode = settings.amazon?.headerCode;
-      break;
-    case 'propeller':
-      adCode = settings.propeller?.sidebarCode;
-      fallbackCode = settings.propeller?.headerCode;
-      break;
-    case 'adsterra':
-      adCode = settings.adsterra?.sidebarCode;
-      fallbackCode = settings.adsterra?.headerCode;
-      break;
-    case 'custom':
-      adCode = settings.custom?.sidebarCode;
-      fallbackCode = settings.custom?.headerCode;
-      break;
-  }
-
-  // Return HtmlAd if we have code, fallback to header code if not
-  const finalCode = (adCode && adCode.trim()) ? adCode : fallbackCode;
-  if (finalCode && finalCode.trim()) {
-    return <HtmlAd code={finalCode} className={containerClass} style={containerStyle} />;
-  }
-
-  return null;
+  const ad = renderProviderAd(settings, effectiveProvider!, 'sidebar', 'w-full flex justify-center', { minHeight: '250px' });
+  if (!ad) return null;
+  return (
+    <div className={`w-full animate-in fade-in slide-in-from-right-2 duration-500 ${className}`}>
+      <div className="relative rounded-xl overflow-hidden bg-gradient-to-b from-muted/30 to-muted/10 border border-border/40 backdrop-blur-sm p-1">
+        <div className="absolute top-1.5 right-2 z-10">
+          <span className="text-[9px] uppercase tracking-widest text-muted-foreground/40 font-medium select-none">Sponsored</span>
+        </div>
+        {ad}
+      </div>
+    </div>
+  );
 }
 
 export function InArticleAd({ className = '' }: AdPlacementProps) {
-  const settings = useAds();
-  const adCounter = useAdCounter();
-  const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
-  const isPageAllowed = useIsPageTypeAllowed(settings);
-  const isMobile = useIsMobile();
+  const { visible, settings, effectiveProvider, adCounter } = useAdVisibility('inArticle');
   const [canShow, setCanShow] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const checkedRef = useRef(false);
   
-  // Get effective provider for this page (may be overridden by page config)
-  const effectiveProvider = adCounter?.getEffectiveProvider() ?? settings?.activeProvider ?? 'none';
+  useEffect(() => { setMounted(true); }, []);
   
   useEffect(() => {
     if (checkedRef.current) return;
-    if (adCounter && adCounter.incrementInArticle()) {
-      setCanShow(true);
-    }
+    if (adCounter && adCounter.incrementInArticle()) setCanShow(true);
     checkedRef.current = true;
   }, [adCounter]);
   
-  // Check placement settings (use mobile settings if on mobile)
-  if (!settings || effectiveProvider === 'none' || isExcluded || !isPageAllowed) return null;
-  const showInArticleAd = isMobile ? settings.showInArticleAdMobile : settings.showInArticleAd;
-  if (showInArticleAd === false) return null;
-  
-  // Check per-page config
-  const pageConfig = adCounter?.getPageConfig();
-  if (pageConfig?.showInArticle === false) return null;
-  
-  // Check if we've exceeded the limit
+  if (!visible || !settings) return null;
   if (!canShow && checkedRef.current) return null;
-
-  const containerStyle: React.CSSProperties = { minHeight: '90px' };
-  const singleAdClass = `flex-1 max-w-md flex justify-center`;
-
-  // Helper to render a single ad unit
-  const renderAdUnit = (key: string) => {
-    switch (effectiveProvider) {
-      case 'adsense':
-        if (settings.adsense?.inArticleSlot && settings.adsense?.publisherId) {
-          return (
-            <AdSenseUnit
-              key={key}
-              slot={settings.adsense.inArticleSlot}
-              publisherId={settings.adsense.publisherId}
-              format="auto"
-              className={singleAdClass}
-              style={containerStyle}
-            />
-          );
-        }
-        return null;
-      case 'medianet': {
-        const code = settings.medianet?.inArticleCode || settings.medianet?.headerCode;
-        return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
-      }
-      case 'amazon': {
-        const code = settings.amazon?.inArticleCode || settings.amazon?.headerCode;
-        return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
-      }
-      case 'propeller': {
-        const code = settings.propeller?.inArticleCode || settings.propeller?.headerCode;
-        return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
-      }
-      case 'adsterra': {
-        const code = settings.adsterra?.inArticleCode || settings.adsterra?.headerCode;
-        return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
-      }
-      case 'custom': {
-        const code = settings.custom?.inArticleCode || settings.custom?.headerCode;
-        return code ? <HtmlAd key={key} code={code} className={singleAdClass} style={containerStyle} /> : null;
-      }
-      default:
-        return null;
-    }
-  };
-
-  const adUnit1 = renderAdUnit('inarticle-ad-1');
-  const adUnit2 = renderAdUnit('inarticle-ad-2');
-  const adUnit3 = renderAdUnit('inarticle-ad-3');
-
-  if (!adUnit1) return null;
-
+  // Check if ad code exists before rendering container
+  if (!hasValidAdCode(settings, effectiveProvider!, 'inArticle')) return null;
+  // Avoid hydration mismatch
+  if (!mounted) return null;
+  
+  const ad = renderProviderAd(settings, effectiveProvider!, 'inArticle', 'w-full flex justify-center', { minHeight: '90px' });
+  if (!ad) return null;
   return (
-    <div className={`w-full py-2 ${className}`}>
-      {/* Desktop: 3 ads side by side */}
-      <div className="hidden md:flex justify-center gap-4 max-w-7xl mx-auto px-4">
-        {adUnit1}
-        {adUnit2}
-        {adUnit3}
-      </div>
-      {/* Mobile: single ad */}
-      <div className="md:hidden flex justify-center px-4">
-        {adUnit1}
+    <div className={`w-full my-6 sm:my-8 animate-in fade-in duration-700 ${className}`}>
+      <div className="max-w-4xl mx-auto">
+        <div className="relative">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+          <div className="pt-4 pb-4">
+            <div className="relative rounded-xl overflow-hidden bg-gradient-to-r from-muted/30 via-muted/15 to-muted/30 border border-border/30 backdrop-blur-sm">
+              <div className="absolute top-1 left-1/2 -translate-x-1/2 z-10">
+                <span className="text-[9px] uppercase tracking-widest text-muted-foreground/40 font-medium select-none">Advertisement</span>
+              </div>
+              {ad}
+            </div>
+          </div>
+          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+        </div>
       </div>
     </div>
   );
 }
 
 // ============================================
-// Generic Ad Unit (for custom placements)
+// Generic Ad Unit
 // ============================================
 interface AdUnitProps {
   placement: 'header' | 'footer' | 'sidebar' | 'inArticle';
@@ -903,34 +660,23 @@ interface AdUnitProps {
 
 export function AdUnit({ placement, className = '', style }: AdUnitProps) {
   switch (placement) {
-    case 'header':
-      return <HeaderAd className={className} style={style} />;
-    case 'footer':
-      return <FooterAd className={className} style={style} />;
-    case 'sidebar':
-      return <SidebarAd className={className} style={style} />;
-    case 'inArticle':
-      return <InArticleAd className={className} style={style} />;
-    default:
-      return null;
+    case 'header': return <HeaderAd className={className} style={style} />;
+    case 'footer': return <FooterAd className={className} style={style} />;
+    case 'sidebar': return <SidebarAd className={className} style={style} />;
+    case 'inArticle': return <InArticleAd className={className} style={style} />;
+    default: return null;
   }
 }
 
-// Auto Ads component (for providers that support auto placement)
 export function AutoAds() {
   const settings = useAds();
   const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
-
-  // Auto ads are primarily for AdSense and are handled by the script
-  if (!settings || settings.activeProvider !== 'adsense' || !settings.adsense?.autoAds || isExcluded) {
-    return null;
-  }
-
+  if (!settings || settings.activeProvider !== 'adsense' || !settings.adsense?.autoAds || isExcluded) return null;
   return null;
 }
 
 // ============================================
-// Course-Specific Ad Component
+// Course-Specific Ad
 // ============================================
 interface CourseAdProps {
   adCode: string | null | undefined;
@@ -943,20 +689,8 @@ export function CourseAd({ adCode, showAds = true, className = '', style }: Cour
   const settings = useAds();
   const isExcluded = useIsExcludedPage(settings?.excludedPages || null);
   const isPageAllowed = useIsPageTypeAllowed(settings);
-  
-  // Don't render if ads are disabled for this course
-  if (!showAds) return null;
-  
-  // Don't render if page is excluded or course ads are disabled globally
-  if (isExcluded || !isPageAllowed) return null;
-  
-  // Don't render if no ad code provided
-  if (!adCode || adCode.trim() === '') {
-    // Fall back to global in-article ad if no course-specific ad
-    return <InArticleAd className={className} style={style} />;
-  }
-  
-  // Render course-specific ad
+  if (!showAds || isExcluded || !isPageAllowed) return null;
+  if (!adCode || adCode.trim() === '') return <InArticleAd className={className} style={style} />;
   return (
     <div className={`course-ad ${className}`} style={style}>
       <HtmlAd code={adCode} />

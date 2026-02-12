@@ -1,5 +1,6 @@
 import { Header } from "@/components/header"
-import { HeaderAd } from "@/components/ads"
+import { Footer } from "@/components/footer"
+import { HeaderAd, InArticleAd } from "@/components/ads"
 
 export default function TermsPage() {
   const currentDate = new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })
@@ -99,8 +100,14 @@ export default function TermsPage() {
         <p className="text-muted-foreground">
           If you have any questions about these Terms of Service, please contact us at proteclink.com@gmail.com
         </p>
+        
+        {/* In-Article Ad */}
+        <div className="mt-10">
+          <InArticleAd />
+        </div>
       </div>
     </div>
+    <Footer />
     </div>
   )
 }

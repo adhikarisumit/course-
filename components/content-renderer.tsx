@@ -245,7 +245,7 @@ export function ContentRenderer({ content, className = "" }: ContentRendererProp
               </p>
             )
           case 'code':
-            return <CodeBlock key={i} code={el.content} language={el.language || 'text'} showLanguageSelector={true} className="my-4" />
+            return <CodeBlock key={i} code={el.content} language={el.language || 'text'} showLanguageSelector={false} className="my-4" />
           case 'blockquote':
             return (
               <blockquote key={i} className="border-l-4 border-primary pl-4 my-4 italic text-muted-foreground">

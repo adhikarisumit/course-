@@ -1,6 +1,7 @@
 import { BookOpen, Target, Users, Award, GraduationCap, Zap, Shield, Heart } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import { InArticleAd, HeaderAd } from "@/components/ads"
 
 export default function AboutPage() {
@@ -142,9 +143,15 @@ export default function AboutPage() {
             programming, design, business, or any other subject, Proteclink provides the foundation for successful
             online education.
           </p>
+          
+          {/* In-Article Ad */}
+          <div className="mt-8">
+            <InArticleAd />
+          </div>
         </div>
       </div>
     </div>
+    <Footer />
     </div>
   )
 }
