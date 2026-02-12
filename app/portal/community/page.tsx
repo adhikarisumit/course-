@@ -137,14 +137,10 @@ export default function CommunityPage() {
     }
   }, [session])
 
-  // Auto-scroll to bottom when new messages arrive
+  // Scroll to bottom only on initial load or when user sends a message
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
 
   // Fetch chat rooms
   const fetchRooms = useCallback(async () => {
@@ -197,7 +193,9 @@ export default function CommunityPage() {
   }, [selectedRoom, toast])
 
   useEffect(() => {
-    fetchMessages()
+    fetchMessages().then(() => {
+      setTimeout(() => scrollToBottom(), 100)
+    })
   }, [fetchMessages])
 
   // Poll for new messages every 5 seconds
@@ -229,6 +227,7 @@ export default function CommunityPage() {
       const message = await response.json()
       setMessages((prev) => [...prev, message])
       setNewMessage("")
+      setTimeout(() => scrollToBottom(), 100)
     } catch (error) {
       console.error("Error sending message:", error)
       toast({
