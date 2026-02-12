@@ -108,7 +108,7 @@ export function HtmlContentRenderer({ content, className = "" }: HtmlContentRend
               key={elementKey++}
               code={codeText}
               language={language}
-              showLanguageSelector={true}
+              showLanguageSelector={false}
               className="my-3 sm:my-4"
             />
           );

@@ -264,7 +264,7 @@ export function MarkdownRenderer({ content, className = "" }: MarkdownRendererPr
           case 'code':
             return (
               <div key={index} className="not-prose my-4">
-                <CodeBlock code={element.content} language={element.language || 'text'} showLanguageSelector={true} />
+                <CodeBlock code={element.content} language={element.language || 'text'} showLanguageSelector={false} />
               </div>
             )
 
