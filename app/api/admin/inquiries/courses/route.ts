@@ -1,40 +1,19 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
-import { readFile, writeFile, mkdir } from "fs/promises"
-import path from "path"
-
-const COURSES_FILE = path.join(process.cwd(), "storage", "inquiry-courses.json")
-
-async function ensureFile() {
-  try {
-    await mkdir(path.join(process.cwd(), "storage"), { recursive: true })
-    await readFile(COURSES_FILE, "utf-8")
-  } catch {
-    await writeFile(COURSES_FILE, JSON.stringify([]), "utf-8")
-  }
-}
-
-async function getCourses(): Promise<string[]> {
-  await ensureFile()
-  const data = await readFile(COURSES_FILE, "utf-8")
-  return JSON.parse(data)
-}
-
-async function saveCourses(courses: string[]) {
-  await ensureFile()
-  await writeFile(COURSES_FILE, JSON.stringify(courses, null, 2), "utf-8")
-}
+import prisma from "@/lib/prisma"
 
 // GET - List all inquiry course options
 export async function GET() {
   try {
     const session = await auth()
-    if (!session?.user?.email) {
+    if (!session?.user || (session.user.role !== "admin" && session.user.role !== "super")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const courses = await getCourses()
-    return NextResponse.json({ courses })
+    const options = await prisma.inquiryCourseOption.findMany({
+      orderBy: { order: "asc" },
+    })
+    return NextResponse.json({ courses: options.map((o: { name: string }) => o.name) })
   } catch (error) {
     console.error("Error fetching inquiry courses:", error)
     return NextResponse.json({ error: "Failed to fetch courses" }, { status: 500 })
@@ -45,7 +24,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const session = await auth()
-    if (!session?.user?.email) {
+    if (!session?.user || (session.user.role !== "admin" && session.user.role !== "super")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -54,17 +33,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Course name is required" }, { status: 400 })
     }
 
-    const courses = await getCourses()
     const trimmed = course.trim()
 
-    if (courses.some((c: string) => c.toLowerCase() === trimmed.toLowerCase())) {
+    // Check if course already exists (case-insensitive)
+    const existing = await prisma.inquiryCourseOption.findFirst({
+      where: { name: { equals: trimmed, mode: "insensitive" } },
+    })
+    if (existing) {
       return NextResponse.json({ error: "Course already exists" }, { status: 409 })
     }
 
-    courses.push(trimmed)
-    await saveCourses(courses)
+    // Get max order for new course
+    const last = await prisma.inquiryCourseOption.findFirst({
+      orderBy: { order: "desc" },
+    })
 
-    return NextResponse.json({ courses }, { status: 201 })
+    await prisma.inquiryCourseOption.create({
+      data: { name: trimmed, order: (last?.order ?? -1) + 1 },
+    })
+
+    const all = await prisma.inquiryCourseOption.findMany({ orderBy: { order: "asc" } })
+    return NextResponse.json({ courses: all.map((o: { name: string }) => o.name) }, { status: 201 })
   } catch (error) {
     console.error("Error adding inquiry course:", error)
     return NextResponse.json({ error: "Failed to add course" }, { status: 500 })
@@ -75,7 +64,7 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     const session = await auth()
-    if (!session?.user?.email) {
+    if (!session?.user || (session.user.role !== "admin" && session.user.role !== "super")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -84,11 +73,12 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Course name is required" }, { status: 400 })
     }
 
-    const courses = await getCourses()
-    const filtered = courses.filter((c: string) => c !== course)
-    await saveCourses(filtered)
+    await prisma.inquiryCourseOption.deleteMany({
+      where: { name: course },
+    })
 
-    return NextResponse.json({ courses: filtered })
+    const all = await prisma.inquiryCourseOption.findMany({ orderBy: { order: "asc" } })
+    return NextResponse.json({ courses: all.map((o: { name: string }) => o.name) })
   } catch (error) {
     console.error("Error deleting inquiry course:", error)
     return NextResponse.json({ error: "Failed to delete course" }, { status: 500 })
@@ -99,7 +89,7 @@ export async function DELETE(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const session = await auth()
-    if (!session?.user?.email) {
+    if (!session?.user || (session.user.role !== "admin" && session.user.role !== "super")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -108,8 +98,18 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Courses array is required" }, { status: 400 })
     }
 
-    await saveCourses(courses)
-    return NextResponse.json({ courses })
+    // Update order for each course
+    await Promise.all(
+      courses.map((name: string, index: number) =>
+        prisma.inquiryCourseOption.updateMany({
+          where: { name },
+          data: { order: index },
+        })
+      )
+    )
+
+    const all = await prisma.inquiryCourseOption.findMany({ orderBy: { order: "asc" } })
+    return NextResponse.json({ courses: all.map((o: { name: string }) => o.name) })
   } catch (error) {
     console.error("Error updating inquiry courses:", error)
     return NextResponse.json({ error: "Failed to update courses" }, { status: 500 })

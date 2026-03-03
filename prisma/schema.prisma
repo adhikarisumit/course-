@@ -363,6 +363,16 @@ model Inquiry {
   @@index([email])
 }
 
+// Inquiry Course Options (dropdown choices for inquiry form)
+model InquiryCourseOption {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([order])
+}
+
 // Community Chat System for Student Portal
 model ChatRoom {
   id          String        @id @default(cuid())

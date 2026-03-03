@@ -264,10 +264,10 @@ export function Header() {
     <header className="border-b border-border bg-card">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <GraduationCap  className="h-8 w-8" />
             <span className="text-xl font-semibold">Proteclink</span>
-          </div>
+          </Link>
 
           <nav className="flex items-center gap-6">
             <Link href="/" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
