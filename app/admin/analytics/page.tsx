@@ -137,7 +137,7 @@ export default function AdminAnalyticsPage() {
         <TabsContent value="overview" className="space-y-6">
           {/* Key Metrics */}
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
+            <Card className="bg-linear-to-br from-green-500/10 to-green-600/5 border-green-500/20">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
                 <DollarSign className="h-4 w-4 text-green-600" />
@@ -155,7 +155,7 @@ export default function AdminAnalyticsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
+            <Card className="bg-linear-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Enrollments</CardTitle>
                 <BookOpen className="h-4 w-4 text-blue-600" />
@@ -173,7 +173,7 @@ export default function AdminAnalyticsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
+            <Card className="bg-linear-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Users</CardTitle>
                 <Users className="h-4 w-4 text-purple-600" />
@@ -191,7 +191,7 @@ export default function AdminAnalyticsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
+            <Card className="bg-linear-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Active Resources</CardTitle>
                 <FolderOpen className="h-4 w-4 text-amber-600" />
@@ -597,7 +597,7 @@ export default function AdminAnalyticsPage() {
         <TabsContent value="resources" className="space-y-6">
           {/* Resource Metrics */}
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
+            <Card className="bg-linear-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Resource Revenue</CardTitle>
                 <DollarSign className="h-4 w-4 text-purple-600" />
@@ -610,7 +610,7 @@ export default function AdminAnalyticsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
+            <Card className="bg-linear-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Purchases</CardTitle>
                 <Package className="h-4 w-4 text-blue-600" />
@@ -623,7 +623,7 @@ export default function AdminAnalyticsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
+            <Card className="bg-linear-to-br from-green-500/10 to-green-600/5 border-green-500/20">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Downloads</CardTitle>
                 <Download className="h-4 w-4 text-green-600" />
@@ -636,7 +636,7 @@ export default function AdminAnalyticsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
+            <Card className="bg-linear-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Clicks</CardTitle>
                 <MousePointerClick className="h-4 w-4 text-amber-600" />

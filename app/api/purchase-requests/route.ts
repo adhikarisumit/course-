@@ -54,20 +54,6 @@ export async function POST(request: Request) {
       }
       amount = item.price || 0
       itemTitle = item.title
-
-      // Check if already enrolled
-      const existingEnrollment = await prisma.enrollment.findUnique({
-        where: {
-          userId_courseId: {
-            userId: session.user.id,
-            courseId: itemId,
-          },
-        },
-      })
-
-      if (existingEnrollment) {
-        return NextResponse.json({ error: "You are already enrolled in this course" }, { status: 400 })
-      }
     } else if (itemType === "resource") {
       item = await prisma.resource.findUnique({ where: { id: itemId } })
       if (!item) {

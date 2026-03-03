@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
           id: true,
           title: true,
           _count: {
-            select: { enrollments: true },
+            select: { payments: true },
           },
         },
         orderBy: { createdAt: "desc" },
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
       include: {
         lessons: true,
         _count: {
-          select: { enrollments: true },
+          select: { payments: true },
         },
       },
       orderBy: { createdAt: "desc" },

@@ -26,10 +26,9 @@ export default async function AdminProfilePage() {
   }
 
   // Fetch admin statistics
-  const [totalUsers, totalCourses, totalEnrollments, totalPayments] = await Promise.all([
+  const [totalUsers, totalCourses, totalPayments] = await Promise.all([
     prisma.user.count(),
     prisma.course.count(),
-    prisma.enrollment.count(),
     prisma.payment.count(),
   ])
 
@@ -110,8 +109,8 @@ export default async function AdminProfilePage() {
                 </div>
                 <div className="text-center p-4 rounded-lg bg-purple-500/5 border border-purple-500/20">
                   <Activity className="h-8 w-8 mx-auto mb-2 text-purple-600 dark:text-purple-400" />
-                  <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">{totalEnrollments}</div>
-                  <div className="text-sm text-muted-foreground mt-1">Enrollments</div>
+                  <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">{totalPayments}</div>
+                  <div className="text-sm text-muted-foreground mt-1">Transactions</div>
                 </div>
                 <div className="text-center p-4 rounded-lg bg-orange-500/5 border border-orange-500/20">
                   <DollarSign className="h-8 w-8 mx-auto mb-2 text-orange-600 dark:text-orange-400" />
@@ -140,12 +139,6 @@ export default async function AdminProfilePage() {
                   <Link href="/admin/courses">
                     <BookOpen className="h-6 w-6" />
                     <span>Manage Courses</span>
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" className="h-20 flex-col gap-2">
-                  <Link href="/admin/enrollments">
-                    <Activity className="h-6 w-6" />
-                    <span>Enrollments</span>
                   </Link>
                 </Button>
               </div>

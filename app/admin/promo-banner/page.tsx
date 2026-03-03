@@ -480,7 +480,7 @@ export default function PromoBannerPage() {
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <CardTitle className="text-base sm:text-lg break-words">{banner.title}</CardTitle>
+                      <CardTitle className="text-base sm:text-lg wrap-break-word">{banner.title}</CardTitle>
                       {banner.isActive && (
                         <Badge variant="default" className="bg-green-500">Active</Badge>
                       )}
@@ -492,7 +492,7 @@ export default function PromoBannerPage() {
                       <CardDescription>{banner.description}</CardDescription>
                     )}
                   </div>
-                  <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -567,7 +567,7 @@ export default function PromoBannerPage() {
                 <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                   {banner.linkUrl && (
                     <div className="flex items-center gap-1 break-all">
-                      <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                      <ExternalLink className="h-3 w-3 shrink-0" />
                       <span className="truncate">Links to: {banner.linkUrl}</span>
                     </div>
                   )}

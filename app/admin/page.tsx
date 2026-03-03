@@ -33,12 +33,11 @@ export default async function AdminDashboard() {
         }
       }
 
-      const [userCount, studentCount, courseCount, lessonCount, enrollmentCount, paymentCount, mentorCount] = await Promise.all([
+      const [userCount, studentCount, courseCount, lessonCount, paymentCount, mentorCount] = await Promise.all([
         prisma.user.count(),
         prisma.user.count({ where: { role: "user" } }), // Only count actual students, not admins
         prisma.course.count(),
         prisma.lesson.count(),
-        prisma.enrollment.count(),
         prisma.payment.count(),
         prisma.mentor.count(),
       ])
@@ -49,11 +48,10 @@ export default async function AdminDashboard() {
           students: studentCount,
           courses: courseCount,
           lessons: lessonCount,
-          enrollments: enrollmentCount,
           payments: paymentCount,
           mentors: mentorCount,
         },
-        totalRecords: userCount + courseCount + lessonCount + enrollmentCount + paymentCount + mentorCount,
+        totalRecords: userCount + courseCount + lessonCount + paymentCount + mentorCount,
       }
     } catch (error) {
       console.error("Error fetching database stats:", error)
@@ -88,21 +86,6 @@ export default async function AdminDashboard() {
           <CardContent>
             <Link href="/admin/courses">
               <Button className="w-full">Manage Courses</Button>
-            </Link>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Enrollments</CardTitle>
-              <Users className="h-5 w-5 text-muted-foreground" />
-            </div>
-            <CardDescription>Manually enroll students</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/admin/enrollments">
-              <Button className="w-full">Manage Enrollments</Button>
             </Link>
           </CardContent>
         </Card>
@@ -226,8 +209,8 @@ export default async function AdminDashboard() {
                 <p className="text-2xl font-bold">{dbStats?.tables.students || 0}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Enrollments</p>
-                <p className="text-2xl font-bold">{dbStats?.tables.enrollments || 0}</p>
+                <p className="text-sm text-muted-foreground">Mentors</p>
+                <p className="text-2xl font-bold">{dbStats?.tables.mentors || 0}</p>
               </div>
             </div>
           </CardContent>
@@ -309,13 +292,6 @@ export default async function AdminDashboard() {
                   <div>
                     <p className="text-xs text-muted-foreground">Lessons</p>
                     <p className="text-sm font-semibold">{dbStats?.tables.lessons || 0}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Table className="h-3 w-3 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Enrollments</p>
-                    <p className="text-sm font-semibold">{dbStats?.tables.enrollments || 0}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

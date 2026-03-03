@@ -33,7 +33,8 @@ import {
   BookOpen,
   Users,
   Settings,
-  Shield
+  Shield,
+  Inbox
 } from "lucide-react"
 import { useSession, signOut } from "next-auth/react"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -95,9 +96,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Link href="/admin/courses" className={linkClass} onClick={handleClick}>
           Courses
         </Link>
-        <Link href="/admin/enrollments" className={linkClass} onClick={handleClick}>
-          Enrollments
-        </Link>
         <Link href="/admin/users" className={linkClass} onClick={handleClick}>
           Users
         </Link>
@@ -113,6 +111,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Link href="/admin/promo-banner" className={linkClass} onClick={handleClick}>
           Promo Banner
         </Link>
+        <Link href="/admin/secondary-banner" className={linkClass} onClick={handleClick}>
+          Secondary Banner
+        </Link>
+        <Link href="/admin/inquiries" className={linkClass} onClick={handleClick}>
+          Inquiries
+        </Link>
         <Link href="/admin/analytics" className={linkClass} onClick={handleClick}>
           Analytics
         </Link>
@@ -121,9 +125,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </Link>
         {isSuperAdmin && (
           <>
-            <Link href="/admin/ads" className={linkClass} onClick={handleClick}>
-              Ads
-            </Link>
             <Link href="/admin/manage-admins" className={linkClass} onClick={handleClick}>
               Manage Admins
             </Link>
@@ -179,9 +180,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link href="/admin/users">All Users</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild className={dropdownItemClass}>
-              <Link href="/admin/enrollments">Enrollments</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild className={dropdownItemClass}>
               <Link href="/admin/mentors">Mentors</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -196,7 +194,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
             <DropdownMenuItem asChild className={dropdownItemClass}>
+              <Link href="/admin/inquiries">Inquiries</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className={dropdownItemClass}>
               <Link href="/admin/promo-banner">Promo Banner</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className={dropdownItemClass}>
+              <Link href="/admin/secondary-banner">Secondary Banner</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild className={dropdownItemClass}>
               <Link href="/admin/analytics">Analytics</Link>
@@ -217,9 +221,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
               <DropdownMenuItem asChild className={dropdownItemClass}>
-                <Link href="/admin/ads">Ads</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild className={dropdownItemClass}>
                 <Link href="/admin/manage-admins">Manage Admins</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -232,7 +233,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-background">
       {/* Admin Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
         <div className="container flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-4">
             <Link href="/admin" className="flex items-center gap-2">
@@ -305,7 +306,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </header>
 
       {/* Main Content */}
-      <main>{children}</main>
+      <main className="container mx-auto px-4 py-6">{children}</main>
     </div>
   )
 }

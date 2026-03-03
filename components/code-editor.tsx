@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useEffect, useCallback } from "react"
+import { useRef, useState, useEffect } from "react"
 import Editor, { OnMount } from "@monaco-editor/react"
 import { loader } from "@monaco-editor/react"
 import { useTheme } from "next-themes"
@@ -13,38 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
 import {
   Tooltip,
   TooltipContent,
@@ -62,19 +32,10 @@ import {
   Settings,
   Maximize2,
   Minimize2,
-  Save,
-  FolderOpen,
-  FileCode,
-  Trash2,
-  Edit,
-  MoreVertical,
-  Clock,
-  Plus,
   Download,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
-import { formatDistanceToNow } from "date-fns"
 
 interface Language {
   id: string
@@ -82,16 +43,6 @@ interface Language {
   extension: string
   monacoLanguage: string
   defaultCode: string
-}
-
-interface CodeSnippet {
-  id: string
-  title: string
-  description: string | null
-  code: string
-  language: string
-  createdAt: string
-  updatedAt: string
 }
 
 const LANGUAGES: Language[] = [
@@ -389,50 +340,9 @@ export default function CodeEditor() {
   const [activeTab, setActiveTab] = useState("output")
   const [fontSize, setFontSize] = useState(14)
   const [editorTheme, setEditorTheme] = useState("vs-dark")
-  
-  // Snippet management states
-  const [snippets, setSnippets] = useState<CodeSnippet[]>([])
-  const [isLoadingSnippets, setIsLoadingSnippets] = useState(false)
-  const [currentSnippet, setCurrentSnippet] = useState<CodeSnippet | null>(null)
-  const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false)
-  const [isLoadDialogOpen, setIsLoadDialogOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [snippetToDelete, setSnippetToDelete] = useState<CodeSnippet | null>(null)
-  const [saveTitle, setSaveTitle] = useState("")
-  const [saveDescription, setSaveDescription] = useState("")
-  const [isSaving, setIsSaving] = useState(false)
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
-
-  // Track unsaved changes
-  useEffect(() => {
-    if (currentSnippet) {
-      setHasUnsavedChanges(code !== currentSnippet.code || language.id !== currentSnippet.language)
-    } else {
-      setHasUnsavedChanges(code !== language.defaultCode)
-    }
-  }, [code, language, currentSnippet])
 
   // Proteclink detection
   const containsProteclink = /proteclink/i.test(code)
-
-  const fetchSnippets = useCallback(async () => {
-    setIsLoadingSnippets(true)
-    try {
-      const response = await fetch("/api/code/snippets")
-      if (response.ok) {
-        const data = await response.json()
-        setSnippets(data.snippets)
-      }
-    } catch (error) {
-      console.error("Error fetching snippets:", error)
-    } finally {
-      setIsLoadingSnippets(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchSnippets()
-  }, [fetchSnippets])
 
   const handleEditorDidMount: OnMount = async (editor) => {
     editorRef.current = editor
@@ -468,13 +378,6 @@ export default function CodeEditor() {
       }
     });
 
-    // Add Ctrl+S to save snippet (if editing)
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, (e) => {
-      e.preventDefault()
-      if (currentSnippet) {
-        handleSaveSnippet()
-      }
-    })
   }
 
   // Register formatting providers for languages that don't have built-in formatters
@@ -1110,112 +1013,6 @@ export default function CodeEditor() {
     toast.success(`Exported as ${filename}`)
   }
 
-  const handleNewSnippet = () => {
-    setCurrentSnippet(null)
-    setCode(language.defaultCode)
-    setOutput("")
-    setStdin("")
-    toast.info("Started new snippet")
-  }
-
-  const handleSaveSnippet = async () => {
-    if (!saveTitle.trim()) {
-      toast.error("Please enter a title")
-      return
-    }
-
-    setIsSaving(true)
-
-    try {
-      if (currentSnippet) {
-        // Update existing snippet
-        const response = await fetch(`/api/code/snippets/${currentSnippet.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: saveTitle,
-            description: saveDescription,
-            code,
-            language: language.id,
-          }),
-        })
-
-        if (!response.ok) throw new Error("Failed to update snippet")
-
-        const data = await response.json()
-        setCurrentSnippet(data.snippet)
-        toast.success("Snippet updated successfully")
-      } else {
-        // Create new snippet
-        const response = await fetch("/api/code/snippets", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: saveTitle,
-            description: saveDescription,
-            code,
-            language: language.id,
-          }),
-        })
-
-        if (!response.ok) throw new Error("Failed to save snippet")
-
-        const data = await response.json()
-        setCurrentSnippet(data.snippet)
-        toast.success("Snippet saved successfully")
-      }
-
-      setIsSaveDialogOpen(false)
-      fetchSnippets()
-    } catch (error) {
-      toast.error("Failed to save snippet")
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
-  const handleLoadSnippet = (snippet: CodeSnippet) => {
-    const lang = LANGUAGES.find((l) => l.id === snippet.language) || LANGUAGES[0]
-    setLanguage(lang)
-    setCode(snippet.code)
-    setCurrentSnippet(snippet)
-    setIsLoadDialogOpen(false)
-    setOutput("")
-    setStdin("")
-    toast.success(`Loaded "${snippet.title}"`)
-  }
-
-  const handleDeleteSnippet = async () => {
-    if (!snippetToDelete) return
-
-    try {
-      const response = await fetch(`/api/code/snippets/${snippetToDelete.id}`, {
-        method: "DELETE",
-      })
-
-      if (!response.ok) throw new Error("Failed to delete snippet")
-
-      if (currentSnippet?.id === snippetToDelete.id) {
-        setCurrentSnippet(null)
-        setCode(language.defaultCode)
-      }
-
-      toast.success("Snippet deleted successfully")
-      fetchSnippets()
-    } catch (error) {
-      toast.error("Failed to delete snippet")
-    } finally {
-      setIsDeleteDialogOpen(false)
-      setSnippetToDelete(null)
-    }
-  }
-
-  const openSaveDialog = () => {
-    setSaveTitle(currentSnippet?.title || "")
-    setSaveDescription(currentSnippet?.description || "")
-    setIsSaveDialogOpen(true)
-  }
-
   // Define custom themes
   const defineCustomThemes = (monaco: any) => {
     // GitHub Dark theme
@@ -1473,24 +1270,6 @@ export default function CodeEditor() {
     }
   }, [resolvedTheme, editorTheme]);
 
-  const getLanguageBadgeColor = (langId: string) => {
-    const colors: Record<string, string> = {
-      javascript: "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400",
-      typescript: "bg-blue-500/20 text-blue-600 dark:text-blue-400",
-      python: "bg-green-500/20 text-green-600 dark:text-green-400",
-      java: "bg-orange-500/20 text-orange-600 dark:text-orange-400",
-      cpp: "bg-purple-500/20 text-purple-600 dark:text-purple-400",
-      c: "bg-gray-500/20 text-gray-600 dark:text-gray-400",
-      csharp: "bg-violet-500/20 text-violet-600 dark:text-violet-400",
-      go: "bg-cyan-500/20 text-cyan-600 dark:text-cyan-400",
-      rust: "bg-red-500/20 text-red-600 dark:text-red-400",
-      php: "bg-indigo-500/20 text-indigo-600 dark:text-indigo-400",
-      ruby: "bg-rose-500/20 text-rose-600 dark:text-rose-400",
-      kotlin: "bg-pink-500/20 text-pink-600 dark:text-pink-400",
-    }
-    return colors[langId] || "bg-gray-500/20 text-gray-600"
-  }
-
   return (
     <TooltipProvider>
       <div className={cn(
@@ -1502,7 +1281,7 @@ export default function CodeEditor() {
         <div className="flex flex-wrap items-center gap-2">
           <Select value={language.id} onValueChange={handleLanguageChange}>
             <SelectTrigger className="w-[140px]">
-              <Code2 className="h-4 w-4 mr-1.5 flex-shrink-0" />
+              <Code2 className="h-4 w-4 mr-1.5 shrink-0" />
               <SelectValue placeholder="Language" />
             </SelectTrigger>
             <SelectContent>
@@ -1517,7 +1296,7 @@ export default function CodeEditor() {
           <Select value={fontSize.toString()} onValueChange={(v) => setFontSize(parseInt(v))}>
             <SelectTrigger className="w-[85px]">
               <span className="flex items-center gap-1">
-                <Settings className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
+                <Settings className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 <span className="font-medium text-sm">{fontSize}px</span>
               </span>
             </SelectTrigger>
@@ -1534,7 +1313,7 @@ export default function CodeEditor() {
             <SelectTrigger className="w-[130px]">
               <span className="flex items-center gap-1.5 overflow-hidden">
                 <div className={cn(
-                  "w-2 h-2 rounded-full flex-shrink-0",
+                  "w-2 h-2 rounded-full shrink-0",
                   EDITOR_THEMES.find(t => t.id === editorTheme)?.category === 'dark' 
                     ? "bg-zinc-600" 
                     : "bg-amber-400"
@@ -1547,7 +1326,7 @@ export default function CodeEditor() {
               {EDITOR_THEMES.filter(t => t.category === 'dark').map((theme) => (
                 <SelectItem key={theme.id} value={theme.id}>
                   <span className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-zinc-600 flex-shrink-0" />
+                    <div className="w-2 h-2 rounded-full bg-zinc-600 shrink-0" />
                     {theme.name}
                   </span>
                 </SelectItem>
@@ -1556,7 +1335,7 @@ export default function CodeEditor() {
               {EDITOR_THEMES.filter(t => t.category === 'light').map((theme) => (
                 <SelectItem key={theme.id} value={theme.id}>
                   <span className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0" />
+                    <div className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
                     {theme.name}
                   </span>
                 </SelectItem>
@@ -1564,203 +1343,9 @@ export default function CodeEditor() {
             </SelectContent>
           </Select>
 
-          {currentSnippet && (
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-md">
-              <FileCode className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium truncate max-w-[150px]">
-                {currentSnippet.title}
-              </span>
-              {hasUnsavedChanges && (
-                <Badge variant="outline" className="text-xs">
-                  Unsaved
-                </Badge>
-              )}
-            </div>
-          )}
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          {/* New Snippet */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleNewSnippet}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent><p>New</p></TooltipContent>
-          </Tooltip>
-
-          {/* Save Dialog */}
-          <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={openSaveDialog}
-                  >
-                    <Save className="h-4 w-4" />
-                  </Button>
-                </DialogTrigger>
-              </TooltipTrigger>
-              <TooltipContent><p>Save</p></TooltipContent>
-            </Tooltip>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {currentSnippet ? "Update Snippet" : "Save Snippet"}
-                </DialogTitle>
-                <DialogDescription>
-                  {currentSnippet
-                    ? "Update your saved code snippet"
-                    : "Save your code to access it later"}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Title</Label>
-                  <Input
-                    id="title"
-                    placeholder="My awesome code"
-                    value={saveTitle}
-                    onChange={(e) => setSaveTitle(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description (optional)</Label>
-                  <Textarea
-                    id="description"
-                    placeholder="What does this code do?"
-                    value={saveDescription}
-                    onChange={(e) => setSaveDescription(e.target.value)}
-                    rows={3}
-                  />
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Code2 className="h-4 w-4" />
-                  <span>Language: {language.name}</span>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsSaveDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button onClick={handleSaveSnippet} disabled={isSaving}>
-                  {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  {currentSnippet ? "Update" : "Save"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-
-          {/* Load Dialog */}
-          <Dialog open={isLoadDialogOpen} onOpenChange={setIsLoadDialogOpen}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => {
-                      fetchSnippets()
-                      setIsLoadDialogOpen(true)
-                    }}
-                  >
-                    <FolderOpen className="h-4 w-4" />
-                  </Button>
-                </DialogTrigger>
-              </TooltipTrigger>
-              <TooltipContent><p>Load</p></TooltipContent>
-            </Tooltip>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Your Saved Snippets</DialogTitle>
-                <DialogDescription>
-                  Load a previously saved code snippet
-                </DialogDescription>
-              </DialogHeader>
-              <ScrollArea className="h-[400px] pr-4">
-                {isLoadingSnippets ? (
-                  <div className="flex items-center justify-center h-32">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                  </div>
-                ) : snippets.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
-                    <FileCode className="h-10 w-10 mb-2 opacity-50" />
-                    <p>No saved snippets yet</p>
-                    <p className="text-sm">Save your first snippet to see it here</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {snippets.map((snippet) => (
-                      <div
-                        key={snippet.id}
-                        className="flex items-start justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors group"
-                      >
-                        <button
-                          className="flex-1 text-left"
-                          onClick={() => handleLoadSnippet(snippet)}
-                        >
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium">{snippet.title}</span>
-                            <Badge className={cn("text-xs", getLanguageBadgeColor(snippet.language))}>
-                              {LANGUAGES.find((l) => l.id === snippet.language)?.name || snippet.language}
-                            </Badge>
-                          </div>
-                          {snippet.description && (
-                            <p className="text-sm text-muted-foreground line-clamp-1">
-                              {snippet.description}
-                            </p>
-                          )}
-                          <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
-                            <Clock className="h-3 w-3" />
-                            {formatDistanceToNow(new Date(snippet.updatedAt), { addSuffix: true })}
-                          </div>
-                        </button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100"
-                            >
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleLoadSnippet(snippet)}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Open & Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() => {
-                                setSnippetToDelete(snippet)
-                                setIsDeleteDialogOpen(true)
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </ScrollArea>
-            </DialogContent>
-          </Dialog>
-
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -1932,14 +1517,14 @@ export default function CodeEditor() {
                   value="output" 
                   className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-1 gap-2"
                 >
-                  <Terminal className="h-4 w-4 flex-shrink-0" />
+                  <Terminal className="h-4 w-4 shrink-0" />
                   <span>Output</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="input"
                   className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-1 gap-2"
                 >
-                  <Code2 className="h-4 w-4 flex-shrink-0" />
+                  <Code2 className="h-4 w-4 shrink-0" />
                   <span>Input (stdin)</span>
                 </TabsTrigger>
               </TabsList>
@@ -1959,7 +1544,7 @@ export default function CodeEditor() {
                       Running code...
                     </div>
                   ) : output ? (
-                    <pre className="whitespace-pre-wrap break-words">{output}</pre>
+                    <pre className="whitespace-pre-wrap wrap-break-word">{output}</pre>
                   ) : (
                     <span className="text-muted-foreground">
                       Click &quot;Run Code&quot; to see the output here...
@@ -1992,26 +1577,6 @@ export default function CodeEditor() {
         Code runs in a sandboxed environment
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Snippet</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete &quot;{snippetToDelete?.title}&quot;? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteSnippet}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
     </TooltipProvider>
   )

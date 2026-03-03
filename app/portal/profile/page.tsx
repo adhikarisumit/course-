@@ -17,20 +17,17 @@ export default async function ProfilePage() {
     redirect("/auth/signin")
   }
 
-  // Fetch user details with enrollments
+  // Fetch user details with payments (used as enrollments)
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
     include: {
-      enrollments: {
+      payments: {
         include: {
           course: true,
         },
-      },
-      payments: {
         orderBy: {
           createdAt: "desc",
         },
-        take: 5,
       },
     },
   })
@@ -45,8 +42,9 @@ export default async function ProfilePage() {
     .join("")
     .toUpperCase() || "U"
 
-  const totalEnrollments = user.enrollments.length
-  const completedCourses = user.enrollments.filter((e: any) => e.completed).length
+  const completedPayments = user.payments.filter((p: any) => p.status === "completed" || p.status === "succeeded")
+  const totalEnrollments = completedPayments.length
+  const completedCourses = 0 // No completion tracking without Enrollment model
   const activeCourses = totalEnrollments - completedCourses
 
   return (
@@ -85,7 +83,7 @@ export default async function ProfilePage() {
                   {user.name}
                   {user.profileVerified && (
                     <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-blue-500" title="Verified">
-                      <Check className="h-3 w-3 text-white stroke-[3]" />
+                      <Check className="h-3 w-3 text-white stroke-3" />
                     </span>
                   )}
                 </h3>
@@ -97,7 +95,7 @@ export default async function ProfilePage() {
                   {user.profileVerified && (
                     <Badge variant="default" className="bg-blue-500 hover:bg-blue-600">
                       <span className="inline-flex items-center justify-center h-3 w-3 rounded-full bg-white mr-1">
-                        <Check className="h-2 w-2 text-blue-500 stroke-[3]" />
+                        <Check className="h-2 w-2 text-blue-500 stroke-3" />
                       </span>
                       Verified
                     </Badge>
@@ -160,7 +158,7 @@ export default async function ProfilePage() {
               <CardDescription>Courses you are currently enrolled in</CardDescription>
             </CardHeader>
             <CardContent>
-              {user.enrollments.length === 0 ? (
+              {completedPayments.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <p className="mb-4">You haven't enrolled in any courses yet.</p>
                   <Button asChild>
@@ -169,32 +167,24 @@ export default async function ProfilePage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {user.enrollments.map((enrollment: any) => (
+                  {completedPayments.map((payment: any) => (
                     <div
-                      key={enrollment.id}
+                      key={payment.id}
                       className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent/50 transition-colors"
                     >
                       <div className="flex-1">
-                        <h4 className="font-semibold">{enrollment.course.title}</h4>
+                        <h4 className="font-semibold">{payment.course?.title || "Course"}</h4>
                         <div className="flex items-center gap-4 mt-2">
                           <div className="text-sm text-muted-foreground">
-                            Progress: {enrollment.progress}%
+                            Purchased: {new Date(payment.createdAt).toLocaleDateString()}
                           </div>
-                          {enrollment.completed && (
-                            <Badge variant="default" className="bg-green-500">
-                              Completed
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="w-full bg-secondary rounded-full h-2 mt-2">
-                          <div
-                            className="bg-primary h-2 rounded-full transition-all"
-                            style={{ width: `${enrollment.progress}%` }}
-                          />
+                          <Badge variant="default" className="bg-green-500">
+                            Active
+                          </Badge>
                         </div>
                       </div>
                       <Button asChild variant="outline" size="sm" className="ml-4">
-                        <Link href={`/courses/${enrollment.course.id}`}>View</Link>
+                        <Link href={`/courses/${payment.courseId}`}>View</Link>
                       </Button>
                     </div>
                   ))}

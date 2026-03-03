@@ -24,7 +24,6 @@ model User {
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
   accounts         Account[]
-  enrollments      Enrollment[]
   receivedMessages Message[]    @relation("ReceivedMessages")
   sentMessages     Message[]    @relation("SentMessages")
   payments         Payment[]
@@ -92,13 +91,9 @@ model Course {
   recurringSchedule    String?
   features             String?
   whatYouWillLearn     String?
-  // Course-specific Ad Settings
-  adCode               String?      // Custom HTML/JS ad code for this course
-  showAds              Boolean      @default(true)  // Enable/disable ads for this course
   createdAt            DateTime     @default(now())
   updatedAt            DateTime     @updatedAt
   isDeleted            Boolean      @default(false)
-  enrollments          Enrollment[]
   lessons              Lesson[]
   payments             Payment[]
   chatRooms            ChatRoom[]
@@ -127,23 +122,6 @@ model Lesson {
 
   @@index([courseId])
   @@index([order])
-}
-
-model Enrollment {
-  id         String    @id @default(cuid())
-  userId     String
-  courseId   String
-  enrolledAt DateTime  @default(now())
-  expiresAt  DateTime?
-  progress   Int       @default(0)
-  completed  Boolean   @default(false)
-  course     Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, courseId])
-  @@index([userId])
-  @@index([courseId])
-  @@index([enrolledAt])
 }
 
 model LessonProgress {
@@ -318,20 +296,26 @@ model PromoBanner {
   @@index([startDate, endDate])
 }
 
-model CodeSnippet {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  code        String
-  language    String
-  userId      String
-  isPublic    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model SecondaryBanner {
+  id              String    @id @default(cuid())
+  title           String
+  description     String?
+  badgeText       String?
+  linkUrl         String?
+  linkText        String?
+  backgroundColor String?   @default("#1e40af")
+  textColor       String?   @default("#ffffff")
+  isActive        Boolean   @default(false)
+  sections        String    @default("[\"after-hero\"]") // JSON array of section positions
+  showTimer       Boolean   @default(false)
+  marqueeSpeed    Int       @default(30) // marquee scroll duration in seconds
+  startDate       DateTime?
+  endDate         DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  @@index([userId])
-  @@index([language])
-  @@index([createdAt])
+  @@index([isActive])
+  @@index([startDate, endDate])
 }
 
 model PurchaseRequest {
@@ -357,109 +341,26 @@ model PurchaseRequest {
   @@index([createdAt])
 }
 
-model AdSenseSettings {
-  id                String   @id @default(cuid())
-  publisherId       String   // Google AdSense Publisher ID (ca-pub-XXXXXXXX)
-  headScript        String?  @db.Text // Full AdSense script to paste in head
-  isEnabled         Boolean  @default(false)
-  enableAutoAds     Boolean  @default(false)
-  enableInArticle   Boolean  @default(false)
-  enableSidebar     Boolean  @default(false)
-  enableHeader      Boolean  @default(false)
-  enableFooter      Boolean  @default(false)
-  inArticleSlot     String?  // Ad slot for in-article ads
-  sidebarSlot       String?  // Ad slot for sidebar ads
-  headerSlot        String?  // Ad slot for header ads
-  footerSlot        String?  // Ad slot for footer ads
-  excludedPages     String?  // Comma-separated list of pages to exclude ads
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-}
+// Inquiry submissions from the website contact form
+model Inquiry {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  subject     String?
+  course      String?  // Selected course of interest
+  jlptLevel   String?  // JLPT level: N5, N4, N3, N2, N1, None
+  codingLevel String?  // Coding level: Beginner, Intermediate, Advanced, None
+  message     String   @db.Text
+  status      String   @default("unread") // unread, read, replied, archived
+  adminNote   String?  @db.Text
+  repliedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-model AdSettings {
-  id                String   @id @default(cuid())
-  // Active Provider Selection
-  activeProvider    String   @default("none") // none, adsense, medianet, amazon, propeller, adsterra, custom
-  excludedPages     String?  // Comma-separated list of pages to exclude ads
-  
-  // Ad Placement Controls
-  showHeaderAd      Boolean  @default(true)
-  showFooterAd      Boolean  @default(true)
-  showSidebarAd     Boolean  @default(true)
-  showInArticleAd   Boolean  @default(true)
-  showHomePageAd    Boolean  @default(true)
-  showCoursePageAd  Boolean  @default(true)
-  showPortalAd      Boolean  @default(true)
-  showBlogAd        Boolean  @default(true)
-  
-  // Mobile Ad Placement Controls
-  showHeaderAdMobile      Boolean  @default(true)
-  showFooterAdMobile      Boolean  @default(true)
-  showSidebarAdMobile     Boolean  @default(false) // Sidebars often hidden on mobile
-  showInArticleAdMobile   Boolean  @default(true)
-  
-  // Google AdSense Settings
-  adsenseEnabled      Boolean  @default(false)
-  adsensePublisherId  String?  // ca-pub-XXXXXXXX
-  adsenseHeadScript   String?  @db.Text // Full AdSense script to paste in head
-  adsenseAutoAds      Boolean  @default(false)
-  adsenseHeaderSlot   String?
-  adsenseFooterSlot   String?
-  adsenseSidebarSlot  String?
-  adsenseInArticleSlot String?
-  
-  // Media.net Settings
-  medianetEnabled     Boolean  @default(false)
-  medianetCustomerId  String?  // cid value
-  medianetHeaderCode  String?  // Full ad code for header
-  medianetFooterCode  String?
-  medianetSidebarCode String?
-  medianetInArticleCode String?
-  
-  // Amazon Native Ads Settings
-  amazonEnabled       Boolean  @default(false)
-  amazonTrackingId    String?  // Tracking ID
-  amazonAdInstanceId  String?  // Ad instance ID
-  amazonHeaderCode    String?
-  amazonFooterCode    String?
-  amazonSidebarCode   String?
-  amazonInArticleCode String?
-  
-  // PropellerAds Settings
-  propellerEnabled    Boolean  @default(false)
-  propellerZoneId     String?
-  propellerHeaderCode String?
-  propellerFooterCode String?
-  propellerSidebarCode String?
-  propellerInArticleCode String?
-  
-  // Adsterra Settings
-  adsterraEnabled     Boolean  @default(false)
-  adsterraKey         String?
-  adsterraHeaderCode  String?
-  adsterraFooterCode  String?
-  adsterraSidebarCode String?
-  adsterraInArticleCode String?
-  
-  // Custom Ad Provider
-  customEnabled       Boolean  @default(false)
-  customProviderName  String?
-  customHeadScript    String?  // Script to inject in <head>
-  customHeaderCode    String?
-  customFooterCode    String?
-  customSidebarCode   String?
-  customInArticleCode String?
-  
-  // Per-Page Ad Configuration (JSON format)
-  // Stores: { "/playground": { maxAds: 2, showHeader: true, showFooter: false, showInArticle: true, showSidebar: false } }
-  pageAdConfig        String?  @db.Text
-  
-  // Global Ad Limits
-  maxAdsPerPage       Int      @default(5)
-  maxInArticleAds     Int      @default(3)
-  
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  @@index([status])
+  @@index([createdAt])
+  @@index([email])
 }
 
 // Community Chat System for Student Portal

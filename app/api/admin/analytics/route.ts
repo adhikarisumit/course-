@@ -22,12 +22,6 @@ export async function GET(_request: NextRequest) {
 
     // Use Promise.all for parallel queries to improve performance
     const [
-      enrollmentsThisMonth,
-      enrollmentsLastMonth,
-      totalEnrollments,
-      enrollmentsWithCoursesThisMonth,
-      enrollmentsWithCoursesLastMonth,
-      allEnrollmentsWithCourses,
       usersThisMonth,
       usersLastMonth,
       totalUsers,
@@ -40,34 +34,11 @@ export async function GET(_request: NextRequest) {
       allResourcePurchases,
       topResources,
       paymentStats,
-      topCoursesData
+      paymentsThisMonth,
+      paymentsLastMonth,
+      totalLessonProgress,
+      completedLessonProgress,
     ] = await Promise.all([
-      // Enrollment counts
-      prisma.enrollment.count({
-        where: { enrolledAt: { gte: firstDayThisMonth } }
-      }),
-      prisma.enrollment.count({
-        where: {
-          enrolledAt: { gte: firstDayLastMonth, lte: lastDayLastMonth }
-        }
-      }),
-      prisma.enrollment.count(),
-
-      // Revenue calculations using proper joins and aggregation
-      prisma.enrollment.findMany({
-        where: { enrolledAt: { gte: firstDayThisMonth } },
-        include: { course: { select: { price: true } } }
-      }),
-      prisma.enrollment.findMany({
-        where: {
-          enrolledAt: { gte: firstDayLastMonth, lte: lastDayLastMonth }
-        },
-        include: { course: { select: { price: true } } }
-      }),
-      prisma.enrollment.findMany({
-        include: { course: { select: { price: true } } }
-      }),
-
       // User counts
       prisma.user.count({
         where: { createdAt: { gte: firstDayThisMonth } }
@@ -149,47 +120,31 @@ export async function GET(_request: NextRequest) {
       // Payment statistics
       prisma.payment.count(),
 
-      // Top courses by enrollment
-      prisma.course.findMany({
-        take: 5,
-        include: {
-          _count: {
-            select: { enrollments: true }
-          },
-          enrollments: {
-            select: {
-              course: { select: { price: true } }
-            }
-          }
-        },
-        orderBy: {
-          enrollments: { _count: 'desc' }
-        }
-      })
+      // Payments this month
+      prisma.payment.findMany({
+        where: { createdAt: { gte: firstDayThisMonth } },
+        select: { amount: true }
+      }),
+
+      // Payments last month
+      prisma.payment.findMany({
+        where: { createdAt: { gte: firstDayLastMonth, lte: lastDayLastMonth } },
+        select: { amount: true }
+      }),
+
+      // Lesson progress stats
+      prisma.lessonProgress.count(),
+      prisma.lessonProgress.count({ where: { completed: true } }),
     ])
 
-    // Calculate revenue from enrollment data
-    const revenueThisMonth = enrollmentsWithCoursesThisMonth.reduce((sum, enrollment) => sum + (enrollment.course?.price || 0), 0)
-    const revenueLastMonth = enrollmentsWithCoursesLastMonth.reduce((sum, enrollment) => sum + (enrollment.course?.price || 0), 0)
-    const totalRevenueAmount = allEnrollmentsWithCourses.reduce((sum, enrollment) => sum + (enrollment.course?.price || 0), 0)
+    // Calculate revenue from payments
+    const revenueThisMonth = paymentsThisMonth.reduce((sum, p) => sum + (p.amount || 0), 0)
+    const revenueLastMonth = paymentsLastMonth.reduce((sum, p) => sum + (p.amount || 0), 0)
 
-    // Calculate completion stats efficiently
-    const completionStats = await prisma.enrollment.aggregate({
-      _count: {
-        id: true,
-      },
-      where: { completed: true }
-    })
-
-    const inProgressStats = await prisma.enrollment.aggregate({
-      _count: {
-        id: true,
-      },
-      where: {
-        completed: false,
-        progress: { gt: 0 }
-      }
-    })
+    // Calculate resource revenue
+    const resourceRevenueThisMonth = resourcePurchasesThisMonth.reduce((sum, p) => sum + (p.amount || 0), 0)
+    const resourceRevenueLastMonth = resourcePurchasesLastMonth.reduce((sum, p) => sum + (p.amount || 0), 0)
+    const totalResourceRevenue = allResourcePurchases.reduce((sum, p) => sum + (p.amount || 0), 0)
 
     // Format users by role
     const formattedUsersByRole = usersByRole.reduce((acc, curr) => {
@@ -197,19 +152,28 @@ export async function GET(_request: NextRequest) {
       return acc
     }, {} as Record<string, number>)
 
+    // Get top courses by lesson count
+    const topCoursesData = await prisma.course.findMany({
+      take: 5,
+      where: { isPublished: true },
+      include: {
+        _count: {
+          select: { lessons: true }
+        },
+      },
+      orderBy: {
+        lessons: { _count: 'desc' }
+      }
+    })
+
     // Format top courses
     const topCourses = topCoursesData.map(course => ({
       id: course.id,
       title: course.title,
-      enrollments: course._count.enrollments,
-      revenue: course.enrollments.reduce((sum, enrollment) => sum + (enrollment.course?.price || 0), 0),
-      completionRate: 0 // TODO: Calculate completion rate
+      lessons: course._count.lessons,
+      revenue: 0,
+      completionRate: 0
     }))
-
-    // Calculate resource revenue
-    const resourceRevenueThisMonth = resourcePurchasesThisMonth.reduce((sum, p) => sum + (p.amount || 0), 0)
-    const resourceRevenueLastMonth = resourcePurchasesLastMonth.reduce((sum, p) => sum + (p.amount || 0), 0)
-    const totalResourceRevenue = allResourcePurchases.reduce((sum, p) => sum + (p.amount || 0), 0)
 
     // Format top resources
     const formattedTopResources = topResources.map(resource => ({
@@ -225,18 +189,17 @@ export async function GET(_request: NextRequest) {
     const draftCourses = allCourses.filter(c => !c.isPublished).length
     const publishedCourses = allCourses.filter(c => c.isPublished).length
 
-    // Calculate combined revenue (courses + resources)
+    // Calculate combined revenue (payments + resources)
     const combinedRevenueThisMonth = revenueThisMonth + resourceRevenueThisMonth
     const combinedRevenueLastMonth = revenueLastMonth + resourceRevenueLastMonth
-    const totalCombinedRevenue = totalRevenueAmount + totalResourceRevenue
+    const totalCombinedRevenue = revenueThisMonth + revenueLastMonth + totalResourceRevenue
 
     const analytics = {
       enrollments: {
-        thisMonth: enrollmentsThisMonth,
-        lastMonth: enrollmentsLastMonth,
-        total: totalEnrollments,
-        growth: enrollmentsLastMonth > 0 ?
-          ((enrollmentsThisMonth - enrollmentsLastMonth) / enrollmentsLastMonth * 100) : 0
+        thisMonth: 0,
+        lastMonth: 0,
+        total: 0,
+        growth: 0
       },
       revenue: {
         thisMonth: combinedRevenueThisMonth,
@@ -244,11 +207,10 @@ export async function GET(_request: NextRequest) {
         total: totalCombinedRevenue,
         growth: combinedRevenueLastMonth > 0 ?
           ((combinedRevenueThisMonth - combinedRevenueLastMonth) / combinedRevenueLastMonth * 100) : 0,
-        // Breakdown
         courses: {
           thisMonth: revenueThisMonth,
           lastMonth: revenueLastMonth,
-          total: totalRevenueAmount
+          total: revenueThisMonth + revenueLastMonth
         },
         resources: {
           thisMonth: resourceRevenueThisMonth,
@@ -277,11 +239,11 @@ export async function GET(_request: NextRequest) {
         totalPurchases: allResourcePurchases.length
       },
       completion: {
-        rate: totalEnrollments > 0 ?
-          (completionStats._count.id / totalEnrollments * 100) : 0,
-        completed: completionStats._count.id,
-        inProgress: inProgressStats._count.id,
-        notStarted: totalEnrollments - completionStats._count.id - inProgressStats._count.id
+        rate: totalLessonProgress > 0 ?
+          (completedLessonProgress / totalLessonProgress * 100) : 0,
+        completed: completedLessonProgress,
+        inProgress: totalLessonProgress - completedLessonProgress,
+        notStarted: 0
       },
       payments: {
         total: paymentStats

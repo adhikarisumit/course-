@@ -1,9 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Cpu, Search, Menu, X, User, LogOut, LayoutDashboard, Settings, Book, Code2 } from "lucide-react"
+import { Menu, X, User, LogOut, LayoutDashboard, Settings, Book, Code2, GraduationCap } from "lucide-react"
 import Link from "next/link"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useSession, signOut } from "next-auth/react" // import useSession
@@ -19,36 +18,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { HeaderAd } from "@/components/ads"
 
-interface HeaderProps {
-  searchQuery?: string
-  setSearchQuery?: (query: string) => void
-}
-
-export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
+export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery)
   const router = useRouter()
   const pathname = usePathname()
-  
-  const handleSearch = () => {
-    const query = localSearchQuery || searchQuery
-    if (query.trim()) {
-      // Navigate to courses page with search query
-      router.push(`/courses?search=${encodeURIComponent(query.trim())}`)
-      setMobileOpen(false)
-    } else {
-      // If no query, just go to courses page
-      router.push('/courses')
-      setMobileOpen(false)
-    }
-  }
-
-  const handleSearchInputChange = (value: string) => {
-    setLocalSearchQuery(value)
-    if (setSearchQuery) {
-      setSearchQuery(value)
-    }
-  }
 
   const handleMentorClick = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -292,33 +265,10 @@ export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <Cpu  className="h-8 w-8" />
+            <GraduationCap  className="h-8 w-8" />
             <span className="text-xl font-semibold">Proteclink</span>
           </div>
 
-          {setSearchQuery && (
-            <div className="hidden md:flex flex-1 max-w-md mx-8">
-              <div className="relative w-full flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search courses..."
-                    className="pl-10"
-                    value={localSearchQuery}
-                    onChange={(e) => handleSearchInputChange(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleSearch()
-                      }
-                    }}
-                  />
-                </div>
-                <Button onClick={handleSearch} size="default">
-                  Search
-                </Button>
-              </div>
-            </div>
-          )}
           <nav className="flex items-center gap-6">
             <Link href="/" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
               Home
@@ -369,28 +319,6 @@ export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
       {mobileOpen && (
         <div className="md:hidden bg-card border-t border-border">
           <div className="container mx-auto px-4 py-3 flex flex-col gap-3">
-            {/* Mobile search */}
-            {setSearchQuery && (
-              <div className="relative w-full flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search courses..."
-                    className="pl-10"
-                    value={localSearchQuery}
-                    onChange={(e) => handleSearchInputChange(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleSearch()
-                      }
-                    }}
-                  />
-                </div>
-                <Button onClick={handleSearch} size="default">
-                  Search
-                </Button>
-              </div>
-            )}
             {/* Mobile nav links */}
             <div className="flex flex-col gap-3 border-t border-border pt-3 items-end">
               <Link href="/" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
@@ -405,6 +333,21 @@ export function Header({ searchQuery = "", setSearchQuery }: HeaderProps) {
               <Link href="/contact" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
                 Contact
               </Link>
+              <div className="w-full border-t border-border pt-3 mt-1">
+                <p className="text-xs text-muted-foreground mb-2 text-right">Browse Courses</p>
+                <div className="flex flex-col gap-2 items-end">
+                  <Link href="/courses" className="text-sm font-medium hover:text-primary transition-colors py-1 flex items-center gap-2" onClick={() => setMobileOpen(false)}>
+                    <GraduationCap className="h-4 w-4" />
+                    All Courses
+                  </Link>
+                  <Link href="/courses?category=Programming" className="text-sm text-muted-foreground hover:text-primary transition-colors py-0.5" onClick={() => setMobileOpen(false)}>Programming</Link>
+                  <Link href="/courses?category=Design" className="text-sm text-muted-foreground hover:text-primary transition-colors py-0.5" onClick={() => setMobileOpen(false)}>Design</Link>
+                  <Link href="/courses?category=Business" className="text-sm text-muted-foreground hover:text-primary transition-colors py-0.5" onClick={() => setMobileOpen(false)}>Business</Link>
+                  <Link href="/courses?category=Data+Science" className="text-sm text-muted-foreground hover:text-primary transition-colors py-0.5" onClick={() => setMobileOpen(false)}>Data Science</Link>
+                  <Link href="/courses?category=Languages" className="text-sm text-muted-foreground hover:text-primary transition-colors py-0.5" onClick={() => setMobileOpen(false)}>Languages</Link>
+                  <Link href="/courses?category=Databases" className="text-sm text-muted-foreground hover:text-primary transition-colors py-0.5" onClick={() => setMobileOpen(false)}>Databases</Link>
+                </div>
+              </div>
               <div className="w-full border-t border-border pt-3 mt-1">
                 <p className="text-xs text-muted-foreground mb-2 text-right">Free Tools</p>
                 <div className="flex flex-col gap-2 items-end">

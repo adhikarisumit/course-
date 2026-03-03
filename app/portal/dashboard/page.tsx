@@ -22,26 +22,19 @@ export default async function DashboardPage() {
     redirect("/auth/signin")
   }
 
-  const enrollments = await prisma.enrollment.findMany({
-    where: { userId: session.user.id },
+  const courses = await prisma.course.findMany({
+    where: { isPublished: true },
     include: {
-      course: {
-        include: {
-          lessons: true,
-        },
-      },
+      lessons: true,
     },
-    orderBy: { enrolledAt: "desc" },
+    orderBy: { createdAt: "desc" },
   })
 
   const stats = {
-    totalCourses: enrollments.length,
-    inProgress: enrollments.filter((e: any) => !e.completed).length,
-    completed: enrollments.filter((e: any) => e.completed).length,
-    totalHours: enrollments.reduce((acc: number, e: any) => {
-      const hours = e.course.duration?.match(/\d+/)?.[0] || 0
-      return acc + Number(hours)
-    }, 0),
+    totalCourses: courses.length,
+    freeCourses: courses.filter((c: any) => !c.isPaid).length,
+    paidCourses: courses.filter((c: any) => c.isPaid).length,
+    totalLessons: courses.reduce((acc: number, c: any) => acc + (c.lessons?.length || 0), 0),
   }
 
   const initials = session.user.name
@@ -62,7 +55,7 @@ export default async function DashboardPage() {
   const firstName = session.user.name?.split(" ")[0] || "Student"
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
+    <div className="min-h-screen bg-linear-to-b from-muted/30 to-background">
       <div className="container mx-auto px-4 py-6 md:py-8 max-w-7xl">
         
         {/* Welcome Header */}
@@ -102,11 +95,11 @@ export default async function DashboardPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
+          <Card className="bg-linear-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
             <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground font-medium">Enrolled</p>
+                  <p className="text-sm text-muted-foreground font-medium">Courses</p>
                   <p className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">{stats.totalCourses}</p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
@@ -116,12 +109,12 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
+          <Card className="bg-linear-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
             <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground font-medium">In Progress</p>
-                  <p className="text-2xl md:text-3xl font-bold text-amber-600 dark:text-amber-400">{stats.inProgress}</p>
+                  <p className="text-sm text-muted-foreground font-medium">Free</p>
+                  <p className="text-2xl md:text-3xl font-bold text-amber-600 dark:text-amber-400">{stats.freeCourses}</p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center">
                   <Clock className="h-6 w-6 text-amber-600 dark:text-amber-400" />
@@ -130,12 +123,12 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
+          <Card className="bg-linear-to-br from-green-500/10 to-green-600/5 border-green-500/20">
             <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground font-medium">Completed</p>
-                  <p className="text-2xl md:text-3xl font-bold text-green-600 dark:text-green-400">{stats.completed}</p>
+                  <p className="text-sm text-muted-foreground font-medium">Paid</p>
+                  <p className="text-2xl md:text-3xl font-bold text-green-600 dark:text-green-400">{stats.paidCourses}</p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
                   <Award className="h-6 w-6 text-green-600 dark:text-green-400" />
@@ -144,12 +137,12 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
+          <Card className="bg-linear-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
             <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground font-medium">Hours</p>
-                  <p className="text-2xl md:text-3xl font-bold text-purple-600 dark:text-purple-400">{stats.totalHours}</p>
+                  <p className="text-sm text-muted-foreground font-medium">Lessons</p>
+                  <p className="text-2xl md:text-3xl font-bold text-purple-600 dark:text-purple-400">{stats.totalLessons}</p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-purple-500/10 flex items-center justify-center">
                   <TrendingUp className="h-6 w-6 text-purple-600 dark:text-purple-400" />
@@ -167,10 +160,10 @@ export default async function DashboardPage() {
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-xl">My Courses</CardTitle>
-                    <CardDescription>Continue learning where you left off</CardDescription>
+                    <CardTitle className="text-xl">Available Courses</CardTitle>
+                    <CardDescription>Browse and start learning</CardDescription>
                   </div>
-                  {enrollments.length > 0 && (
+                  {courses.length > 0 && (
                     <Button asChild variant="ghost" size="sm">
                       <Link href="/courses" className="gap-1">
                         View all
@@ -181,14 +174,14 @@ export default async function DashboardPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                {enrollments.length === 0 ? (
+                {courses.length === 0 ? (
                   <div className="text-center py-12 px-4">
                     <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
                       <GraduationCap className="h-10 w-10 text-muted-foreground" />
                     </div>
                     <h3 className="text-lg font-semibold mb-2">No courses yet</h3>
                     <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-                      Start your learning journey by exploring our course catalog
+                      Courses will appear here once they're published
                     </p>
                     <Button asChild size="lg">
                       <Link href="/courses">
@@ -199,28 +192,23 @@ export default async function DashboardPage() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {enrollments.slice(0, 4).map((enrollment: any) => (
+                    {courses.slice(0, 4).map((course: any) => (
                       <div
-                        key={enrollment.id}
+                        key={course.id}
                         className="group flex flex-col sm:flex-row gap-4 p-4 rounded-xl border bg-card hover:bg-muted/50 transition-colors"
                       >
                         {/* Course Image */}
-                        <div className="relative w-full sm:w-40 h-24 rounded-lg overflow-hidden flex-shrink-0">
-                          {enrollment.course.image ? (
+                        <div className="relative w-full sm:w-40 h-24 rounded-lg overflow-hidden shrink-0">
+                          {course.image ? (
                             <Image
-                              src={enrollment.course.image}
-                              alt={enrollment.course.title}
+                              src={course.image}
+                              alt={course.title}
                               fill
                               className="object-cover group-hover:scale-105 transition-transform duration-300"
                             />
                           ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                            <div className="w-full h-full bg-linear-to-br from-primary/20 to-primary/10 flex items-center justify-center">
                               <BookOpen className="h-8 w-8 text-primary/50" />
-                            </div>
-                          )}
-                          {enrollment.progress > 0 && enrollment.progress < 100 && (
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Play className="h-8 w-8 text-white" />
                             </div>
                           )}
                         </div>
@@ -230,30 +218,26 @@ export default async function DashboardPage() {
                           <div className="flex items-start justify-between gap-2">
                             <div>
                               <h3 className="font-semibold truncate group-hover:text-primary transition-colors">
-                                {enrollment.course.title}
+                                {course.title}
                               </h3>
                               <p className="text-sm text-muted-foreground line-clamp-1">
-                                {enrollment.course.description}
+                                {course.description}
                               </p>
                             </div>
-                            <Badge variant={enrollment.completed ? "default" : "secondary"} className="flex-shrink-0">
-                              {enrollment.completed ? "Completed" : `${enrollment.progress}%`}
+                            <Badge variant={course.isPaid ? "secondary" : "default"} className="shrink-0">
+                              {course.isPaid ? `¥${course.price}` : "Free"}
                             </Badge>
                           </div>
 
-                          {/* Progress Bar */}
-                          <div className="space-y-1">
-                            <Progress value={enrollment.progress} className="h-2" />
-                            <div className="flex items-center justify-between text-xs text-muted-foreground">
-                              <span>{enrollment.course.lessons?.length || 0} lessons</span>
-                              <span>{enrollment.course.duration || "Self-paced"}</span>
-                            </div>
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>{course.lessons?.length || 0} lessons</span>
+                            <span>{course.duration || "Self-paced"}</span>
                           </div>
 
                           {/* Action Button */}
-                          <Button asChild size="sm" variant={enrollment.progress === 0 ? "default" : "outline"} className="w-full sm:w-auto">
-                            <Link href={`/courses/${enrollment.course.id}`}>
-                              {enrollment.progress === 0 ? "Start Course" : enrollment.completed ? "Review" : "Continue"}
+                          <Button asChild size="sm" className="w-full sm:w-auto">
+                            <Link href={`/courses/${course.id}`}>
+                              View Course
                             </Link>
                           </Button>
                         </div>
@@ -330,12 +314,12 @@ export default async function DashboardPage() {
 
             {/* Profile Card */}
             <Card className="shadow-sm overflow-hidden">
-              <div className="h-16 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent" />
+              <div className="h-16 bg-linear-to-r from-primary/20 via-primary/10 to-transparent" />
               <CardContent className="pt-0 -mt-8">
                 <div className="flex flex-col items-center text-center">
                   <Avatar className="h-16 w-16 border-4 border-background shadow-md">
                     <AvatarImage src={session.user.image || undefined} alt={session.user.name || "User"} />
-                    <AvatarFallback className="text-lg bg-gradient-to-br from-primary to-primary/70 text-primary-foreground">
+                    <AvatarFallback className="text-lg bg-linear-to-br from-primary to-primary/70 text-primary-foreground">
                       {initials}
                     </AvatarFallback>
                   </Avatar>

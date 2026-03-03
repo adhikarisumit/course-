@@ -33,11 +33,7 @@ export async function GET(req: NextRequest) {
         isBanned: true,
         bannedAt: true,
         banReason: true,
-        _count: {
-          select: {
-            enrollments: true,
-          },
-        },
+
       },
       orderBy: { createdAt: "desc" },
     })

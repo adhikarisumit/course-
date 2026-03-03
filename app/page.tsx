@@ -1,6 +1,7 @@
 import dynamicImport from "next/dynamic"
 import { HomeClient } from "@/components/home-client"
 import { Hero } from "@/components/hero"
+import { SecondaryBanner } from "@/components/secondary-banner"
 import { Footer } from "@/components/footer"
 import { InArticleAd } from "@/components/ads"
 
@@ -34,16 +35,22 @@ export default function Home() {
     <HomeClient>
       <main className="space-y-0">
         <Hero />
+        <SecondaryBanner section="after-hero" />
         <WhyChooseUs />
+        <SecondaryBanner section="after-why-choose-us" />
         <div className="container mx-auto px-4 py-2">
           <InArticleAd />
         </div>
         <MentorIntro />
+        <SecondaryBanner section="after-mentor-intro" />
         <SuccessMetrics />
+        <SecondaryBanner section="after-success-metrics" />
         <div className="container mx-auto px-4 py-2">
           <InArticleAd />
         </div>
         <Testimonials />
+        <SecondaryBanner section="after-testimonials" />
+        <SecondaryBanner section="before-cta" />
         <CTASection />
       </main>
       <Footer />

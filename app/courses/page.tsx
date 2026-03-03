@@ -23,14 +23,21 @@ export default async function CoursesPage({
     },
     include: {
       lessons: true,
-      enrollments: session?.user ? {
-        where: { userId: session.user.id },
+      payments: session?.user ? {
+        where: { userId: session.user.id, status: "completed" },
+        take: 1,
       } : undefined,
     },
     orderBy: { createdAt: "desc" },
   }) as any[];
 
+  // Map payments to enrollments format for backward compatibility with client component
+  const coursesWithEnrollments = courses.map((course: any) => ({
+    ...course,
+    enrollments: course.payments?.length > 0 ? course.payments : [],
+  }));
+
   return (
-    <CoursesClient courses={courses} initialSearch={search || ""} />
+    <CoursesClient courses={coursesWithEnrollments} initialSearch={search || ""} />
   )
 }

@@ -15,11 +15,6 @@ export async function DELETE(
       where: { courseId: id },
     });
 
-    // Delete enrollments
-    await prisma.enrollment.deleteMany({
-      where: { courseId: id },
-    });
-
     // Delete lesson progress
     await prisma.lessonProgress.deleteMany({
       where: {
@@ -66,11 +61,6 @@ export async function GET(
         lessons: {
           orderBy: { order: "asc" },
         },
-        enrollments: session?.user
-          ? {
-              where: { userId: session.user.id },
-            }
-          : undefined,
       },
     }) as any;
 
@@ -78,9 +68,7 @@ export async function GET(
       return NextResponse.json({ error: "Course not found" }, { status: 404 })
     }
 
-    // Check enrollment
-    const isEnrolled = course.enrollments && course.enrollments.length > 0
-    const enrollment = isEnrolled ? course.enrollments[0] : null
+    const isEnrolled = !!session?.user
 
     // Get lesson progress if user is logged in
     const lessonProgress = session?.user
@@ -109,7 +97,7 @@ export async function GET(
       price: course.price,
       isPaid: course.isPaid,
       isEnrolled,
-      progress: enrollment?.progress || 0,
+      progress: 0,
       lessons: lessonsWithProgress,
       courseType: (course as any).courseType,
       meetingLink: (course as any).meetingLink,
@@ -120,8 +108,6 @@ export async function GET(
       recurringSchedule: (course as any).recurringSchedule,
       features: (course as any).features,
       accessDurationMonths: (course as any).accessDurationMonths,
-      adCode: (course as any).adCode,
-      showAds: (course as any).showAds ?? true,
     })
   } catch (error) {
     console.error("Error fetching course:", error)

@@ -18,7 +18,7 @@ type Course = {
   description?: string;
   isPublished: boolean;
   lessons?: { id: string }[];
-  _count?: { enrollments: number };
+  _count?: { payments: number };
   category?: string;
   level?: string;
   isPaid?: boolean;
@@ -35,7 +35,7 @@ function AdminCoursesPageClient() {
   React.useEffect(() => {
     fetch("/api/admin/courses")
       .then((res) => res.json())
-      .then((data) => setCourses(data))
+      .then((data) => setCourses(Array.isArray(data) ? data : data.courses || []))
   }, [])
 
   const handleDelete = async (id: string) => {
@@ -129,7 +129,7 @@ function AdminCoursesPageClient() {
                       </div>
                       <div className="flex items-center gap-1">
                         <Users className="h-4 w-4 text-muted-foreground" />
-                        <span>{course._count?.enrollments || 0} students</span>
+                        <span>{course._count?.payments || 0} students</span>
                       </div>
                     </div>
 

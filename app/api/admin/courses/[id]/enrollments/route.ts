@@ -16,20 +16,20 @@ export async function GET(
     const { searchParams } = new URL(request.url)
     const completed = searchParams.get("completed") === "true"
 
-    const enrollments = await prisma.enrollment.findMany({
+    const payments = await prisma.payment.findMany({
       where: {
         courseId: id,
-        ...(completed && { completed: true })
+        ...(completed && { status: "completed" })
       },
       include: {
         user: {
           select: { id: true, name: true, email: true }
         }
       },
-      orderBy: { enrolledAt: "desc" }
+      orderBy: { createdAt: "desc" }
     })
 
-    return NextResponse.json(enrollments)
+    return NextResponse.json(payments)
   } catch (error) {
     console.error("Error fetching enrollments:", error)
     return NextResponse.json({ error: "Failed to fetch enrollments" }, { status: 500 })

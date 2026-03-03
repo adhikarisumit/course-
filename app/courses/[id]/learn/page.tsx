@@ -13,7 +13,6 @@ import Link from "next/link"
 import { useSession } from "next-auth/react"
 import { YouTubePlayer } from "@/components/youtube-player"
 import { HtmlContentRenderer } from "@/components/html-content-renderer"
-import { CourseAd } from "@/components/ads"
 
 interface Lesson {
   id: string
@@ -32,7 +31,6 @@ interface Course {
   title: string
   description: string | null
   isPaid: boolean
-  isEnrolled: boolean
   progress: number
   lessons: Lesson[]
   courseType?: string
@@ -42,8 +40,6 @@ interface Course {
   scheduledEndTime?: string | null
   isRecurring?: boolean
   recurringSchedule?: string | null
-  adCode?: string | null
-  showAds?: boolean
 }
 
 export default function LearnPage({ params }: { params: Promise<{ id: string }> }) {
@@ -109,12 +105,14 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
       // Update local state
       setCourse((prev) => {
         if (!prev) return prev
+        const updatedLessons = prev.lessons.map((l) =>
+          l.id === currentLesson.id ? { ...l, isCompleted: true } : l
+        )
+        const completedCount = updatedLessons.filter(l => l.isCompleted).length
         return {
           ...prev,
-          progress: data.enrollmentProgress,
-          lessons: prev.lessons.map((l) =>
-            l.id === currentLesson.id ? { ...l, isCompleted: true } : l
-          ),
+          progress: Math.round((completedCount / updatedLessons.length) * 100),
+          lessons: updatedLessons,
         }
       })
 
@@ -177,7 +175,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
   }
 
   const currentIndex = course.lessons.findIndex((l) => l.id === currentLesson.id)
-  const canAccess = !course.isPaid || course.isEnrolled || currentLesson.isFree
+  const canAccess = !course.isPaid || !!session || currentLesson.isFree
 
   if (!canAccess) {
     return (
@@ -188,11 +186,11 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
               <Lock className="h-5 w-5" />
               Content Locked
             </CardTitle>
-            <CardDescription>You need to enroll in this course to access this lesson.</CardDescription>
+            <CardDescription>You need to sign in to access this lesson.</CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link href={`/courses/${unwrappedParams?.id}/enroll`}>Enroll Now</Link>
+              <Link href="/auth/signin">Sign In</Link>
             </Button>
           </CardContent>
         </Card>
@@ -201,7 +199,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background overflow-x-hidden">
+    <div className="min-h-screen bg-linear-to-b from-muted/30 to-background overflow-x-hidden">
       {/* Top Navigation */}
       <div className="border-b bg-card">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
@@ -259,7 +257,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                   <div className="max-h-[200px] overflow-y-auto">
                     {course.lessons.map((lesson, index) => {
                       const isActive = lesson.id === currentLesson.id
-                      const canAccessLesson = !course.isPaid || course.isEnrolled || lesson.isFree
+                      const canAccessLesson = !course.isPaid || !!session || lesson.isFree
 
                       return (
                         <button
@@ -277,7 +275,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                         >
                           <div className="flex items-center gap-2">
                             <div
-                              className={`flex items-center justify-center h-5 w-5 rounded-full text-xs font-medium flex-shrink-0 ${
+                              className={`flex items-center justify-center h-5 w-5 rounded-full text-xs font-medium shrink-0 ${
                                 lesson.isCompleted
                                   ? "bg-green-500 text-white"
                                   : isActive
@@ -294,7 +292,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium truncate">{lesson.title}</p>
                             </div>
-                            {!canAccessLesson && <Lock className="h-3 w-3 flex-shrink-0" />}
+                            {!canAccessLesson && <Lock className="h-3 w-3 shrink-0" />}
                           </div>
                         </button>
                       )
@@ -359,7 +357,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                 <div className="max-h-[600px] overflow-y-auto">
                   {course.lessons.map((lesson, index) => {
                     const isActive = lesson.id === currentLesson.id
-                    const canAccessLesson = !course.isPaid || course.isEnrolled || lesson.isFree
+                    const canAccessLesson = !course.isPaid || !!session || lesson.isFree
 
                     return (
                       <button
@@ -376,7 +374,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                       >
                         <div className="flex items-start gap-3">
                           <div
-                            className={`flex items-center justify-center h-6 w-6 rounded-full text-xs font-medium flex-shrink-0 ${
+                            className={`flex items-center justify-center h-6 w-6 rounded-full text-xs font-medium shrink-0 ${
                               lesson.isCompleted
                                 ? "bg-green-500 text-white"
                                 : isActive
@@ -393,7 +391,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <p className="text-sm font-medium truncate">{lesson.title}</p>
-                              {!canAccessLesson && <Lock className="h-3 w-3 flex-shrink-0" />}
+                              {!canAccessLesson && <Lock className="h-3 w-3 shrink-0" />}
                             </div>
                             {lesson.duration && (
                               <p className="text-xs text-muted-foreground mt-1">
@@ -429,7 +427,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
               <CardHeader className="p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <CardTitle className="text-lg sm:text-xl md:text-2xl mb-1 sm:mb-2 break-words">{currentLesson.title}</CardTitle>
+                    <CardTitle className="text-lg sm:text-xl md:text-2xl mb-1 sm:mb-2 wrap-break-word">{currentLesson.title}</CardTitle>
                     {currentLesson.duration && (
                       <CardDescription className="text-xs sm:text-sm">{currentLesson.duration}</CardDescription>
                     )}
@@ -444,7 +442,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
               </CardHeader>
               <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0 space-y-3 sm:space-y-4 overflow-hidden max-w-full">
                 {currentLesson.description && (
-                  <p className="text-sm sm:text-base text-muted-foreground break-words">{currentLesson.description}</p>
+                  <p className="text-sm sm:text-base text-muted-foreground wrap-break-word">{currentLesson.description}</p>
                 )}
                 <Separator />
                 {currentLesson.content && (
@@ -455,12 +453,6 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
               </CardContent>
             </Card>
 
-            {/* Course-Specific Ad */}
-            {course && (
-              <div className="my-4">
-                <CourseAd adCode={course.adCode} showAds={course.showAds} />
-              </div>
-            )}
 
             {/* Navigation and Actions */}
             <div className="space-y-3">

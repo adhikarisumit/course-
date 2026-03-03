@@ -38,20 +38,6 @@ export async function POST(
       return NextResponse.json({ error: "Lesson not found" }, { status: 404 })
     }
 
-    // Check if user is enrolled (or course is free)
-    if (lesson.course.isPaid) {
-      const enrollment = await prisma.enrollment.findFirst({
-        where: {
-          userId: session.user.id,
-          courseId: courseId,
-        },
-      })
-
-      if (!enrollment) {
-        return NextResponse.json({ error: "Not enrolled in course" }, { status: 403 })
-      }
-    }
-
     // Mark lesson as complete
     await prisma.lessonProgress.upsert({
       where: {
@@ -84,26 +70,6 @@ export async function POST(
 
     const progress = Math.round((completedLessons / totalLessons) * 100)
     const isCompleted = progress === 100
-
-    // Update enrollment progress (create if doesn't exist for free courses)
-    await prisma.enrollment.upsert({
-      where: {
-        userId_courseId: {
-          userId: session.user.id,
-          courseId: courseId,
-        },
-      },
-      update: {
-        progress,
-        completed: isCompleted,
-      },
-      create: {
-        userId: session.user.id,
-        courseId: courseId,
-        progress,
-        completed: isCompleted,
-      },
-    })
 
     return NextResponse.json({
       success: true,

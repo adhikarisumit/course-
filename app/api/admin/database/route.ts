@@ -31,11 +31,10 @@ export async function GET() {
     }
 
     // Get table counts
-    const [userCount, courseCount, lessonCount, enrollmentCount, paymentCount, mentorCount] = await Promise.all([
+    const [userCount, courseCount, lessonCount, paymentCount, mentorCount] = await Promise.all([
       prisma.user.count(),
       prisma.course.count(),
       prisma.lesson.count(),
-      prisma.enrollment.count(),
       prisma.payment.count(),
       prisma.mentor.count(),
     ])
@@ -47,11 +46,10 @@ export async function GET() {
         users: userCount,
         courses: courseCount,
         lessons: lessonCount,
-        enrollments: enrollmentCount,
         payments: paymentCount,
         mentors: mentorCount,
       },
-      totalRecords: userCount + courseCount + lessonCount + enrollmentCount + paymentCount + mentorCount,
+      totalRecords: userCount + courseCount + lessonCount + paymentCount + mentorCount,
     })
   } catch (error) {
     console.error("Error fetching database stats:", error)

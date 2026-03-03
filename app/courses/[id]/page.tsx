@@ -26,49 +26,11 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
       lessons: {
         orderBy: { order: "asc" },
       },
-      enrollments: session?.user ? {
-        where: { userId: session.user.id },
-      } : undefined,
     },
   }) as any;
 
   if (!course) {
     notFound()
-  }
-
-  let isEnrolled = course.enrollments && course.enrollments.length > 0
-  let enrollment = isEnrolled ? course.enrollments[0] : null
-
-  // Auto-enroll free courses
-  if (!course.isPaid && !isEnrolled && session?.user) {
-    try {
-      await prisma.enrollment.create({
-        data: {
-          userId: session.user.id,
-          courseId: course.id,
-          enrolledAt: new Date(),
-          expiresAt: new Date(Date.now() + (course.accessDurationMonths || 6) * 30 * 24 * 60 * 60 * 1000), // Approximate months to milliseconds
-        },
-      })
-      // Re-fetch to get the new enrollment
-      const updatedCourse = await prisma.course.findFirst({
-        where: { id },
-        include: {
-          lessons: { orderBy: { order: "asc" } },
-          enrollments: session?.user ? { where: { userId: session.user.id } } : undefined,
-        },
-      }) as any
-      course.enrollments = updatedCourse.enrollments
-      isEnrolled = updatedCourse.enrollments && updatedCourse.enrollments.length > 0
-      enrollment = isEnrolled ? updatedCourse.enrollments[0] : null
-    } catch (error) {
-      // Enrollment might fail if already enrolled, ignore
-    }
-  }
-
-  // If course is paid and user is not enrolled, redirect to enrollment page
-  if (course.isPaid && !isEnrolled && session?.user) {
-    redirect(`/courses/${course.id}/enroll`)
   }
 
   // If not logged in and course is paid, redirect to signin
@@ -86,7 +48,7 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
   const completedLessons = lessonProgress.filter((p: any) => p.completed).length
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
+    <div className="min-h-screen bg-linear-to-b from-muted/30 to-background">
       <div className="container mx-auto px-4 py-8">
         {/* Course Header */}
         <div className="grid lg:grid-cols-3 gap-8 mb-8">
@@ -129,12 +91,7 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
                   Live
                 </Badge>
               )}
-              {isEnrolled && (
-                <Badge className="bg-green-500">
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Enrolled
-                </Badge>
-              )}
+
             </div>
 
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">{course.title}</h1>
@@ -151,12 +108,7 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
                   <span>{course.duration}</span>
                 </div>
               )}
-              {isEnrolled && (
-                <div className="flex items-center gap-2">
-                  <Award className="h-5 w-5 text-primary" />
-                  <span>{enrollment?.progress}% Complete</span>
-                </div>
-              )}
+
             </div>
           </div>
 
@@ -169,91 +121,65 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {isEnrolled && enrollment ? (
-                  <>
-                    {(course as any).courseType === "live" && (course as any).meetingLink ? (
-                      <>
-                        <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 space-y-3">
-                          <div className="flex items-center gap-2 text-primary font-semibold">
-                            <Video className="h-5 w-5" />
-                            <span>Live Session</span>
-                          </div>
-                          {(course as any).scheduledStartTime && (
-                            <div className="space-y-1 text-sm">
-                              <div className="flex items-center gap-2 text-muted-foreground">
-                                <Calendar className="h-4 w-4" />
-                                <span>Scheduled Time</span>
-                              </div>
-                              <p className="font-medium">
-                                {new Date((course as any).scheduledStartTime).toLocaleString('en-US', {
-                                  dateStyle: 'full',
-                                  timeStyle: 'short'
-                                })}
-                              </p>
-                              {(course as any).scheduledEndTime && (
-                                <p className="text-xs text-muted-foreground">
-                                  to {new Date((course as any).scheduledEndTime).toLocaleString('en-US', {
-                                    timeStyle: 'short'
-                                  })}
-                                </p>
-                              )}
-                              {(course as any).isRecurring && (course as any).recurringSchedule && (
-                                <p className="text-xs text-muted-foreground mt-2">
-                                  🔁 {(course as any).recurringSchedule}
-                                </p>
-                              )}
-                            </div>
-                          )}
-                          <Button asChild className="w-full" size="lg">
-                            <a href={(course as any).meetingLink} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="h-4 w-4 mr-2" />
-                              Join Live Session
-                            </a>
-                          </Button>
-                          <p className="text-xs text-center text-muted-foreground">
-                            Platform: {(course as any).meetingPlatform === 'google-meet' ? 'Google Meet' : (course as any).meetingPlatform === 'teams' ? 'Microsoft Teams' : (course as any).meetingPlatform?.charAt(0).toUpperCase() + (course as any).meetingPlatform?.slice(1)}
-                          </p>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span>Progress</span>
-                            <span className="font-medium">{enrollment.progress}%</span>
-                          </div>
-                          <Progress value={enrollment.progress} />
-                          <p className="text-sm text-muted-foreground">
-                            {completedLessons} of {course.lessons.length} lessons completed
-                          </p>
-                        </div>
-                        <Button asChild className="w-full" size="lg">
-                          <Link href={`/courses/${course.id}/learn`}>
-                            <Play className="h-4 w-4 mr-2" />
-                            Continue Learning
-                          </Link>
-                        </Button>
-                      </>
-                    )}
-                  </>
-                ) : course.isPaid ? (
-                  <>
-                    <div className="text-3xl font-bold text-center py-4">
-                      ¥{course.price}
+                {(course as any).courseType === "live" && (course as any).meetingLink ? (
+                  <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 space-y-3">
+                    <div className="flex items-center gap-2 text-primary font-semibold">
+                      <Video className="h-5 w-5" />
+                      <span>Live Session</span>
                     </div>
+                    {(course as any).scheduledStartTime && (
+                      <div className="space-y-1 text-sm">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          <span>Scheduled Time</span>
+                        </div>
+                        <p className="font-medium">
+                          {new Date((course as any).scheduledStartTime).toLocaleString('en-US', {
+                            dateStyle: 'full',
+                            timeStyle: 'short'
+                          })}
+                        </p>
+                        {(course as any).scheduledEndTime && (
+                          <p className="text-xs text-muted-foreground">
+                            to {new Date((course as any).scheduledEndTime).toLocaleString('en-US', {
+                              timeStyle: 'short'
+                            })}
+                          </p>
+                        )}
+                        {(course as any).isRecurring && (course as any).recurringSchedule && (
+                          <p className="text-xs text-muted-foreground mt-2">
+                            🔁 {(course as any).recurringSchedule}
+                          </p>
+                        )}
+                      </div>
+                    )}
                     <Button asChild className="w-full" size="lg">
-                      <Link href={session?.user ? `/courses/${course.id}/enroll` : "/auth/signin"}>
-                        <Lock className="h-4 w-4 mr-2" />
-                        Enroll Now
+                      <a href={(course as any).meetingLink} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Join Live Session
+                      </a>
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        {completedLessons} of {course.lessons.length} lessons completed
+                      </p>
+                      <Progress value={course.lessons.length > 0 ? (completedLessons / course.lessons.length) * 100 : 0} />
+                    </div>
+                    {course.isPaid && (
+                      <div className="text-3xl font-bold text-center py-4">
+                        ¥{course.price}
+                      </div>
+                    )}
+                    <Button asChild className="w-full" size="lg">
+                      <Link href={session?.user ? `/courses/${course.id}/learn` : "/auth/signin"}>
+                        <Play className="h-4 w-4 mr-2" />
+                        {completedLessons > 0 ? "Continue Learning" : "Start Learning"}
                       </Link>
                     </Button>
                   </>
-                ) : (
-                  <Button asChild className="w-full" size="lg">
-                    <Link href={session?.user ? `/courses/${course.id}/learn` : "/auth/signin"}>
-                      Start Free Course
-                    </Link>
-                  </Button>
                 )}
 
                 <div className="pt-4 border-t space-y-2 text-sm">
@@ -306,7 +232,7 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
                   {course.lessons.map((lesson: any, index: number) => {
                     const progress = lessonProgress.find((p: any) => p.lessonId === lesson.id)
                     const isCompleted = progress?.completed || false
-                    const canAccess = !course.isPaid || isEnrolled || lesson.isFree
+                    const canAccess = !course.isPaid || !!session?.user || lesson.isFree
 
                     return (
                       <AccordionItem key={lesson.id} value={lesson.id}>
@@ -317,7 +243,7 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex flex-wrap items-center gap-1 sm:gap-2">
-                                <span className="font-medium text-sm sm:text-base break-words">{lesson.title}</span>
+                                <span className="font-medium text-sm sm:text-base wrap-break-word">{lesson.title}</span>
                                 {lesson.isFree && (
                                   <Badge variant="outline" className="text-[10px] sm:text-xs">Free</Badge>
                                 )}

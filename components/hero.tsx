@@ -1,9 +1,13 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, MessageSquareText } from "lucide-react"
+import { InquiryModal } from "@/components/inquiry-modal"
 
 export function Hero() {
+  const [inquiryOpen, setInquiryOpen] = useState(false)
+
   return (
     <section className="relative py-12 sm:py-16 md:py-24 lg:py-32 overflow-hidden bg-gray-900">
       {/* Programming keyboard background image - very visible */}
@@ -15,12 +19,12 @@ export function Hero() {
       ></div>
       
       {/* Dark overlay for both light and dark modes */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900/60 via-gray-900/50 to-gray-900/70"></div>
-      <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-gray-900/60"></div>
+      <div className="absolute inset-0 bg-linear-to-br from-gray-900/60 via-gray-900/50 to-gray-900/70"></div>
+      <div className="absolute inset-0 bg-linear-to-t from-gray-900/80 via-transparent to-gray-900/60"></div>
       
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-balance bg-gradient-to-br from-white to-gray-200 bg-clip-text text-transparent leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-balance bg-linear-to-br from-white to-gray-200 bg-clip-text text-transparent leading-tight">
             Transform Your Career with Expert-Curated Learning
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-3 sm:mb-4 text-pretty px-2">
@@ -44,6 +48,14 @@ export function Hero() {
                 Meet Your Mentor
               </a>
             </Button>
+            <Button
+              size="lg"
+              onClick={() => setInquiryOpen(true)}
+              className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 hover:shadow-xl hover:shadow-emerald-600/30 transition-all cursor-pointer"
+            >
+              <MessageSquareText className="h-4 w-4" />
+              Send Inquiry
+            </Button>
           </div>
           
           {/* Trust indicators */}
@@ -63,6 +75,9 @@ export function Hero() {
           </div>
         </div>
       </div>
+
+      {/* Inquiry Modal */}
+      <InquiryModal open={inquiryOpen} onOpenChange={setInquiryOpen} />
     </section>
   )
 }

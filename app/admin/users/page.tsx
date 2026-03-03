@@ -633,9 +633,7 @@ interface User {
   banReason: string | null
   createdAt: string
   image: string | null
-  _count: {
-    enrollments: number
-  }
+
 }
 
 export default function AdminUsersPage() {
@@ -857,10 +855,10 @@ export default function AdminUsersPage() {
 
       {/* Users List - Tabs for Admins, Students and Banned */}
       <Tabs defaultValue="students" className="w-full mt-4">
-        <TabsList>
-          <TabsTrigger value="students">Students ({studentUsers.length})</TabsTrigger>
-          <TabsTrigger value="admins">Admins ({adminUsers.length})</TabsTrigger>
-          <TabsTrigger value="banned" className="text-red-500 data-[state=active]:text-red-600">Banned ({bannedUsers.length})</TabsTrigger>
+        <TabsList className="w-full md:w-auto flex overflow-x-auto">
+          <TabsTrigger value="students" className="flex-1 md:flex-none">Students ({studentUsers.length})</TabsTrigger>
+          <TabsTrigger value="admins" className="flex-1 md:flex-none">Admins ({adminUsers.length})</TabsTrigger>
+          <TabsTrigger value="banned" className="flex-1 md:flex-none text-red-500 data-[state=active]:text-red-600">Banned ({bannedUsers.length})</TabsTrigger>
         </TabsList>
         <TabsContent value="students">
           <Card>
@@ -876,7 +874,7 @@ export default function AdminUsersPage() {
                   {studentUsers.map((user) => (
                     <div
                       key={user.id}
-                      className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                      className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
                     >
                       <div className="flex-1 space-y-1 w-full min-w-0">
                         <div className="flex flex-wrap items-center gap-2 min-w-0">
@@ -902,24 +900,20 @@ export default function AdminUsersPage() {
                               Verified
                             </Badge>
                           )}
-                          {user._count.enrollments > 0 && (
-                            <Badge variant="outline">
-                              {user._count.enrollments} course{user._count.enrollments > 1 ? "s" : ""}
-                            </Badge>
-                          )}
+
                         </div>
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground min-w-0">
-                          <div className="flex items-center gap-1">
-                            <Mail className="h-3 w-3" />
-                            <span>{user.email}</span>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground min-w-0">
+                          <div className="flex items-center gap-1 min-w-0">
+                            <Mail className="h-3 w-3 shrink-0" />
+                            <span className="truncate">{user.email}</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
+                            <Calendar className="h-3 w-3 shrink-0" />
                             <span>Joined {new Date(user.createdAt).toLocaleDateString()}</span>
                           </div>
                         </div>
                       </div>
-                      <div className="flex flex-col gap-2 items-stretch sm:items-end w-full sm:w-auto mt-4 sm:mt-0">
+                      <div className="flex flex-col gap-2 items-stretch md:items-end w-full md:w-auto md:min-w-[200px] md:max-w-[320px] mt-2 md:mt-0">
                         {/* Reset Password Dialog - only for students or super admin */}
                         {(session?.user?.role === "super" || user.role === "student") && (
                         <Dialog
@@ -1039,7 +1033,7 @@ export default function AdminUsersPage() {
                         </Dialog>
                         )}
                         {/* Chat and Delete Chat for students */}
-                        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <div className="flex flex-wrap gap-2 w-full">
                           <VerifyProfileButton 
                             userId={user.id} 
                             userRole={user.role} 
@@ -1061,7 +1055,7 @@ export default function AdminUsersPage() {
                                 user={{ id: user.id, name: user.name || user.email }}
                                 onMessageRead={loadUnreadCounts}
                                 trigger={
-                                  <Button variant="secondary" size="sm" className="w-full sm:w-auto relative">
+                                  <Button variant="secondary" size="sm" className="flex-1 min-w-[100px] md:flex-none relative">
                                     <Mail className="h-4 w-4 mr-2" />
                                     Message
                                     {unreadCounts[user.id] > 0 && (
@@ -1107,7 +1101,7 @@ export default function AdminUsersPage() {
                   {adminUsers.map((user) => (
                     <div
                       key={user.id}
-                      className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                      className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
                     >
                       <div className="flex-1 space-y-1 w-full min-w-0">
                         <div className="flex flex-wrap items-center gap-2 min-w-0">
@@ -1122,18 +1116,18 @@ export default function AdminUsersPage() {
                           <p className="font-medium">{user.name || "No name"}</p>
                           <Badge variant="default">admin</Badge>
                         </div>
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground min-w-0">
-                          <div className="flex items-center gap-1">
-                            <Mail className="h-3 w-3" />
-                            <span>{user.email}</span>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground min-w-0">
+                          <div className="flex items-center gap-1 min-w-0">
+                            <Mail className="h-3 w-3 shrink-0" />
+                            <span className="truncate">{user.email}</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
+                            <Calendar className="h-3 w-3 shrink-0" />
                             <span>Joined {new Date(user.createdAt).toLocaleDateString()}</span>
                           </div>
                         </div>
                       </div>
-                      <div className="flex flex-col gap-2 items-stretch sm:items-end w-full sm:w-auto mt-4 sm:mt-0">
+                      <div className="flex flex-col gap-2 items-stretch md:items-end w-full md:w-auto md:min-w-[200px] mt-2 md:mt-0">
                         {/* Reset Password Dialog for admins - only super admin can reset admin passwords */}
                         {session?.user?.role === "super" && (
                         <Dialog
@@ -1277,7 +1271,7 @@ export default function AdminUsersPage() {
                   {bannedUsers.map((user) => (
                     <div
                       key={user.id}
-                      className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-4 border border-red-200 dark:border-red-800 rounded-lg bg-red-50/50 dark:bg-red-950/20"
+                      className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between p-4 border border-red-200 dark:border-red-800 rounded-lg bg-red-50/50 dark:bg-red-950/20"
                     >
                       <div className="flex-1 space-y-1 w-full min-w-0">
                         <div className="flex flex-wrap items-center gap-2 min-w-0">
@@ -1297,12 +1291,12 @@ export default function AdminUsersPage() {
                           </Badge>
                         </div>
                         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground min-w-0">
-                          <div className="flex items-center gap-1">
-                            <Mail className="h-3 w-3" />
-                            <span>{user.email}</span>
+                          <div className="flex items-center gap-1 min-w-0">
+                            <Mail className="h-3 w-3 shrink-0" />
+                            <span className="truncate">{user.email}</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
+                            <Calendar className="h-3 w-3 shrink-0" />
                             <span>Joined {new Date(user.createdAt).toLocaleDateString()}</span>
                           </div>
                           {user.bannedAt && (
@@ -1318,8 +1312,8 @@ export default function AdminUsersPage() {
                           </div>
                         )}
                       </div>
-                      <div className="flex flex-col gap-2 items-stretch sm:items-end w-full sm:w-auto mt-4 sm:mt-0">
-                        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                      <div className="flex flex-col gap-2 items-stretch md:items-end w-full md:w-auto mt-2 md:mt-0">
+                        <div className="flex flex-wrap gap-2 w-full md:w-auto">
                           <BanUserButton 
                             userId={user.id} 
                             userRole={user.role} 

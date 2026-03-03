@@ -94,9 +94,9 @@ export function Categories({ selectedCategory, onSelectCategory }: CategoriesPro
 								}`}
 								data-category={category.title}
 							>
-								<div className={`absolute inset-0 bg-gradient-to-br ${category.bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
+								<div className={`absolute inset-0 bg-linear-to-br ${category.bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
 								<CardContent className="p-6 text-center relative z-10">
-									<div className={`inline-block p-3 rounded-xl bg-gradient-to-br ${category.bgGradient} mb-3`}>
+									<div className={`inline-block p-3 rounded-xl bg-linear-to-br ${category.bgGradient} mb-3`}>
 										<Icon
 											className={`h-8 w-8 ${category.color} group-hover:scale-110 transition-transform duration-300`}
 										/>

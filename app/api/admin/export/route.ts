@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       case "payments":
         return await exportPayments()
       case "enrollments":
-        return await exportEnrollments()
+        return NextResponse.json({ error: "Enrollment export is no longer available" }, { status: 400 })
       case "courses":
         return await exportCourses()
       case "all-users":
@@ -65,7 +65,6 @@ async function exportStudents() {
       profileVerified: true,
       _count: {
         select: {
-          enrollments: true,
           payments: true,
         },
       },
@@ -74,14 +73,13 @@ async function exportStudents() {
   })
 
   const csv = [
-    ["ID", "Name", "Email", "Joined Date", "Profile Verified", "Enrollments", "Payments"],
+    ["ID", "Name", "Email", "Joined Date", "Profile Verified", "Payments"],
     ...students.map((student) => [
       student.id,
       student.name || "N/A",
       student.email,
       new Date(student.createdAt).toLocaleDateString(),
       student.profileVerified ? "Yes" : "No",
-      student._count.enrollments.toString(),
       student._count.payments.toString(),
     ]),
   ]
@@ -108,7 +106,6 @@ async function exportAllUsers() {
       profileVerified: true,
       _count: {
         select: {
-          enrollments: true,
           payments: true,
         },
       },
@@ -117,7 +114,7 @@ async function exportAllUsers() {
   })
 
   const csv = [
-    ["ID", "Name", "Email", "Role", "Joined Date", "Profile Verified", "Enrollments", "Payments"],
+    ["ID", "Name", "Email", "Role", "Joined Date", "Profile Verified", "Payments"],
     ...users.map((user) => [
       user.id,
       user.name || "N/A",
@@ -125,7 +122,6 @@ async function exportAllUsers() {
       user.role,
       new Date(user.createdAt).toLocaleDateString(),
       user.profileVerified ? "Yes" : "No",
-      user._count.enrollments.toString(),
       user._count.payments.toString(),
     ]),
   ]
@@ -183,67 +179,21 @@ async function exportPayments() {
   })
 }
 
-async function exportEnrollments() {
-  const enrollments = await prisma.enrollment.findMany({
-    include: {
-      user: {
-        select: {
-          name: true,
-          email: true,
-        },
-      },
-      course: {
-        select: {
-          title: true,
-          price: true,
-        },
-      },
-    },
-    orderBy: { enrolledAt: "desc" },
-  })
-
-  const csv = [
-    ["ID", "Student Name", "Student Email", "Course Title", "Course Price", "Progress", "Completed", "Enrolled Date"],
-    ...enrollments.map((enrollment) => [
-      enrollment.id,
-      enrollment.user.name || "N/A",
-      enrollment.user.email,
-      enrollment.course.title,
-      enrollment.course.price.toString(),
-      `${enrollment.progress}%`,
-      enrollment.completed ? "Yes" : "No",
-      new Date(enrollment.enrolledAt).toLocaleDateString(),
-    ]),
-  ]
-    .map((row) => row.map((cell) => `"${cell}"`).join(","))
-    .join("\n")
-
-  return new NextResponse(csv, {
-    headers: {
-      "Content-Type": "text/csv",
-      "Content-Disposition": `attachment; filename="enrollments-${new Date().toISOString().split("T")[0]}.csv"`,
-    },
-  })
-}
-
 async function exportCourses() {
   const courses = await prisma.course.findMany({
     orderBy: { createdAt: "desc" },
   })
 
-  // Get counts separately
+  // Get lesson counts separately
   const coursesWithCounts = await Promise.all(
     courses.map(async (course) => {
-      const [enrollmentCount, lessonCount] = await Promise.all([
-        prisma.enrollment.count({ where: { courseId: course.id } }),
-        prisma.lesson.count({ where: { courseId: course.id } }),
-      ])
-      return { ...course, enrollmentCount, lessonCount }
+      const lessonCount = await prisma.lesson.count({ where: { courseId: course.id } })
+      return { ...course, lessonCount }
     })
   )
 
   const csv = [
-    ["ID", "Title", "Category", "Price", "Level", "Published", "Duration", "Access Months", "Enrollments", "Lessons", "Created Date"],
+    ["ID", "Title", "Category", "Price", "Level", "Published", "Duration", "Access Months", "Lessons", "Created Date"],
     ...coursesWithCounts.map((course) => [
       course.id,
       course.title,
@@ -253,7 +203,6 @@ async function exportCourses() {
       course.isPublished ? "Yes" : "No",
       course.duration || "N/A",
       course.accessDurationMonths.toString(),
-      course.enrollmentCount.toString(),
       course.lessonCount.toString(),
       new Date(course.createdAt).toLocaleDateString(),
     ]),

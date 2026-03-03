@@ -1,9 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { InquiryModal } from '@/components/inquiry-modal';
 
 interface PromoBannerData {
   id: string;
@@ -18,8 +16,7 @@ interface PromoBannerData {
 
 export function PromoBanner() {
   const [banner, setBanner] = useState<PromoBannerData | null>(null);
-  const { data: session } = useSession();
-  const router = useRouter();
+  const [inquiryOpen, setInquiryOpen] = useState(false);
 
   useEffect(() => {
     const fetchBanner = async () => {
@@ -40,18 +37,6 @@ export function PromoBanner() {
 
     fetchBanner();
   }, []);
-
-  const handleBannerClick = (e: React.MouseEvent) => {
-    if (!banner?.linkUrl) return;
-    
-    // If user is not signed in, redirect to sign in with callback
-    if (!session?.user) {
-      e.preventDefault();
-      const callbackUrl = encodeURIComponent(banner.linkUrl);
-      router.push(`/auth/signin?callbackUrl=${callbackUrl}`);
-    }
-    // If signed in, the Link will handle navigation normally
-  };
 
   if (!banner) {
     return null;
@@ -96,21 +81,15 @@ export function PromoBanner() {
   );
 
   return (
-    <div 
-      className="relative w-full z-40"
-      style={{ backgroundColor: bgColor }}
-    >
-      {banner.linkUrl ? (
-        <Link 
-          href={banner.linkUrl} 
-          className="block hover:opacity-95 transition-opacity"
-          onClick={handleBannerClick}
-        >
-          <BannerContent />
-        </Link>
-      ) : (
+    <>
+      <div 
+        className="relative w-full z-40 cursor-pointer hover:opacity-95 transition-opacity"
+        style={{ backgroundColor: bgColor }}
+        onClick={() => setInquiryOpen(true)}
+      >
         <BannerContent />
-      )}
-    </div>
+      </div>
+      <InquiryModal open={inquiryOpen} onOpenChange={setInquiryOpen} />
+    </>
   );
 }

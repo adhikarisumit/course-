@@ -1,9 +1,7 @@
 "use client";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GraduationCap, Users, BookOpen, Star } from "lucide-react";
-import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -30,7 +28,7 @@ export default function MentorIntroClient({ mentors, totalStudents, totalCourses
   };
 
   return (
-    <section id="mentor" className="py-16 md:py-24 bg-gradient-to-br from-background via-primary/5 to-background">
+    <section id="mentor" className="py-16 md:py-24 bg-linear-to-br from-background via-primary/5 to-background">
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
           {/* Section Header */}
@@ -54,7 +52,7 @@ export default function MentorIntroClient({ mentors, totalStudents, totalCourses
                 <Card key={mentor.id} className="overflow-hidden border hover:shadow-lg transition-shadow h-full flex flex-col">
                   <CardContent className="p-0 flex flex-col h-full">
                     {/* Image Section */}
-                    <div className="relative h-[140px] bg-gradient-to-br from-primary/20 to-primary/5">
+                    <div className="relative h-[140px] bg-linear-to-br from-primary/20 to-primary/5">
                       <div className="absolute inset-0 flex items-center justify-center">
                         {mentor.image ? (
                           <div className="relative w-28 h-28 rounded-full overflow-hidden border-3 border-white shadow-lg">
@@ -69,7 +67,7 @@ export default function MentorIntroClient({ mentors, totalStudents, totalCourses
                             />
                           </div>
                         ) : (
-                          <div className="relative w-28 h-28 rounded-full bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center">
+                          <div className="relative w-28 h-28 rounded-full bg-linear-to-br from-primary to-primary/50 flex items-center justify-center">
                             <GraduationCap className="w-14 h-14 text-white" />
                           </div>
                         )}
@@ -126,13 +124,6 @@ export default function MentorIntroClient({ mentors, totalStudents, totalCourses
                         ))}
                       </div>
                       <div className="flex-1" />
-                      <div className="space-y-2 mt-auto">
-                        <Button asChild className="w-full" size="sm">
-                          <Link href="/courses">
-                            View Courses
-                          </Link>
-                        </Button>
-                      </div>
                     </div>
                   </CardContent>
                 </Card>
