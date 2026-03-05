@@ -277,7 +277,7 @@ export default function AdminPurchaseRequestsPage() {
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <User className="h-4 w-4 text-muted-foreground shrink-0" />
                           <p className="font-semibold truncate">
                             {request.user.name || request.user.email}
                           </p>
@@ -289,7 +289,7 @@ export default function AdminPurchaseRequestsPage() {
 
                     {/* Item Info */}
                     <div className="flex items-start gap-2 p-2 bg-muted/50 rounded-md">
-                      <div className="flex-shrink-0 mt-0.5">
+                      <div className="shrink-0 mt-0.5">
                         {getTypeIcon(request.itemType)}
                       </div>
                       <div className="min-w-0 flex-1">
@@ -309,7 +309,7 @@ export default function AdminPurchaseRequestsPage() {
                     {/* Message if exists */}
                     {request.message && (
                       <div className="flex items-start gap-2 text-sm">
-                        <MessageSquare className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                        <MessageSquare className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                         <p className="text-muted-foreground line-clamp-2">{request.message}</p>
                       </div>
                     )}
@@ -364,7 +364,7 @@ export default function AdminPurchaseRequestsPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="text-destructive hover:text-destructive flex-shrink-0"
+                        className="text-destructive hover:text-destructive shrink-0"
                         onClick={() => handleDelete(request.id)}
                       >
                         <Trash2 className="h-4 w-4" />

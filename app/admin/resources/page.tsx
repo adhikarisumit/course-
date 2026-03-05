@@ -689,10 +689,10 @@ export default function AdminResourcesPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="min-w-[150px] sm:min-w-[200px]">Title</TableHead>
-                    <TableHead className="min-w-[80px] sm:min-w-[100px]">Type</TableHead>
-                    <TableHead className="min-w-[80px] sm:min-w-[100px] hidden sm:table-cell">Category</TableHead>
-                    <TableHead className="min-w-[60px] sm:min-w-[80px]">Free</TableHead>
-                    <TableHead className="min-w-[70px] sm:min-w-[80px]">Active</TableHead>
+                    <TableHead className="min-w-20 sm:min-w-[100px]">Type</TableHead>
+                    <TableHead className="min-w-20 sm:min-w-[100px] hidden sm:table-cell">Category</TableHead>
+                    <TableHead className="min-w-[60px] sm:min-w-20">Free</TableHead>
+                    <TableHead className="min-w-[70px] sm:min-w-20">Active</TableHead>
                     <TableHead className="min-w-[100px] sm:min-w-[120px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -790,7 +790,7 @@ export default function AdminResourcesPage() {
                     <TableHead className="min-w-[150px] sm:min-w-[200px]">User Email</TableHead>
                     <TableHead className="min-w-[120px] sm:min-w-[200px]">Resource</TableHead>
                     <TableHead className="min-w-[100px] sm:min-w-[120px] hidden sm:table-cell">Purchase Date</TableHead>
-                    <TableHead className="min-w-[80px] sm:min-w-[100px]">Actions</TableHead>
+                    <TableHead className="min-w-20 sm:min-w-[100px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

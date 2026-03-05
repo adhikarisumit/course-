@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { CheckCircle, XCircle, Clock, ExternalLink, RefreshCw, User, FileText, DollarSign } from "lucide-react"
+import { CheckCircle, XCircle, Clock, ExternalLink, RefreshCw, User, FileText, DollarSign, MessageSquare } from "lucide-react"
 import { toast } from "sonner"
 
 interface ResourcePurchase {
@@ -17,6 +17,7 @@ interface ResourcePurchase {
   amount: number
   currency: string
   status: string
+  message: string | null
   createdAt: string
   user: {
     id: string
@@ -196,7 +197,7 @@ export default function ResourceAccessPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-950 dark:to-yellow-900 border-yellow-200 dark:border-yellow-800">
+        <Card className="bg-linear-to-br from-yellow-50 to-yellow-100 dark:from-yellow-950 dark:to-yellow-900 border-yellow-200 dark:border-yellow-800">
           <CardContent className="pt-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-yellow-200 dark:bg-yellow-800">
@@ -210,7 +211,7 @@ export default function ResourceAccessPage() {
           </CardContent>
         </Card>
         
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-200 dark:border-green-800">
+        <Card className="bg-linear-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-200 dark:border-green-800">
           <CardContent className="pt-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-green-200 dark:bg-green-800">
@@ -224,7 +225,7 @@ export default function ResourceAccessPage() {
           </CardContent>
         </Card>
         
-        <Card className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950 dark:to-red-900 border-red-200 dark:border-red-800">
+        <Card className="bg-linear-to-br from-red-50 to-red-100 dark:from-red-950 dark:to-red-900 border-red-200 dark:border-red-800">
           <CardContent className="pt-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-red-200 dark:bg-red-800">
@@ -238,7 +239,7 @@ export default function ResourceAccessPage() {
           </CardContent>
         </Card>
         
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800">
+        <Card className="bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800">
           <CardContent className="pt-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-blue-200 dark:bg-blue-800">
@@ -350,6 +351,7 @@ export default function ResourceAccessPage() {
             <TableHead>Resource</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Amount</TableHead>
+            <TableHead>Message</TableHead>
             <TableHead>Date</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
@@ -382,6 +384,16 @@ export default function ResourceAccessPage() {
               </TableCell>
               <TableCell>
                 ¥{purchase.amount}
+              </TableCell>
+              <TableCell>
+                {purchase.message ? (
+                  <div className="flex items-start gap-1.5 max-w-[200px]">
+                    <MessageSquare className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
+                    <p className="text-sm text-muted-foreground line-clamp-2" title={purchase.message}>{purchase.message}</p>
+                  </div>
+                ) : (
+                  <span className="text-xs text-muted-foreground">—</span>
+                )}
               </TableCell>
               <TableCell>
                 {new Date(purchase.createdAt).toLocaleDateString()}

@@ -109,6 +109,7 @@ export async function PATCH(
                 amount: purchaseRequest.amount,
                 currency: purchaseRequest.currency,
                 status: "completed",
+                message: purchaseRequest.message,
               },
             })
           }

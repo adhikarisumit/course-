@@ -172,7 +172,7 @@ export function PurchaseModal({ open, onOpenChange, resource, userEmail, onSucce
                   <span>Send <strong>¥{resource.price?.toLocaleString()}</strong> via PayPay to:</span>
                 </li>
                 <li className="ml-4">
-                  <div className="flex items-center gap-1 bg-white dark:bg-gray-900 px-2 py-1 rounded border inline-flex">
+                  <div className="inline-flex items-center gap-1 bg-white dark:bg-gray-900 px-2 py-1 rounded border">
                     <span className="font-mono font-semibold text-sm">aatit</span>
                     <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={copyToClipboard}>
                       <Copy className="h-3 w-3" />
