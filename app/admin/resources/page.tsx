@@ -56,6 +56,7 @@ interface ResourcePurchase {
   amount: number
   currency: string
   status: string
+  message?: string
   createdAt: string
   user: {
     id: string
@@ -906,6 +907,7 @@ export default function AdminResourcesPage() {
                         <TableHead>User</TableHead>
                         <TableHead>Resource</TableHead>
                         <TableHead>Amount</TableHead>
+                        <TableHead>Message</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Date</TableHead>
                         <TableHead>Actions</TableHead>
@@ -932,6 +934,13 @@ export default function AdminResourcesPage() {
                           </TableCell>
                           <TableCell>
                             ¥{purchase.amount}
+                          </TableCell>
+                          <TableCell>
+                            {purchase.message ? (
+                              <span className="text-sm text-muted-foreground line-clamp-2 max-w-[200px]">{purchase.message}</span>
+                            ) : (
+                              <span className="text-sm text-muted-foreground italic">No message</span>
+                            )}
                           </TableCell>
                           <TableCell>
                             {getStatusBadge(purchase.status)}
