@@ -257,7 +257,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <span className="sr-only">Toggle menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[70vw] sm:w-[300px]">
+              <SheetContent side="right" className="w-[40%] min-w-[280px] max-w-[360px]">
                 <SheetHeader>
                   <SheetTitle>Admin Menu</SheetTitle>
                   <SheetDescription>Navigate admin panel</SheetDescription>

@@ -629,7 +629,7 @@ export default function InquiriesPage() {
 
       {/* Detail Dialog */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="max-w-2xl w-[95vw] sm:w-full max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl w-[95vw] md:w-[85vw] lg:w-full max-h-[90vh] overflow-y-auto">
           {selectedInquiry && (
             <>
               <DialogHeader>
@@ -673,14 +673,14 @@ export default function InquiriesPage() {
                     <CardTitle className="text-sm">Contact Details</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-3">
                       <div>
                         <Label className="text-xs text-muted-foreground">Name</Label>
                         <p className="font-medium">{selectedInquiry.name}</p>
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <Label className="text-xs text-muted-foreground">Email</Label>
-                        <p>
+                        <p className="break-all">
                           <a href={`mailto:${selectedInquiry.email}`} className="text-primary hover:underline">
                             {selectedInquiry.email}
                           </a>
@@ -699,13 +699,13 @@ export default function InquiriesPage() {
                       {selectedInquiry.subject && (
                         <div>
                           <Label className="text-xs text-muted-foreground">Subject</Label>
-                          <p className="font-medium">{selectedInquiry.subject}</p>
+                          <p className="font-medium wrap-break-word">{selectedInquiry.subject}</p>
                         </div>
                       )}
                     </div>
                     {/* Course & Level Info */}
                     {(selectedInquiry.course || selectedInquiry.jlptLevel || selectedInquiry.codingLevel) && (
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t">
+                      <div className="flex flex-col gap-3 pt-3 border-t">
                         {selectedInquiry.course && (
                           <div>
                             <Label className="text-xs text-muted-foreground">Interested Course</Label>

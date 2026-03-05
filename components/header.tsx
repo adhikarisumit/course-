@@ -82,12 +82,11 @@ export function Header() {
     return (
       <button
         type="button"
-        aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-        aria-expanded={mobileOpen}
-        onClick={() => setMobileOpen((s) => !s)}
+        aria-label="Open menu"
+        onClick={() => setMobileOpen(true)}
         className="md:hidden p-2 rounded hover:bg-accent/10"
       >
-        {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        <Menu className="h-5 w-5" />
       </button>
     )
   }
@@ -101,17 +100,21 @@ export function Header() {
     }
     
     return (
-      <div className="w-full border-t border-border pt-3 mt-1">
-        <div className="flex items-center gap-3 mb-3 justify-end">
-          <div className="text-right">
-            <p className="text-sm font-medium">{session.user.name}</p>
-            <p className="text-xs text-muted-foreground">{session.user.email}</p>
+      <div className="w-full">
+        <div className="flex items-center gap-3 mb-3 px-3">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={session.user.image || undefined} alt={session.user.name || "User"} />
+            <AvatarFallback>{session.user.name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "U"}</AvatarFallback>
+          </Avatar>
+          <div className="min-w-0">
+            <p className="text-sm font-medium truncate">{session.user.name}</p>
+            <p className="text-xs text-muted-foreground truncate">{session.user.email}</p>
           </div>
         </div>
-        <div className="flex flex-col gap-2 items-end">
+        <div className="flex flex-col gap-0.5">
           <Link 
             href="/portal/dashboard" 
-            className="text-sm font-medium hover:text-primary transition-colors py-1 flex items-center gap-2"
+            className="text-sm font-medium hover:text-primary hover:bg-accent/10 transition-colors py-2 px-3 rounded-md flex items-center gap-2"
             onClick={() => setMobileOpen(false)}
           >
             <LayoutDashboard className="h-4 w-4" />
@@ -119,7 +122,7 @@ export function Header() {
           </Link>
           <Link 
             href="/portal/profile" 
-            className="text-sm font-medium hover:text-primary transition-colors py-1 flex items-center gap-2"
+            className="text-sm font-medium hover:text-primary hover:bg-accent/10 transition-colors py-2 px-3 rounded-md flex items-center gap-2"
             onClick={() => setMobileOpen(false)}
           >
             <User className="h-4 w-4" />
@@ -128,7 +131,7 @@ export function Header() {
           {(session.user.role === "admin" || session.user.role === "super") && (
             <Link 
               href="/admin/courses" 
-              className="text-sm font-medium hover:text-primary transition-colors py-1 flex items-center gap-2"
+              className="text-sm font-medium hover:text-primary hover:bg-accent/10 transition-colors py-2 px-3 rounded-md flex items-center gap-2"
               onClick={() => setMobileOpen(false)}
             >
               <Settings className="h-4 w-4" />
@@ -136,7 +139,7 @@ export function Header() {
             </Link>
           )}
           <button
-            className="text-sm font-medium text-destructive hover:text-destructive/80 transition-colors py-1 flex items-center gap-2"
+            className="text-sm font-medium text-destructive hover:text-destructive/80 hover:bg-destructive/10 transition-colors py-2 px-3 rounded-md flex items-center gap-2 w-full text-left"
             onClick={() => {
               setMobileOpen(false)
               signOut({ callbackUrl: "/" })
@@ -315,62 +318,90 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile navigation panel */}
+      {/* Mobile sidebar overlay */}
       {mobileOpen && (
-        <div className="md:hidden bg-card border-t border-border">
-          <div className="container mx-auto px-4 py-3 flex flex-col gap-3">
-            {/* Mobile nav links */}
-            <div className="flex flex-col gap-3 border-t border-border pt-3 items-end">
-              <Link href="/" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
-                Home
-              </Link>
-              <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
-                About
-              </Link>
-              <Link href="/#mentor" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={(e) => { handleMentorClick(e); setMobileOpen(false); }}>
-                Mentor
-              </Link>
-              <Link href="/contact" className="text-sm font-medium hover:text-primary transition-colors py-1" onClick={() => setMobileOpen(false)}>
-                Contact
-              </Link>
-              <div className="w-full border-t border-border pt-3 mt-1">
-                <p className="text-xs text-muted-foreground mb-2 text-right">Browse Courses</p>
-                <div className="flex flex-col gap-2 items-end">
-                  <Link href="/courses" className="text-sm font-medium hover:text-primary transition-colors py-1 flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-                    <GraduationCap className="h-4 w-4" />
-                    All Courses
-                  </Link>
-                  <Link href="/courses?category=Programming" className="text-sm text-muted-foreground hover:text-primary transition-colors py-0.5" onClick={() => setMobileOpen(false)}>Programming</Link>
-                  <Link href="/courses?category=Design" className="text-sm text-muted-foreground hover:text-primary transition-colors py-0.5" onClick={() => setMobileOpen(false)}>Design</Link>
-                  <Link href="/courses?category=Business" className="text-sm text-muted-foreground hover:text-primary transition-colors py-0.5" onClick={() => setMobileOpen(false)}>Business</Link>
-                  <Link href="/courses?category=Data+Science" className="text-sm text-muted-foreground hover:text-primary transition-colors py-0.5" onClick={() => setMobileOpen(false)}>Data Science</Link>
-                  <Link href="/courses?category=Languages" className="text-sm text-muted-foreground hover:text-primary transition-colors py-0.5" onClick={() => setMobileOpen(false)}>Languages</Link>
-                  <Link href="/courses?category=Databases" className="text-sm text-muted-foreground hover:text-primary transition-colors py-0.5" onClick={() => setMobileOpen(false)}>Databases</Link>
-                </div>
-              </div>
-              <div className="w-full border-t border-border pt-3 mt-1">
-                <p className="text-xs text-muted-foreground mb-2 text-right">Free Tools</p>
-                <div className="flex flex-col gap-2 items-end">
-                  <Link href="/jisho" className="text-sm font-medium hover:text-primary transition-colors py-1 flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-                    <Book className="h-4 w-4" />
-                    Japanese Dictionary
-                  </Link>
-                  <Link href="/playground" className="text-sm font-medium hover:text-primary transition-colors py-1 flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-                    <Code2 className="h-4 w-4" />
-                    Code Playground
-                  </Link>
-                </div>
-              </div>
-              {/* Mobile user profile section for logged-in users */}
-              <MobileUserSection />
-            </div>
-            {/* Mobile auth buttons for non-authenticated users */}
-            <div className="block sm:hidden">
-              <MobileAuthButtons />
-            </div>
+        <div 
+          className="md:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm transition-opacity"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Mobile sidebar panel */}
+      <div 
+        className={`md:hidden fixed top-0 right-0 h-full w-[40%] min-w-[280px] max-w-[360px] bg-card border-l border-border z-50 shadow-2xl transform transition-transform duration-300 ease-in-out overflow-y-auto ${
+          mobileOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        {/* Sidebar header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <Link href="/" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
+            <GraduationCap className="h-6 w-6" />
+            <span className="text-lg font-semibold">Proteclink</span>
+          </Link>
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={() => setMobileOpen(false)}
+            className="p-1.5 rounded-md hover:bg-accent/10 transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="flex flex-col px-5 py-4 gap-1">
+          {/* Navigation links */}
+          <Link href="/" className="text-sm font-medium hover:text-primary hover:bg-accent/10 transition-colors py-2.5 px-3 rounded-md" onClick={() => setMobileOpen(false)}>
+            Home
+          </Link>
+          <Link href="/about" className="text-sm font-medium hover:text-primary hover:bg-accent/10 transition-colors py-2.5 px-3 rounded-md" onClick={() => setMobileOpen(false)}>
+            About
+          </Link>
+          <Link href="/#mentor" className="text-sm font-medium hover:text-primary hover:bg-accent/10 transition-colors py-2.5 px-3 rounded-md" onClick={(e) => { handleMentorClick(e); setMobileOpen(false); }}>
+            Mentor
+          </Link>
+          <Link href="/contact" className="text-sm font-medium hover:text-primary hover:bg-accent/10 transition-colors py-2.5 px-3 rounded-md" onClick={() => setMobileOpen(false)}>
+            Contact
+          </Link>
+
+          {/* Browse Courses section */}
+          <div className="mt-3 pt-3 border-t border-border">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-3">Browse Courses</p>
+            <Link href="/courses" className="text-sm font-medium hover:text-primary hover:bg-accent/10 transition-colors py-2 px-3 rounded-md flex items-center gap-2" onClick={() => setMobileOpen(false)}>
+              <GraduationCap className="h-4 w-4" />
+              All Courses
+            </Link>
+            <Link href="/courses?category=Programming" className="text-sm text-muted-foreground hover:text-primary hover:bg-accent/10 transition-colors py-1.5 px-3 pl-9 rounded-md block" onClick={() => setMobileOpen(false)}>Programming</Link>
+            <Link href="/courses?category=Design" className="text-sm text-muted-foreground hover:text-primary hover:bg-accent/10 transition-colors py-1.5 px-3 pl-9 rounded-md block" onClick={() => setMobileOpen(false)}>Design</Link>
+            <Link href="/courses?category=Business" className="text-sm text-muted-foreground hover:text-primary hover:bg-accent/10 transition-colors py-1.5 px-3 pl-9 rounded-md block" onClick={() => setMobileOpen(false)}>Business</Link>
+            <Link href="/courses?category=Data+Science" className="text-sm text-muted-foreground hover:text-primary hover:bg-accent/10 transition-colors py-1.5 px-3 pl-9 rounded-md block" onClick={() => setMobileOpen(false)}>Data Science</Link>
+            <Link href="/courses?category=Languages" className="text-sm text-muted-foreground hover:text-primary hover:bg-accent/10 transition-colors py-1.5 px-3 pl-9 rounded-md block" onClick={() => setMobileOpen(false)}>Languages</Link>
+            <Link href="/courses?category=Databases" className="text-sm text-muted-foreground hover:text-primary hover:bg-accent/10 transition-colors py-1.5 px-3 pl-9 rounded-md block" onClick={() => setMobileOpen(false)}>Databases</Link>
+          </div>
+
+          {/* Free Tools section */}
+          <div className="mt-3 pt-3 border-t border-border">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-3">Free Tools</p>
+            <Link href="/jisho" className="text-sm font-medium hover:text-primary hover:bg-accent/10 transition-colors py-2 px-3 rounded-md flex items-center gap-2" onClick={() => setMobileOpen(false)}>
+              <Book className="h-4 w-4" />
+              Japanese Dictionary
+            </Link>
+            <Link href="/playground" className="text-sm font-medium hover:text-primary hover:bg-accent/10 transition-colors py-2 px-3 rounded-md flex items-center gap-2" onClick={() => setMobileOpen(false)}>
+              <Code2 className="h-4 w-4" />
+              Code Playground
+            </Link>
+          </div>
+
+          {/* Mobile user profile section for logged-in users */}
+          <div className="mt-3 pt-3 border-t border-border">
+            <MobileUserSection />
+          </div>
+
+          {/* Mobile auth buttons for non-authenticated users */}
+          <div className="block sm:hidden mt-3 pt-3 border-t border-border">
+            <MobileAuthButtons />
           </div>
         </div>
-      )}
+      </div>
     </header>
   )
 }
